@@ -1,0 +1,30 @@
+__pycache__
+*.pyc
+package.json
+.vscode
+tags
+.idea
+/configs/config.json
+.env
+
+# Coverage.py output
+.coverage
+htmlcov/
+
+reinvent/models/lib_invent
+reinvent/models/link_invent
+reinvent/models/reinvent_core
+reinvent_models
+
+
+# Python memory_profiler output
+mprofile_*.dat
+azdock_run.log
+
+/reinvent.egg-info/*
+/reinvent.egg-info/dependency_links.txt
+/reinvent/models/lib_invent/
+/reinvent/models/link_invent/
+/reinvent/models/reinvent_core/
+/reinvent_models/
+/build/
