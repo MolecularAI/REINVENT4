@@ -1,0 +1,9 @@
+# Example compounds for REINVENT4 Mol2Mol
+#
+# NOTE: this may need a lot of GPU memory so the number of compounds must be
+#       fairly small
+#
+# One molecule per line
+
+O=S(=O)(c1cccc2cnccc12)N1CCCNCC1	CHEMBL38380
+COc1ccc(CN(CC(=O)NO)S(=O)(=O)c2ccc(OC)cc2)cc1	CHEMBL82783

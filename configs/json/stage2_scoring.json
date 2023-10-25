@@ -1,0 +1,14 @@
+{
+    "component": [
+        {
+            "QED": {
+                "endpoint": [
+                    {
+                        "weight": 0.5,
+                        "name": "QED Score"
+                    }
+                ]
+            }
+        }
+    ]
+}

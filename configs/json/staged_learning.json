@@ -1,0 +1,108 @@
+{
+    "run_type": "staged_learning",
+    "use_cuda": true,
+    "tb_logdir": "tb_logs",
+    "json_out_config": "_staged_learning.json",
+    "parameters": {
+        "use_checkpoint": false,
+        "summary_csv_prefix": "staged_learning",
+        "prior_file": "models/reinvent.prior",
+        "agent_file": "models/reinvent.prior",
+        "batch_size": 64,
+        "unique_sequences": true,
+        "randomize_smiles": true
+    },
+    "learning_strategy": {
+        "type": "dap",
+        "sigma": 128,
+        "rate": 0.0001
+    },
+    "diversity_filter": {
+        "type": "IdenticalMurckoScaffold",
+        "bucket_size": 25,
+        "minscore": 0.4,
+        "minsimilarity": 0.4,
+        "penalty_multiplier": 0.5
+    },
+    "stage": [
+        {
+            "chkpt_file": "test1.chkpt",
+            "termination": "simple",
+            "max_score": 0.6,
+            "min_steps": 25,
+            "max_steps": 100,
+            "scoring": {
+                "type": "geometric_mean",
+                "component": [
+                    {
+                        "custom_alerts": {
+                            "endpoint": [
+                                {
+                                    "name": "Unwanted SMARTS",
+                                    "weight": 0.79,
+                                    "params": {
+                                        "smarts": [
+                                            "[*;r8]",
+                                            "[*;r9]",
+                                            "[*;r10]",
+                                            "[*;r11]",
+                                            "[*;r12]",
+                                            "[*;r13]",
+                                            "[*;r14]",
+                                            "[*;r15]",
+                                            "[*;r16]",
+                                            "[*;r17]",
+                                            "[#8][#8]",
+                                            "[#6;+]",
+                                            "[#16][#16]",
+                                            "[#7;!n][S;!$(S(=O)=O)]",
+                                            "[#7;!n][#7;!n]",
+                                            "C#C",
+                                            "C(=[O,S])[O,S]",
+                                            "[#7;!n][C;!$(C(=[O,N])[N,O])][#16;!s]",
+                                            "[#7;!n][C;!$(C(=[O,N])[N,O])][#7;!n]",
+                                            "[#7;!n][C;!$(C(=[O,N])[N,O])][#8;!o]",
+                                            "[#8;!o][C;!$(C(=[O,N])[N,O])][#16;!s]",
+                                            "[#8;!o][C;!$(C(=[O,N])[N,O])][#8;!o]",
+                                            "[#16;!s][C;!$(C(=[O,N])[N,O])][#16;!s]"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "MolecularWeight": {
+                            "endpoint": [
+                                {
+                                    "name": "Molecular weight",
+                                    "weight": 0.342,
+                                    "transform": {
+                                        "type": "double_sigmoid",
+                                        "high": 500.0,
+                                        "low": 200.0,
+                                        "coef_div": 500.0,
+                                        "coef_si": 20.0,
+                                        "coef_se": 20.0
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "chkpt_file": "test2.chkpt",
+            "termination": "simple",
+            "max_score": 0.7,
+            "min_steps": 10,
+            "max_steps": 100,
+            "scoring": {
+                "type": "geometric_mean",
+                "filename": "stage2_scoring.toml",
+                "filetype": "toml"
+            }
+        }
+    ]
+}

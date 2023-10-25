@@ -1,0 +1,12 @@
+{
+    "run_type": "sampling",
+    "use_cuda": true,
+    "json_out_config": "_sampling.json",
+    "parameters": {
+        "model_file": "models/reinvent.prior",
+        "output_file": "sampling.csv",
+        "num_smiles": 157,
+        "unique_molecules": true,
+        "randomize_smiles": true
+    }
+}
