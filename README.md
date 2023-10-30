@@ -1,4 +1,4 @@
-This will be the new place for REINVENT after a preprint has been submitted.
+This will be the new place for REINVENT after the preprint has been submitted (expected in the 2nd week of November 2023).
 
 
 REINVENT 4
