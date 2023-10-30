@@ -1,6 +1,3 @@
-This will be the new place for REINVENT after a preprint has been submitted.
-
-
 REINVENT 4
 ==========
 
