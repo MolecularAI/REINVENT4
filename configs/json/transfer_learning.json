@@ -10,9 +10,9 @@
         "num_refs": 100,
         "sample_batch_size": 100,
         "input_model_file": "models/mol2mol_scaffold_generic.prior",
-        "smiles_file": "data/TL_molformer_100.smi",
-        "output_model_file": "TL_molformer.model",
-        "validation_smiles_file": "data/TL_molformer_100_valid.smi",
+        "smiles_file": "compounds.smi",
+        "output_model_file": "TL_Mol2Mol.model",
+        "validation_smiles_file": "validation_compounds.smi",
         "pairs": {
             "type": "tanimoto",
             "upper_threshold": 1.0,

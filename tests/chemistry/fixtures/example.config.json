@@ -1,0 +1,11 @@
+{
+    "MAIN_TEST_PATH": "<provide writing path for your unit/integration tests>",
+    "TEST_RESOURCES": {
+        "REACTION_DEFINITIONS_PATH": ""
+    },
+    "AIZYNTH": {
+        "AIZYNTH_PREDICTION_URL": "",
+        "AIZYNTH_BUILDING_BLOCKS_URL": "",
+        "AIZYNTH_TOKEN": ""
+    }
+}

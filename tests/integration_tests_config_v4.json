@@ -1,0 +1,22 @@
+{
+  "ENVIRONMENTAL_VARIABLES": {
+    "CHEMAXON_EXECUTOR_PATH": "/opt/scp/services/reinvent/reinvent_modules/chemaxon//bin/markush-db-0.7.jar",	  
+    "REINVENT_DEVELOPMENT_ENVIRONMENT": "1"
+  },
+  "MAIN_TEST_PATH": "/tmp/REINVENT_tests",
+  "PRIOR_PATH": "/projects/mai/software/reinvent_data/non_user/test_data/agents/chembl/random.prior.new",
+  "LIBINVENT_PRIOR_PATH": "/projects/mai/software/reinvent_data/non_user/test_data/agents/chembl/library.design.prior.new",
+  "LINKINVENT_PRIOR_PATH": "/projects/mai/software/reinvent_data/non_user/priors/new_priors/link_invent_prior.model",
+  "MOLFORMER_PRIOR_PATH": "/projects/mai/software/reinvent_data/non_user/priors/new_priors/molformer/molformer_scaffold_generic.prior",
+  "SMILES_SET_PATH": "/projects/mai/software/reinvent_data/non_user/test_data/datasets/test_set.smi",
+  "REINVENT_INCEPTION_SMI": "/projects/mai/software/reinvent_data/non_user/test_data/misc/reinvent_inception.smi",
+  "LIBINVENT_SMILES_SET_PATH": "/projects/mai/software/reinvent_data/non_user/test_data/misc/libinvent.smi",
+  "LIBINVENT_SMILES_SCAFFOLDS": "/projects/mai/software/reinvent_data/non_user/test_data/misc/scaffolds.smi",
+  "LINKINVENT_SMILES_SET_PATH": "/projects/mai/software/reinvent_data/non_user/test_data/datasets/warhead_linker_pairs.smi",
+  "LINKINVENT_SMILES_WARHEADS": "/projects/mai/software/reinvent_data/non_user/test_data/misc/warheads.smi",
+  "MOLFORMER_SMILES_SET_PATH": "/projects/mai/software/reinvent_data/non_user/test_data/misc/molformer.smi",
+  "TL_REINVENT_SMILES_PATH": "/projects/mai/software/reinvent_data/non_user/test_data/misc/TL_reinvent_100.smi",
+  "TL_LIBINVENT_SMILES_PATH": "/projects/mai/software/reinvent_data/non_user/test_data/misc/TL_libinvent_100.smi",
+  "TL_LINKINVENT_SMILES_PATH": "/projects/mai/software/reinvent_data/non_user/test_data/misc/TL_linkinvent_100.smi",
+  "TL_MOLFORMER_SMILES_PATH": "/projects/mai/software/reinvent_data/non_user/test_data/misc/TL_molformer_100.smi"
+}

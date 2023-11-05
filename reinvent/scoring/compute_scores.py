@@ -1,0 +1,105 @@
+"""Compute the scores and the transformed scores"""
+
+__all__ = ["compute_transform"]
+
+from typing import List, Tuple, Callable, Optional
+import logging
+
+import numpy as np
+
+from reinvent_plugins.components.component_results import ComponentResults
+from .results import TransformResults
+
+
+logger = logging.getLogger(__name__)
+SCORE_FUNC = Callable[[List[str]], ComponentResults]
+
+
+def compute_component_scores(
+    smilies: List[str], scoring_function: SCORE_FUNC, cache, filter_mask: Optional[np.ndarray[bool]]
+) -> ComponentResults:
+    """Compute a single component's scores and cache the results
+
+    The mask filters out all SMILES unwanted for score computation: SMILES not
+    passing a previous filter, invalid SMILES, duplicate SMILES.  Scores are NaN
+    when their values are unknown.
+
+    :param smilies: list of SMILES
+    :param scoring_function: the component callable
+    :param cache: the cache for the component (will be modified)
+    :param filter_mask: array mask to filter out SMILES
+    :returns: the scores
+    """
+
+    # Each component may have multiple scores so use tuples here
+    masked_scores = [(np.nan,)] * len(smilies)
+
+    for i, value in enumerate(filter_mask):
+        if not value:  # the SMILES will not be passed to scoring_function
+            masked_scores[i] = (0.0,)
+
+    scores = {smiles: score for smiles, score in zip(smilies, masked_scores)}  # initialize
+    smilies_non_cached = []
+
+    for smiles, score in scores.items():
+        if smiles in cache:
+            scores[smiles] = cache[smiles]
+        elif any(score):  # filter out SMILES already scored zero, will catch np.nan
+            smilies_non_cached.append(smiles)
+        # If score is zero we do not need to compute the score
+
+    component_results = scoring_function(smilies_non_cached)
+    number_of_components = len(component_results.scores)
+
+    for data in zip(smilies_non_cached, *component_results.scores):
+        smiles = data[0]
+        component_scores = data[1:]
+
+        scores[smiles] = component_scores
+
+    # check if we have a score that has not been computed by scoring_function
+    for smiles, score in scores.items():
+        if len(score) != number_of_components:  # should only ever be (0.0, )
+            scores[smiles] = score * number_of_components
+
+    cache.update(((k, v) for k, v in scores.items()))
+
+    # add cached scores to ComponentResults
+    scores_values = [scores[smiles] for smiles in smilies]
+    component_results.scores = [np.array(arr) for arr in zip(*scores_values)]
+
+    return component_results
+
+
+def compute_transform(
+    component_type, params: Tuple, smilies: List[str], caches: dict, filter_mask: np.ndarray[bool]
+) -> TransformResults:
+    """Compute the component score and transform of it
+
+    :param component_type: type of the component
+    :param params: parameters for the component
+    :param smilies: list of SMILES
+    :param caches: the component's cache
+    :param filter_mask: filter to mask out zero scored SMILES
+    :returns: dataclass with transformed results
+    """
+
+    names, scoring_function, transforms, weights = params
+
+    component_results = compute_component_scores(
+        smilies, scoring_function, caches[component_type], filter_mask
+    )
+
+    transformed_scores = []
+
+    for scores, transform in zip(component_results.scores, transforms):
+        transformed = transform(scores) if transform else scores
+        transformed_scores.append(transformed * filter_mask)
+
+    transform_types = [transform.params.type if transform else None for transform in transforms]
+
+    transform_result = TransformResults(
+        component_type, names, transform_types, transformed_scores, component_results, weights
+    )
+
+    return transform_result
