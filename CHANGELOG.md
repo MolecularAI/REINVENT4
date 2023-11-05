@@ -11,6 +11,13 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 - Fragment generators using transformers
 
 
+## [4.0.11] 2023-11-02
+
+### Fixed
+
+- Normalize SMILES before passing to string-based scoring component because the SMILES may still contain lables (Libinvent)
+
+
 ## [4.0.10] 2023-10-27
 
 ### Fixed
