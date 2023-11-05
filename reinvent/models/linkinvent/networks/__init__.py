@@ -1,0 +1,1 @@
+from reinvent.models.linkinvent.networks.encoder_decoder import EncoderDecoder

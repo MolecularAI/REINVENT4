@@ -1,0 +1,21 @@
+{
+  "ENVIRONMENTAL_VARIABLES": {
+    "REINVENT_DEVELOPMENT_ENVIRONMENT": "1"
+  },
+  "MAIN_TEST_PATH": "/tmp/REINVENT_tests",
+  "PRIOR_PATH": "/projects/reinvent.model",
+  "LIBINVENT_PRIOR_PATH": "/projects/libinvent.model",
+  "LINKINVENT_PRIOR_PATH": "/projects/linkinvent.model",
+  "MOLFORMER_PRIOR_PATH": "/projects/molformer.model",
+  "SMILES_SET_PATH": "/projects/test_set.smi",
+  "REINVENT_INCEPTION_SMI": "/projects/reinvent_inception.smi",
+  "LIBINVENT_SMILES_SET_PATH": "/projects/libinvent.smi",
+  "LIBINVENT_SMILES_SCAFFOLDS": "/projects/scaffolds.smi",
+  "LINKINVENT_SMILES_SET_PATH": "/projects/warhead_linker_pairs.smi",
+  "LINKINVENT_SMILES_WARHEADS": "/projects/warheads.smi",
+  "MOLFORMER_SMILES_SET_PATH": "/projects/molformer.smi",
+  "TL_REINVENT_SMILES_PATH": "/projects/TL_reinvent_100.smi",
+  "TL_LIBINVENT_SMILES_PATH": "/projects/TL_libinvent_100.smi",
+  "TL_LINKINVENT_SMILES_PATH": "/projects/TL_linkinvent_100.smi",
+  "TL_MOLFORMER_SMILES_PATH": "/projects/TL_molformer_100.smi"
+}

@@ -1,0 +1,1 @@
+from reinvent.models.linkinvent.model_vocabulary.model_vocabulary import ModelVocabulary

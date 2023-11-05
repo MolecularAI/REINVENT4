@@ -1,0 +1,7 @@
+from reinvent.chemistry.phys_chem_descriptors import PhysChemDescriptors
+from reinvent.chemistry.similarity import Similarity
+from reinvent.chemistry.conversions import Conversions
+from reinvent.chemistry.descriptors import Descriptors
+from reinvent.chemistry.utils import get_indices_of_unique_smiles
+from reinvent.chemistry.tokens import TransformationTokens
+from reinvent.chemistry.molecular_transformations import MolecularTransformations
