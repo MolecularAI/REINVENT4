@@ -59,7 +59,8 @@ def write_report(reporter, data, model: ModelAdapter, is_reinvent: bool, dataloa
 
         reporter.add_scalar("KL divergence", kl_div, data.epoch)
 
-        reporter.add_histogram("Tanimoto similarity on RDKitFingerprint", similarities, data.epoch)
+        # FIXME: TB broken
+        #reporter.add_histogram("Tanimoto similarity on RDKitFingerprint", similarities, data.epoch)
 
         # FIXME: rows and cols depend on sample_batch_size
         image_tensor = make_grid_image(smilies, sample_nlls, "NLL", ROWS * COLS, ROWS)
