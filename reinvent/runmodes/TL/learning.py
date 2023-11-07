@@ -105,9 +105,10 @@ class Learning(ABC):
                     s = DataStructs.BulkTanimotoSimilarity(fps[n], fps[n + 1 :])
                     sim.extend(s)
 
-                self.tb_reporter.add_histogram(
-                    "Tanimoto input SMILES", np.array(sim), 0
-                )
+                # FIXME: TB broken
+                #self.tb_reporter.add_histogram(
+                #    "Tanimoto input SMILES", np.array(sim), 0
+                #)
 
         # FIXME: this is only available for Mol2mol
         if self._config.max_sequence_length:

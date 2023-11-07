@@ -9,8 +9,9 @@ REINVENT is a molecular design tool for de novo design, scaffold hopping,
 R-group replacement, linker design, molecule optimization, and other small
 molecule design tasks.  At its heart, REINVENT uses a Reinforcement Learning
 (RL) algorithm to generate optimized molecules compliant with a user defined
-property profile defined as a multi-component score. See AUTHORS.md for
-paper references.
+property profile defined as a multi-component score.
+
+A preprint is available on ChemRxiv: [REINVENT4: Modern AI-Driven Generative Molecule Design](https://chemrxiv.org/engage/chemrxiv/article-details/65463cafc573f893f1cae33a).  See AUTHORS.md for references to previous papers.
 
 
 Requirements
