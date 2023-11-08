@@ -1,6 +1,8 @@
-"""Use RDKit's filter catalog to filter for unwanted structures"""
+"""Use RDKit's filter catalogs to filter for unwanted structures"""
 
 __all__ = ["UnwantedSubstructures"]
+
+import sys
 from dataclasses import dataclass
 from typing import List
 import logging
@@ -19,7 +21,7 @@ logger = logging.getLogger('reinvent')
 @add_tag("__parameters")
 @dataclass
 class Parameters:
-    catalog: List[List[str]]
+    catalogs: List[List[str]]
 
 
 @add_tag("__component", "filter")
@@ -27,14 +29,17 @@ class UnwantedSubstructures:
     def __init__(self, params: Parameters):
         filter_params = FilterCatalogParams()
 
-        for catalog_name in params.catalog:
-            try:
-                catalog = getattr(FilterCatalogParams.FilterCatalogs, catalog_name) # FIXME: check!
-            except AttributeError:
-                logger.error(f"Unkbown catalog {catalog_name}: choose from "
-                             f"{', '.join(FilterCatalogParams.FilterCatalogs.names.keys())}")
+        for catalogs in params.catalogs:
+            for catalog_name in catalogs:
+                try:
+                    catalog = getattr(FilterCatalogParams.FilterCatalogs, catalog_name)
+                except AttributeError:
+                    msg = (f"Unkbown catalog {catalog_name}: choose from "
+                           f"{', '.join(FilterCatalogParams.FilterCatalogs.names.keys())}")
+                    logger.error(msg)
+                    raise RuntimeError(msg)
 
-            filter_params.AddCatalog(catalog)
+                filter_params.AddCatalog(catalog)
 
         self.catalog = FilterCatalog(filter_params)
 
