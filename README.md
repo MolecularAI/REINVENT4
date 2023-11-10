@@ -38,11 +38,12 @@ Installation
     ```shell
     pip install -r requirements-linux-64.lock
     ```
-4. Install the tool. Dependencies were already installed in the previous step, no need to install them again (flag `--no-deps).  If you want to install in editable (development i.e changes to code are automatically picked up) mode add -e.
+4. If you want to use AMD GPUs on Linux you would need to install the [ROCm PyTorch version](https://pytorch.org/get-started/locally/) manually _after_ installation of the dependencies in point 3.
+5. Install the tool. Dependencies were already installed in the previous step, no need to install them again (flag `--no-deps).  If you want to install in editable (development i.e changes to code are automatically picked up) mode add -e.
     ```shell
     pip install --no-deps . 
     ```
-5. Use the tool. Installer added script `reinvent` to the path.
+6. Use the tool. Installer added script `reinvent` to the path.
     ```shell
     reinvent --help
     ```
