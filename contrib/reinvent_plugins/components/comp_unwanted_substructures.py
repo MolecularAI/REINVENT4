@@ -15,7 +15,7 @@ from .component_results import ComponentResults
 from reinvent_plugins.mol_cache import molcache
 from .add_tag import add_tag
 
-logger = logging.getLogger('reinvent')
+logger = logging.getLogger("reinvent")
 
 
 @add_tag("__parameters")
@@ -34,15 +34,16 @@ class UnwantedSubstructures:
                 try:
                     catalog = getattr(FilterCatalogParams.FilterCatalogs, catalog_name)
                 except AttributeError:
-                    msg = (f"Unkbown catalog {catalog_name}: choose from "
-                           f"{', '.join(FilterCatalogParams.FilterCatalogs.names.keys())}")
+                    msg = (
+                        f"Unkbown catalog {catalog_name}: choose from "
+                        f"{', '.join(FilterCatalogParams.FilterCatalogs.names.keys())}"
+                    )
                     logger.error(msg)
                     raise RuntimeError(msg)
 
                 filter_params.AddCatalog(catalog)
 
         self.catalog = FilterCatalog(filter_params)
-
 
     @molcache
     def __call__(self, mols: List[Chem.Mol]) -> np.array:
@@ -54,6 +55,6 @@ class UnwantedSubstructures:
             else:
                 score = 1 - self.catalog.HasMatch(mol)
 
-            scores.append(score)
+            scores.append(np.array(score, dtype=int))
 
-        return ComponentResults([np.array(scores, dtype=float)])
+        return ComponentResults(scores)
