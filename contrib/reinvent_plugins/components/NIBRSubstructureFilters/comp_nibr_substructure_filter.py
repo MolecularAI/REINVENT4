@@ -55,4 +55,4 @@ class NIBRSubstructureFilters:
             # SpecialMol, SeverityScore
             scores.extend(np.array([entry.SeverityScore < cutoff for entry in nibr_scores]))
 
-        return ComponentResults([np.array(scores, dtype=float)])
+        return ComponentResults(scores)
