@@ -1,5 +1,9 @@
 """NIBR substructure filter
 
+Simple implementation using a cutoff to delineate between "good" and "bad"
+molecules.  Could be implemented as a normal scoring component using
+a transform.
+
 This is a demonstration on how one could build a filter catalog with the help of RDKit.
 The actual code was taken from RDKit commit 4a69bc3493dd3e9bb9f7a519e306fbcb545f1452
 and adapted as needed.  The original CSV file was converted to pickle file.
@@ -44,12 +48,11 @@ class NIBRSubstructureFilters:
     def __call__(self, mols: List[Chem.Mol]) -> np.array:
         scores = []
 
-        # SubstructureMatches, Min_N_O_filter, Frac_N_O, Covalent,
-        # SpecialMol, SeverityScore
-
         for cutoff in self.cutoffs:
             nibr_scores = assign_filters(self.catalog, mols)
 
+            # SubstructureMatches, Min_N_O_filter, Frac_N_O, Covalent,
+            # SpecialMol, SeverityScore
             scores.extend(np.array([entry.SeverityScore < cutoff for entry in nibr_scores]))
 
-            return ComponentResults([np.array(scores, dtype=float)])
+        return ComponentResults([np.array(scores, dtype=float)])
