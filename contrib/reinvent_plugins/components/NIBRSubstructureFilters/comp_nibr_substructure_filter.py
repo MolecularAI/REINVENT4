@@ -6,9 +6,9 @@ and adapted as needed.  The original CSV file was converted to pickle file.
 """
 
 __all__ = ["NIBRSubstructureFilters"]
-#from dataclasses import dataclass
 import os
 import pickle
+from dataclasses import dataclass
 from typing import List
 import logging
 
@@ -20,23 +20,25 @@ from ..component_results import ComponentResults
 from reinvent_plugins.mol_cache import molcache
 from ..add_tag import add_tag
 
-logger = logging.getLogger('reinvent')
+logger = logging.getLogger("reinvent")
 
 
-#@add_tag("__parameters")
-#@dataclass
-#class Parameters:
-#    catalog: List[List[str]]
+@add_tag("__parameters")
+@dataclass
+class Parameters:
+    cutoff: List[int]
 
 
 @add_tag("__component", "filter")
 class NIBRSubstructureFilters:
-    def __init__(self, *args, **kwargs):  #params: Parameters):
+    def __init__(self, params: Parameters):
         path = os.path.dirname(__file__)
         catalog_filename = os.path.join(path, "catalog.pkl")
 
         with open(catalog_filename, "rb") as pfile:
             self.catalog = pickle.load(pfile)
+
+        self.cutoffs = params.cutoff
 
     @molcache
     def __call__(self, mols: List[Chem.Mol]) -> np.array:
@@ -45,9 +47,9 @@ class NIBRSubstructureFilters:
         # SubstructureMatches, Min_N_O_filter, Frac_N_O, Covalent,
         # SpecialMol, SeverityScore
 
-        nibr_scores = assign_filters(self.catalog, mols)
-        
-        for entry in nibr_scores:
-            scores.append((entry.SeverityScore))
+        for cutoff in self.cutoffs:
+            nibr_scores = assign_filters(self.catalog, mols)
 
-        return ComponentResults([np.array(scores, dtype=float)])
+            scores.extend(np.array([entry.SeverityScore < cutoff for entry in nibr_scores]))
+
+            return ComponentResults([np.array(scores, dtype=float)])
