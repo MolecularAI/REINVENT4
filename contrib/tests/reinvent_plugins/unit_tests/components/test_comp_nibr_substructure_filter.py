@@ -25,7 +25,7 @@ SMILIES = [
     ],
 )
 
-def test_comp_unwanted_substructures(cutoff, expected_results):
+def test_comp_NIBRSubstructureFilters(cutoff, expected_results):
     params = Parameters(cutoff)
     nibr_filter = NIBRSubstructureFilters(params)
     results = nibr_filter(SMILIES)
