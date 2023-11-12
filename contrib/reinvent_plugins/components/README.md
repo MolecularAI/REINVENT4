@@ -18,6 +18,7 @@ Requirements
 ------------
 
 To use this in REINVENT4 add the plugin path to PYTHONPATH e.g.
-    ```shell
-    export PYTHONPATH=/location/to/REINVENT4/contrib
-    ```
+    
+```shell
+export PYTHONPATH=/location/to/REINVENT4/contrib
+```
