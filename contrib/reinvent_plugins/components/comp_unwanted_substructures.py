@@ -55,6 +55,6 @@ class UnwantedSubstructures:
             else:
                 score = 1 - self.catalog.HasMatch(mol)
 
-            scores.append(np.array(score, dtype=int))
+            scores.append(score)
 
-        return ComponentResults(scores)
+        return ComponentResults([np.array(scores, dtype=bool)])
