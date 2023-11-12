@@ -125,8 +125,8 @@ def parse_output(lines: str, smilies: List[str]) -> np.ndarray[float]:
     # FIXME: prefill array as it seems that Lilly_Medchem_Rules "loses" SMILES
     scores = np.full(len(smilies), np.nan)
 
-    for i, score in sorted(mc_smilies.items()):
-        idx = int(i) - 1
+    for i, score in mc_smilies.items():
+        idx = int(i)
         scores[idx] = score
 
     return scores
