@@ -68,6 +68,7 @@ BAD_PATTERN = re.compile(r"(.*?) ID(\d+) (.*)")
 # \4 demerit value, optional
 # \5 reason for demerits, optional
 DEMERIT_PATTERN = re.compile(r"(.*?) ID(\d+)( : D\((\d+)\) (.*))?")
+UNWANTED = 999
 
 
 def parse_output(lines: str, smilies: List[str]) -> List[float]:
@@ -85,7 +86,7 @@ def parse_output(lines: str, smilies: List[str]) -> List[float]:
         for line in mc_bad:
             match = BAD_PATTERN.match(line)
             ID = match.group(2)
-            mc_smilies[ID] = np.NaN
+            mc_smilies[ID] = UNWANTED
 
     # bad1.smi, bad2.smi: tsubstructure - rejections 1 and 2
     for filename in ("bad1.smi", "bad2.smi"):
@@ -93,7 +94,7 @@ def parse_output(lines: str, smilies: List[str]) -> List[float]:
             for line in tsub_bad:
                 match = BAD_PATTERN.match(line)
                 ID = match.group(2)
-                mc_smilies[ID] = np.NaN
+                mc_smilies[ID] = UNWANTED
 
     # bad3.smi: iwdemerit
     with open("bad3.smi", "r") as mc_bad:
@@ -101,6 +102,10 @@ def parse_output(lines: str, smilies: List[str]) -> List[float]:
             match = DEMERIT_PATTERN.match(line)
             ID = match.group(2)
             demerit = match.group(4)
+
+            # FIXME: this needs reconsideration because the demerits may
+            #        actually be very low but the compounds was rejected
+            #        maybe increase demerit? user adjustable?
             mc_smilies[ID] = int(demerit)
 
     for line in lines.splitlines():
