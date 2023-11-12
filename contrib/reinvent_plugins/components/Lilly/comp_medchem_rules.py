@@ -52,7 +52,7 @@ class LillyMedchemRules:
                 result = run_command(cmd)
 
             demerits = parse_output(result.stdout, smilies)
-            scores.append(np.array(demerits, dtype=float))
+            scores.append(demerits)
 
         return ComponentResults(scores)
 
@@ -71,7 +71,7 @@ DEMERIT_PATTERN = re.compile(r"(.*?) ID(\d+)( : D\((\d+)\) (.*))?")
 UNWANTED = 999
 
 
-def parse_output(lines: str, smilies: List[str]) -> List[float]:
+def parse_output(lines: str, smilies: List[str]) -> np.ndarray[float]:
     """Parse the output from the medchem rule tool
 
     Note: RDKit canonicalization of the Lilly SMILES may not string match
@@ -108,6 +108,8 @@ def parse_output(lines: str, smilies: List[str]) -> List[float]:
             #        maybe increase demerit? user adjustable?
             mc_smilies[ID] = int(demerit)
 
+    good = []
+
     for line in lines.splitlines():
         match = DEMERIT_PATTERN.match(line)
         ID = match.group(2)
@@ -118,6 +120,13 @@ def parse_output(lines: str, smilies: List[str]) -> List[float]:
         else:
             mc_smilies[ID] = int(demerit)
 
-    scores = list(dict(sorted(mc_smilies.items())).values())
+        good.append(demerit)
+
+    # FIXME: prefill array as it seems that Lilly_Medchem_Rules "loses" SMILES
+    scores = np.full(len(smilies), np.nan)
+
+    for i, score in sorted(mc_smilies.items()):
+        idx = int(i) - 1
+        scores[idx] = score
 
     return scores
