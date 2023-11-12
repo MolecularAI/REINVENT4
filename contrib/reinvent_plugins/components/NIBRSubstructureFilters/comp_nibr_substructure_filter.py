@@ -53,6 +53,6 @@ class NIBRSubstructureFilters:
 
             # SubstructureMatches, Min_N_O_filter, Frac_N_O, Covalent,
             # SpecialMol, SeverityScore
-            scores.extend(np.array([entry.SeverityScore < cutoff for entry in nibr_scores]))
+            scores.append(np.array([entry.SeverityScore < cutoff for entry in nibr_scores]))
 
         return ComponentResults(scores)
