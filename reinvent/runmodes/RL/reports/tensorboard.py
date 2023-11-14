@@ -62,15 +62,15 @@ def write_report(reporter, data: TBData) -> None:
             raw_scores.append(original_scores)
 
     for name, _scores in zip(names, scores):
-        reporter.add_scalar(name, np.mean(_scores[mask_idx]), step)
+        reporter.add_scalar(name, np.nanmean(_scores[mask_idx]), step)
 
     for name, _scores in zip(names, raw_scores):
         if _scores.dtype.char == "U":  # raw scores may contain strings
             continue
 
-        reporter.add_scalar(f"{name} (raw)", np.mean(_scores[mask_idx]), step)
+        reporter.add_scalar(f"{name} (raw)", np.nanmean(_scores[mask_idx]), step)
 
-    reporter.add_scalar(f"Loss", data.loss, step)    
+    reporter.add_scalar(f"Loss", data.loss, step)
 
     reporter.add_scalars(
         "Loss: likelihood averages",
