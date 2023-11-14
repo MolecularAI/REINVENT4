@@ -52,6 +52,7 @@ class LillyMedchemRules:
                 result = run_command(cmd)
 
             demerits = parse_output(result.stdout, smilies)
+
             scores.append(demerits)
 
         return ComponentResults(scores)
@@ -122,7 +123,9 @@ def parse_output(lines: str, smilies: List[str]) -> np.ndarray[float]:
 
         good.append(demerit)
 
-    # FIXME: prefill array as it seems that Lilly_Medchem_Rules "loses" SMILES
+    # FIXME: prefill array as Lilly_Medchem_Rules drops SMILES in mc_first_pass
+    #        that in can't interpret e.g. because of aromaticity (there are many
+    #        options how to deal with this but probably no universal one)
     scores = np.full(len(smilies), np.nan)
 
     for i, score in mc_smilies.items():
