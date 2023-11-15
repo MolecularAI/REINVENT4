@@ -135,6 +135,4 @@ def parse_output(lines: str, smilies: List[str]) -> np.ndarray[float]:
         idx = int(i)
         scores[idx] = score
 
-    print(len(smilies), len(scores))
-
     return scores
