@@ -6,17 +6,35 @@ in support.
 """
 
 import os
-import sys
-import argparse
+from dataclasses import dataclass
 from typing import Tuple
+import argparse
+import sys
 
 import torch
 
-import reinvent_models
+from reinvent.models.mol2mol.models.vocabulary import Vocabulary
 import reinvent.models.reinvent
 import reinvent.models.libinvent.models.vocabulary
-import reinvent_models.link_invent.model_vocabulary
 import reinvent.models.mol2mol
+
+
+@dataclass
+class MolformerNetworkParameters:
+    vocabulary_size: int = 0
+    num_layers: int = 6
+    num_heads: int = 8
+    model_dimension: int = 256
+    feedforward_dimension: int = 2048
+    dropout: float = 0.1
+
+
+@dataclass
+class MolformerModelParameterDTO:
+    vocabulary: Vocabulary
+    max_sequence_length: int
+    network_parameter: MolformerNetworkParameters
+    network_state: dict
 
 
 PATH_MAP = (
@@ -44,6 +62,7 @@ PATH_MAP = (
     ("reinvent_models.molformer", reinvent.models.mol2mol),
     ("reinvent_models.molformer.models", reinvent.models.mol2mol.models),
     ("reinvent_models.molformer.models.vocabulary", reinvent.models.mol2mol.models.vocabulary),
+    ("reinvent_models.molformer.dto.molformer_model_parameters_dto", None),
 )
 
 
@@ -55,9 +74,16 @@ def convert_model(in_filename: str, out_filename: str) -> None:
     """
 
     for module, path in PATH_MAP:
-        sys.modules[module] = path
+        if path is None:
+            sys.modules[module] = sys.modules[__name__]
+        else:
+            sys.modules[module] = path
 
     model = torch.load(in_filename)
+
+    if isinstance(model["network_parameter"], MolformerNetworkParameters):
+        model["network_parameter"] = model["network_parameter"].__dict__
+
 
     if "network" in model:
         model_type = "Reinvent"

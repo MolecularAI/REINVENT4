@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from time import time
-from typing import List
 
 from reinvent.runmodes.reporter.remote import get_reporter
 
@@ -13,8 +11,9 @@ reporter = get_reporter()
 @dataclass
 class RemoteData:
     epoch: int
-    epochs: int
+    model_path: str
     mean_nll: float
+    sampled_smiles: list[str]
     mean_nll_valid: float = None
 
 
@@ -27,11 +26,22 @@ def send_report(data: RemoteData, reporter) -> None:
     if not reporter:
         return
 
+    smiles_counts = {}
+    for smi in data.sampled_smiles:
+        if smi not in smiles_counts:
+            smiles_counts[smi] = 0
+        smiles_counts[smi] += 1
+
     record = {
-        "timestamp": time(),
         "epoch": data.epoch,
-        "epochs": data.epochs,
-        "mean_nll_train": data.mean_nll,
-        "mean_nll_valid": data.mean_nll_valid,
+        "model_path": data.model_path,
+        "learning_mean": {
+            "sampled": data.mean_nll_valid,  # this is actually validation
+            "training": data.mean_nll,
+        },
+        "smiles_report": [
+            {"legend": f"Times sampled: {smiles_counts[smi]:d}", "smiles": smi}
+            for smi in smiles_counts
+        ],
     }
     reporter.send(record)

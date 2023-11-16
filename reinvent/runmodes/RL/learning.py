@@ -156,7 +156,7 @@ class Learning(ABC):
                 agent_lls=agent_lls,
                 prior_lls=prior_lls,
                 augmented_nll=augmented_nll,
-                loss=float(loss),
+                loss=float(loss)
             )
 
             if converged(mean_scores, step):
@@ -249,7 +249,7 @@ class Learning(ABC):
         agent_lls: torch.tensor,
         prior_lls: torch.tensor,
         augmented_nll: torch.tensor,
-        loss: float,
+        loss: float
     ):
         """Log the results"""
 

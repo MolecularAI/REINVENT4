@@ -8,16 +8,21 @@ the negative log likelihood if requested.
 __all__ = ["run_sampling"]
 import logging
 import os
-
-import numpy as np
 import time
 
+
 from torch.utils.tensorboard import SummaryWriter
+import numpy as np
+import torch
+
 
 from reinvent import setup_logger, CsvFormatter
 from reinvent.runmodes import create_adapter
 from reinvent.runmodes.samplers.reports.remote import setup_RemoteData, send_report
-from reinvent.runmodes.samplers.reports.tensorboard import setup_TBData, write_report as tb_write_report
+from reinvent.runmodes.samplers.reports.tensorboard import (
+    setup_TBData,
+    write_report as tb_write_report,
+)
 from reinvent.runmodes.setup_sampler import setup_sampler
 from reinvent.runmodes.dtos import ChemistryHelpers
 from reinvent.config_parse import read_smiles_csv_file
@@ -31,7 +36,7 @@ HEADERS = {
     "Reinvent": ("SMILES", "NLL"),
     "Libinvent": ("SMILES", "Scaffold", "R-groups", "NLL"),
     "Linkinvent": ("SMILES", "Warheads", "Linker", "NLL"),
-    "Mol2Mol": ("SMILES", "Input_SMILES","Tanimoto", "NLL"),
+    "Mol2Mol": ("SMILES", "Input_SMILES", "Tanimoto", "NLL"),
 }
 
 
@@ -65,7 +70,7 @@ def run_sampling(config: dict, device, *args, **kwargs):
 
     # number of smiles to be generated for each input; consistent with batch_size parameter as used in RL
     # different from batch size used in dataloader which affect cuda memory
-    parameters['batch_size'] = parameters['num_smiles']
+    parameters["batch_size"] = parameters["num_smiles"]
     sampler, batch_size = setup_sampler(model_type, parameters, adapter, chemistry)
     sampler.unique_sequences = False
 
@@ -92,22 +97,23 @@ def run_sampling(config: dict, device, *args, **kwargs):
 
     # Time took fro sampling
     start_time = time.time()
-    sampled = sampler.sample(input_smilies)
+    with torch.no_grad():
+        sampled = sampler.sample(input_smilies)
     seconds_took = int(time.time() - start_time)
-    logger.info(f'Time taken in seconds: {seconds_took}')
+    logger.info(f"Time taken in seconds: {seconds_took}")
 
     kwargs = {}
     if model_type == "Mol2Mol":
         # compute Tanimoto similarity between generated compounds and input compounds; return largest
         valid_mols, valid_idxs = chemistry.conversions.smiles_to_mols_and_indices(sampled.items2)
         valid_scores = sampler.calculate_tanimoto(input_smilies, sampled.items2)
-        scores = [None]*len(sampled.items2)
+        scores = [None] * len(sampled.items2)
         for i, j in enumerate(valid_idxs):
             scores[j] = valid_scores[i]
-        kwargs = {'Tanimoto': scores}
+        kwargs = {"Tanimoto": scores}
 
     # Log to tensorboard
-    tb_logdir = parameters.get('tb_logdir', None)
+    tb_logdir = parameters.get("tb_logdir", None)
     if tb_logdir:
         tb_reporter = SummaryWriter(log_dir=tb_logdir)
         tb_data = setup_TBData(sampled, seconds_took, **kwargs)
@@ -125,24 +131,24 @@ def run_sampling(config: dict, device, *args, **kwargs):
     # Write to csv
     csv_logger.info(HEADERS[model_type])
     if model_type == "Reinvent":
-        records = zip(sampled.smilies,  sampled.nlls.cpu().tolist())
+        records = zip(sampled.smilies, sampled.nlls.cpu().tolist())
     elif model_type in ["Libinvent", "Linkinvent"]:
         records = zip(sampled.smilies, sampled.items1, sampled.items2, sampled.nlls.cpu().tolist())
-    elif model_type == 'Mol2Mol':
+    elif model_type == "Mol2Mol":
         records = zip(sampled.smilies, sampled.items1, scores, sampled.nlls.cpu().tolist())
     for items in records:
         csv_logger.info([item for item in items])
 
     # check NLL for target smiles if provided
-    if model_type == 'Mol2Mol':
+    if model_type == "Mol2Mol":
         target_smiles = []
-        target_smiles_path = parameters.get('target_smiles_path', "")
+        target_smiles_path = parameters.get("target_smiles_path", "")
         if target_smiles_path:
             with open(target_smiles_path) as f:
-                target_smiles = [line.rstrip('\n') for line in f]
+                target_smiles = [line.rstrip("\n") for line in f]
         if len(target_smiles) > 0:
             input, target, tanimoto, nlls = sampler.check_nll(input_smilies, target_smiles)
-            file = os.path.join(os.path.dirname(target_smiles_path), 'target_nll.csv')
+            file = os.path.join(os.path.dirname(target_smiles_path), "target_nll.csv")
             csv_logger_target_nll = setup_logger(
                 name="csv",
                 filename=file,
@@ -173,10 +179,7 @@ def filter_valid(sampled: SampleBatch) -> SampleBatch:
 
     items2 = list(np.array(sampled.items2)[mask_idx])
 
-    try:
-        nlls = list(np.array(sampled.nlls)[mask_idx])
-    except TypeError:  # Reinvent requires Tensor later
-        nlls = sampled.nlls[mask_idx]
+    nlls = sampled.nlls[mask_idx]
 
     smilies = list(np.array(sampled.smilies)[mask_idx])
     states = np.array([SmilesState.VALID] * len(mask_idx))
