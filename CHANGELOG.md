@@ -11,6 +11,53 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 - Fragment generators using transformers
 
 
+## [4.0.17] 2023-11-17
+
+### Fixed
+
+- Bug in sampling related to the way the sampled.nlls object was treated. Now it is always pytorch tensor object without gradient on cpu.
+
+
+## [4.0.16] 2023-11-15
+
+### Fixed
+
+- Moved TPSA to separate component to enable TPSA calculation for polar S and P, the original RDKit implementation does not consider those atoms and the default is still to leave those out from TPSA calculation
+
+
+## [4.0.15] 2023-11-15
+
+### Fixed
+
+- Issue with NaNs being in the raw and transformed code that would not allow to compute the mean
+
+
+## [4.0.14] 2023-11-13
+
+### Fixed
+
+- Explicit serialization of JSON string because the internal one from requests may fail
+
+
+## [4.0.13] 2023-11-09
+
+### Fixed
+
+- Added a patch to fix a bug on the native implementation of Pytorch related to the histogram functionality of the Tensorboard report
+
+
+## [4.0.12] 2023-11-09
+
+### Changed
+
+- Added a check which raises an exception if the user enters scaffolds with multiple attachement points connected to the same atom (Libinvent, Linkinvent). This
+will be lifted in a future update
+
+### Fixed
+
+- Fixed report format (TL)
+
+
 ## [4.0.11] 2023-11-02
 
 ### Fixed

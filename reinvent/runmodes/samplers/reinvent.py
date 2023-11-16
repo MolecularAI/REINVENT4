@@ -22,7 +22,9 @@ class ReinventSampler(Sampler):
         """
 
         if self.unique_sequences:
-            sampled = remove_duplicate_sequences(self.model.sample(self.batch_size), is_reinvent=True)
+            sampled = remove_duplicate_sequences(
+                self.model.sample(self.batch_size), is_reinvent=True
+            )
         else:
             sampled = self.model.sample(self.batch_size)
 
@@ -32,5 +34,4 @@ class ReinventSampler(Sampler):
         ]
 
         sampled.smilies, sampled.states = validate_smiles(mols)
-
         return sampled

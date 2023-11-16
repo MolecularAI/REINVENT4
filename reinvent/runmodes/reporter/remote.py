@@ -11,6 +11,7 @@ i.e. a reporter will always be available.
 
 __all__ = ["setup_reporter", "get_reporter"]
 import requests
+import json
 import logging
 from typing import Mapping, Protocol
 
@@ -65,7 +66,8 @@ class RemoteJSONReporter:
         if not isinstance(record, Mapping):
             raise TypeError("The record is expected to be a mapping")
 
-        response = requests.post(self.url, json=record, headers=self.headers)
+        json_msg = json.dumps(record)
+        response = requests.post(self.url, json=json_msg, headers=self.headers)
 
         # alternative: check if response.status_code != request.codes.created
         if not response.ok and self.max_msg < MAX_ERR_MSG:

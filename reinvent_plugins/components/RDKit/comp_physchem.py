@@ -59,7 +59,6 @@ def graph_length(mol: Chem.Mol) -> int:
 cls_func_map = {
     "Qed": Descriptors.qed,
     "MolecularWeight": Descriptors.MolWt,
-    "TPSA": Descriptors.TPSA,
     "GraphLength": graph_length,
     "NumAtomStereoCenters": Chem.CalcNumAtomStereoCenters,
     "HBondAcceptors": Lipinski.NumHAcceptors,
