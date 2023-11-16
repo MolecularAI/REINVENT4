@@ -11,8 +11,8 @@ from typing import List
 import logging
 
 import numpy as np
-from rdkit import Chem
 
+from reinvent_plugins.normalize import normalize_smiles
 from ..run_program import run_command
 from ..component_results import ComponentResults
 from ..add_tag import add_tag
@@ -33,6 +33,9 @@ class LillyMedchemRules:
     def __init__(self, params: Parameters):
         self.want_relaxed = params.relaxed
 
+        self.smiles_type = "lilly_smiles"
+
+    @normalize_smiles
     def __call__(self, smilies: List[str]) -> np.array:
         scores = []
 
