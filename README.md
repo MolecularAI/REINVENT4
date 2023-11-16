@@ -97,6 +97,8 @@ different `conda` environment to execute, so you have to set up a separate envir
 Tests 
 -----
 
+This is primarily for developers and users/admins who wish to ensure that the installation principally works.  The information here is not relevant to the practical use of REINVENT.  Please refer to _Basic Usage_ for instructions on how to use the `reinvent` command.
+
 The REINVENT project uses the `pytest` framework for its tests; before you run them you first have to create a 
 configuration, which the tests will use.
 
