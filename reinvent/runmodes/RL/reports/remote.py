@@ -96,10 +96,10 @@ def score_summary(results: ScoreResults, mask_idx: np.ndarray) -> dict:
                 raw_scores.append(original_scores)
 
     for name, _scores in zip(names, scores):
-        score_components[name] = _scores[mask_idx].mean().astype(float)
+        score_components[name] = np.nanmean(_scores[mask_idx]).astype(float)
 
     for name, _scores in zip(names, raw_scores):
-        score_components[name + " (raw)"] = _scores[mask_idx].mean().astype(float)
+        score_components[name + " (raw)"] = np.nanmean(_scores[mask_idx]).astype(float)
 
     return score_components
 

@@ -24,22 +24,22 @@ use_checkpoint = false  # if true read diversity filter from agent_file
 summary_csv_prefix = "staged_learning"  # prefix for the CSV file
 
 ## Reinvent
-prior_file = "models/reinvent.prior"
-agent_file = "models/reinvent.prior"
+prior_file = "priors/reinvent.prior"
+agent_file = "priors/reinvent.prior"
 
 ## LibInvent
-#prior_file = "models/libinvent.prior"
-#agent_file = "models/libinvent.prior"
+#prior_file = "priors/libinvent.prior"
+#agent_file = "priors/libinvent.prior"
 #smiles_file = "scaffolds.smi"  # 1 scaffold per line with attachment points
 
 ## LinkInvent
-#prior_file = "models/linkinvent.prior"
-#agent_file = "models/linkinvent.prior"
+#prior_file = "priors/linkinvent.prior"
+#agent_file = "priors/linkinvent.prior"
 #smiles_file = "warheads.smi"  # 2 warheads per line separated with '|'
 
 ## Mol2Mol
-#prior_file = "models/mol2mol_scaffold_generic.prior"
-#agent_file = "models/mol2mol_scaffold_generic.prior"
+#prior_file = "priors/mol2mol_scaffold_generic.prior"
+#agent_file = "priors/mol2mol_scaffold_generic.prior"
 #smiles_file = "mol2mol.smi"  # 1 compound per line
 #sample_strategy = "multinomial"  # multinomial or beamsearch (deterministic)
 #distance_threshold = 100

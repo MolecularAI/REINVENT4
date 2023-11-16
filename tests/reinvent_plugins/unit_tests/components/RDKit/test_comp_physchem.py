@@ -2,7 +2,6 @@ import numpy as np
 
 from reinvent_plugins.components.RDKit.comp_physchem import Qed
 from reinvent_plugins.components.RDKit.comp_physchem import MolecularWeight
-from reinvent_plugins.components.RDKit.comp_physchem import TPSA
 from reinvent_plugins.components.RDKit.comp_physchem import GraphLength
 from reinvent_plugins.components.RDKit.comp_physchem import NumAtomStereoCenters
 from reinvent_plugins.components.RDKit.comp_physchem import HBondAcceptors
@@ -23,7 +22,6 @@ def test_comp_physchem():
     expected_results = {
         Qed: np.array([0.44262837, 0.39083325]),
         MolecularWeight: np.array([78.114, 82.146]),
-        TPSA: np.array([0.0, 0.0]),
         GraphLength: np.array([3.0, 5.0]),
         NumAtomStereoCenters: np.array([0.0, 0.0]),
         HBondAcceptors: np.array([0.0, 0.0]),

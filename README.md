@@ -48,6 +48,17 @@ Installation
     reinvent --help
     ```
 
+Basic Usage
+-----------
+
+REINVENT is a command line tool and works principally as follows
+```shell
+reinvent -l sampling.log sampling.toml
+```
+
+This writes logging information to the file `sampling.log`.  If you wish to write this to the screen, leave out the `-l sampling.log` part. `sampling.toml` is the configuration file.  A sample and samples for the other run modes is located in `config/toml` of the repository and file paths would need to be adjusted to your local installation.  In particular, ready made prior models are located in `priors` in the Github repository and you would choose one and the appropriate run mode depending on the research problem you are trying to address.  There is additional information in `config/toml` in several `\*.md` files with instructions on how to configure the TOML file.
+
+
 Updating dependencies
 ---------------------
 
@@ -85,6 +96,8 @@ different `conda` environment to execute, so you have to set up a separate envir
 
 Tests 
 -----
+
+This is primarily for developers and users/admins who wish to ensure that the installation principally works.  The information here is not relevant to the practical use of REINVENT.  Please refer to _Basic Usage_ for instructions on how to use the `reinvent` command.
 
 The REINVENT project uses the `pytest` framework for its tests; before you run them you first have to create a 
 configuration, which the tests will use.

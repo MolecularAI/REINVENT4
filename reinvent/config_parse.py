@@ -11,8 +11,34 @@ from typing import List, Tuple, Union, Optional, Callable
 
 import tomli
 
+from rdkit import Chem
 
 smiles_func = Callable[[str], str]
+
+
+def has_multiple_attachment_points_to_same_atom(smiles):
+    mol = Chem.MolFromSmiles(smiles)
+
+    if not mol:
+        raise RuntimeError(f"Error: Input {smiles} is not a valid molecule")
+
+    seen = set()
+
+    for atom in mol.GetAtoms():
+        if atom.HasProp("dummyLabel"):
+            neighbours = atom.GetNeighbors()
+
+            if len(neighbours) > 1:
+                raise RuntimeError("Error: dummy atom is not terminal")
+
+            idx = neighbours[0].GetIdx()
+
+            if idx in seen:
+                return True
+
+            seen.add(idx)
+
+    return False
 
 
 def read_smiles_csv_file(
@@ -61,6 +87,22 @@ def read_smiles_csv_file(
                             smiles = action(smiles)
             else:
                 smiles = tuple(smiles.strip() for smiles in row[columns])
+
+                # FIXME: hard input check for libinvent / linkinvent
+                #        for unsupported scaffolds containing multiple
+                #        attachment points to the same atoms.
+                # libinvent
+                if "|" in smiles[1]:
+                    if has_multiple_attachment_points_to_same_atom(smiles[0]):
+                        raise ValueError(
+                            f"Not supported: Smiles {smiles[0]} contains multiple attachment points for the same atom"
+                        )
+                # linkinvent
+                if "|" in smiles[0]:
+                    if has_multiple_attachment_points_to_same_atom(smiles[1]):
+                        raise ValueError(
+                            f"Not supported: Smiles {smiles[1]} contains multiple attachment points for the same atom"
+                        )
 
             # SMILES transformation may fail
             # FIXME: needs sensible way to report this back to the user
