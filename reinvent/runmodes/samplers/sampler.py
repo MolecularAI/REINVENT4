@@ -56,7 +56,9 @@ class Sampler(ABC):
         """Use provided SMILES list for sampling"""
 
 
-def remove_duplicate_sequences(sampled: SampleBatch, is_reinvent: bool=False, is_mol2mol: bool=False):
+def remove_duplicate_sequences(
+    sampled: SampleBatch, is_reinvent: bool = False, is_mol2mol: bool = False
+):
     """Remove duplicate sequences/SMILES
 
     This operates on the SMILES directly sampled from the model.  This means
@@ -91,7 +93,6 @@ def remove_duplicate_sequences(sampled: SampleBatch, is_reinvent: bool=False, is
     if orig_len > len(sampled.output):
         logger.debug(f"Removed {orig_len - len(sampled.output)} duplicate sequences")
 
-
     return sampled
 
 
@@ -113,7 +114,9 @@ def validate_smiles(mols: List[Chem.Mol], isomeric: bool = False) -> Tuple[List,
             failed = Chem.SanitizeMol(mol, catchErrors=True)
 
             if not failed:
-                canonical_smiles = Chem.MolToSmiles(mol, canonical=True, isomericSmiles=isomeric)
+                canonical_smiles = Chem.MolToSmiles(
+                    mol, canonical=True, isomericSmiles=isomeric
+                )
 
                 if canonical_smiles in seen_before:
                     smilies_states.append(SmilesState.DUPLICATE)

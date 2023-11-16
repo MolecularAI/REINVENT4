@@ -100,3 +100,7 @@ build-backend = "setuptools.build_meta"
 where = [".", "configs"]
 include = ["reinvent*"]
 namespaces = true
+
+
+[tool.setuptools.package-data]
+"*" = ["*.pkl.gz"]

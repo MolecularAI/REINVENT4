@@ -21,17 +21,16 @@ sample_batch_size = 100  # number of sampled molecules chosen for similarity
 # file and possibly a SMILES file with seed structures.
 
 ## Reinvent
-#input_model_file = "models/reinvent.prior"
+#input_model_file = "priors/reinvent.prior"
 #smiles_file = "TL_reinvent_100.smi"  # read 1st column
 #output_model_file = "TL_reinvent.model"
 #validation_smiles_file = "TL_reinvent_100.smi"  
 
-## Molformer 
+## Mol2Mol
 input_model_file = "priors/mol2mol_scaffold_generic.prior"
 smiles_file = "compounds.smi"  # read 1st column
 output_model_file = "TL_Mol2Mol.model"
 validation_smiles_file = "validation_compounds.smi"  # read 1st column
-
 
 # Define the type of similarity and its parameters
 pairs.type = "tanimoto"
@@ -44,13 +43,13 @@ pairs.max_cardinality = 199
 ### both methods use constraints which may leave only a small portion of
 ### the molecule to be optimizable
 ## LibInvent
-#input_model_file = "models/libinvent.prior"
+#input_model_file = "priors/libinvent.prior"
 #smiles_file = "TL_libinvent_100.smi"  # read first 2 columns: warheads, linker
 #validation_smiles_file = "TL_libinvent_100.smi"  # read first 2 columns: warheads, linker
 #output_model_file = "TL_libinvent.model"
 #
 ## LinkInvent
-#input_model_file = "models/linkinvent.prior"
+#input_model_file = "priors/linkinvent.prior"
 #smiles_file = "TL_linkinvent_100.smi"  # read first 2 columns: scaffold, R-groups
 #output_model_file = "TL_linkinvent.model"
 #validation_smiles_file = "TL_linkinvent_100.smi"  # read first 2 columns: scaffold, R-groups

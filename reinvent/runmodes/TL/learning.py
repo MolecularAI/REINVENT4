@@ -19,15 +19,26 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torch.nn.utils import clip_grad_norm_
-from torch.utils.tensorboard import SummaryWriter
+
+# Uncomment this line for newer version of Pytorch.
+# There is a bug in version 1.12 / 1.13 that
+# causes an exception in SummaryWriter.add_histogram
+# from torch.utils.tensorboard import SummaryWriter
 import tqdm
 from tqdm.contrib.logging import tqdm_logging_redirect
 from rdkit import Chem, DataStructs
 
 from reinvent.runmodes.reporter.remote import get_reporter
+from reinvent.runmodes.setup_sampler import setup_sampler
 from .reports.tensorboard import write_report, TBData
 from .reports.remote import send_report, RemoteData
 
+# Patched SummaryWriter
+from reinvent.runmodes.utils.tensorboard import SummaryWriter
+from reinvent.runmodes.dtos import ChemistryHelpers
+from reinvent.chemistry import Conversions
+from reinvent.chemistry.library_design import BondMaker, AttachmentPoints
+from reinvent.models.model_factory.sample_batch import SmilesState
 
 if TYPE_CHECKING:
     from reinvent.models import ModelAdapter
@@ -58,6 +69,8 @@ class Learning(ABC):
         self._config = configuration
         self.device = model.device
 
+        # Setup sampler
+
         try:
             _ = getattr(self.model, "sample_smiles")
             self.can_do_similarity = True
@@ -74,13 +87,29 @@ class Learning(ABC):
         self.smilies = self._config.smilies
         self.validation_smilies = self._config.validation_smilies
 
+        model_type = self.model.__class__.__name__.split("Adapter")[0]
+        chemistry = ChemistryHelpers(
+            Conversions(),  # Lib/LinkInvent, Mol2Mol
+            BondMaker(),  # LibInvent
+            AttachmentPoints(),  # Lib/LinkInvent
+        )
+        sampling_parameters = {"num_smiles": 10, "batch_size": 1}
+        sampler, _ = setup_sampler(model_type, sampling_parameters, self.model, chemistry)
+        sampler.unique_sequences = False
+        self.sampler = sampler
+        self.sampling_smilies = self.smilies[: sampling_parameters["num_smiles"]]
+        if len(self.sampling_smilies) < sampling_parameters["num_smiles"]:
+            self.sampling_smilies = self.sampling_smilies + [self.sampling_smilies[-1]] * (
+                sampling_parameters["num_smiles"] - len(self.sampling_smilies)
+            )
+        if not isinstance(self.sampling_smilies[0], str):
+            self.sampling_smilies = [s[0] for s in self.sampling_smilies]
+
         # FIXME: think what to do for Lib and LinkInvent
         if self.can_do_similarity:
             nmols = min(len(self.smilies), self._config.num_refs)
             ref_smilies = random.sample(self.smilies, nmols)
-            mols = filter(
-                lambda m: m, [Chem.MolFromSmiles(smiles) for smiles in ref_smilies]
-            )
+            mols = filter(lambda m: m, [Chem.MolFromSmiles(smiles) for smiles in ref_smilies])
             self.ref_fps = [Chem.RDKFingerprint(mol) for mol in mols]
 
         self.sample_batch_size = max(self._config.sample_batch_size, 128)
@@ -91,7 +120,6 @@ class Learning(ABC):
         self.tb_reporter = None
         if tb_logdir:
             self.tb_reporter = SummaryWriter(log_dir=tb_logdir)
-
             if self.can_do_similarity:
                 mols = filter(
                     lambda m: m,
@@ -105,10 +133,7 @@ class Learning(ABC):
                     s = DataStructs.BulkTanimotoSimilarity(fps[n], fps[n + 1 :])
                     sim.extend(s)
 
-                # FIXME: TB broken
-                #self.tb_reporter.add_histogram(
-                #    "Tanimoto input SMILES", np.array(sim), 0
-                #)
+                self.tb_reporter.add_histogram("Tanimoto input SMILES", np.array(sim), 0)
 
         # FIXME: this is only available for Mol2mol
         if self._config.max_sequence_length:
@@ -175,8 +200,23 @@ class Learning(ABC):
                         mean_nll_valid = stats["nll"]
                         validation_losses[epoch_no] = mean_nll_valid
 
-                    self.report(mean_nll, mean_nll_valid, epoch_no, end_epoch)
-                    self._save_model(epoch_no)
+                    saved_model_path = self._save_model(epoch_no)
+                    # sampled_smiles, sampled_nll = self.model.sample_smiles(
+                    #     self.dataloader, num=10
+                    # )
+                    samples = self.sampler.sample(self.sampling_smilies)
+                    sampled_smilies = [
+                        s
+                        for s, state in zip(samples.smilies, samples.states)
+                        if state == SmilesState.DUPLICATE or state == SmilesState.VALID
+                    ]
+                    self.report(
+                        mean_nll,
+                        mean_nll_valid,
+                        epoch_no,
+                        saved_model_path,
+                        sampled_smilies,
+                    )
 
                 if self._terminate():
                     break
@@ -219,9 +259,7 @@ class Learning(ABC):
             loss.backward()
 
             if self._config.clip_gradient_norm > 0:
-                clip_grad_norm_(
-                    self.model.network.parameters(), self._config.clip_gradient_norm
-                )
+                clip_grad_norm_(self.model.network.parameters(), self._config.clip_gradient_norm)
             self._optimizer.step()
 
         self._lr_scheduler.step()  # Mol2Mol does this once per batch
@@ -241,7 +279,7 @@ class Learning(ABC):
 
         return terminate
 
-    def _save_model(self, epoch: int = None) -> None:
+    def _save_model(self, epoch: int = None) -> str:
         """Save the model to a file
 
         :param epoch: number when give to use for filename
@@ -251,6 +289,7 @@ class Learning(ABC):
         path = f"{self._config.output_model_file}{suffix}"
 
         self.model.save_to_file(path)
+        return path
 
     def compute_stats(self, dataloader: DataLoader) -> dict:
         """Compute several evaluation stats
@@ -267,7 +306,14 @@ class Learning(ABC):
             n_examples = n_examples + len(batch)
         return {"nll": total_nll / n_examples}
 
-    def report(self, mean_nll: float, mean_nll_valid: float, epoch_no: int, epochs: int):
+    def report(
+        self,
+        mean_nll: float,
+        mean_nll_valid: float,
+        epoch_no: int,
+        model_path: str,
+        sampled_smiles: list[str],
+    ):
         """Log the report to various sources"""
 
         if self.tb_reporter:
@@ -289,7 +335,8 @@ class Learning(ABC):
 
         remote_data = RemoteData(
             epoch=epoch_no,
-            epochs=epochs,
+            model_path=model_path,
+            sampled_smiles=sampled_smiles,
             mean_nll=mean_nll,
             mean_nll_valid=mean_nll_valid,
         )

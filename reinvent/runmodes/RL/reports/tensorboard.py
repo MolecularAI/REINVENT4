@@ -70,7 +70,7 @@ def write_report(reporter, data: TBData) -> None:
 
         reporter.add_scalar(f"{name} (raw)", np.nanmean(_scores[mask_idx]), step)
 
-    reporter.add_scalar(f"Loss", data.loss, step)
+    reporter.add_scalar(f"Loss", data.loss, step)    
 
     reporter.add_scalars(
         "Loss: likelihood averages",
