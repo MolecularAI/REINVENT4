@@ -58,24 +58,6 @@ reinvent -l sampling.log sampling.toml
 
 This writes logging information to the file `sampling.log`.  If you wish to write this to the screen, leave out the `-l sampling.log` part. `sampling.toml` is the configuration file.  A sample and samples for the other run modes is located in `config/toml` of the repository and file paths would need to be adjusted to your local installation.  In particular, ready made prior models are located in `priors` in the Github repository and you would choose one and the appropriate run mode depending on the research problem you are trying to address.  There is additional information in `config/toml` in several `\*.md` files with instructions on how to configure the TOML file.
 
-
-Updating dependencies
----------------------
-
-Update lockfiles with [pip-tools](https://github.com/jazzband/pip-tools) (do not edit lockfiles manually):
-```shell
-pip-compile --extra-index-url=https://download.pytorch.org/whl/cu113 --extra-index-url=https://pypi.anaconda.org/OpenEye/simple --resolver=backtracking pyproject.toml
-```
-To update single package, use `pip-compile --upgrade-package somepackage` (see pip-tools docs).
-
-
-Usage
------
-
-For the time being go through the files in config/toml where you will find
-various examples on how to run REINVENT.  The files in config/json are
-conversions from the JSON files and are functionally equivalent.
-
 <!--- For concrete examples, you can check out the Jupyter notebook examples in the ReinventCommunity repo.
 Running each example will result in a template file.There are templates for many running modes. 
 Each running mode can be executed by `python input.py some\_running\_mode.json` after activating the environment.
@@ -92,6 +74,15 @@ NOTE: these will be updated at a later time!
 <!--- There is another repository containing useful `jupyter` notebooks related to `REINVENT` 
 called [ReinventCommunity](https://github.com/MolecularAI/ReinventCommunity). Note, that it uses a
 different `conda` environment to execute, so you have to set up a separate environment. --->
+
+Updating dependencies
+---------------------
+
+Update lockfiles with [pip-tools](https://github.com/jazzband/pip-tools) (do not edit lockfiles manually):
+```shell
+pip-compile --extra-index-url=https://download.pytorch.org/whl/cu113 --extra-index-url=https://pypi.anaconda.org/OpenEye/simple --resolver=backtracking pyproject.toml
+```
+To update single package, use `pip-compile --upgrade-package somepackage` (see pip-tools docs).
 
 
 Tests 
