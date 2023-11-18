@@ -1,9 +1,12 @@
 """Iain Watson's Lilly Medchem rules
 
-Compute the demerit score for each SMILES.  Not implemented as a filter.
+Compute the demerit score for each SMILES.  Could be implemented as a filter
+using the default demerit of 100 or the relaxed demerit of 160 as boundary.
 """
 
 __all__ = ["LillyMedchemRules"]
+import os
+import shlex
 import re
 import tempfile
 from dataclasses import dataclass
@@ -19,42 +22,46 @@ from ..add_tag import add_tag
 
 logger = logging.getLogger("reinvent")
 
-CMD = "Lilly_Medchem_Rules.rb"  # assume in path
+CMDS_FILENAME = os.path.join(os.path.dirname(__file__), "lcm_commands.lst")
+PARAMS = ["-c smax=25 -c hmax=40", "-c smax=26 -c hmax=50 -f 160"]
 
 
 @add_tag("__parameters")
 @dataclass
 class Parameters:
-    relaxed: List[bool]  # 7-50 heavy atoms, 160 demerit cutoff
+    relaxed: List[bool]  # could be used for filter
+    topdir: List[str]  # root directory of LillyMedchemRules repository
 
 
 @add_tag("__component")
 class LillyMedchemRules:
     def __init__(self, params: Parameters):
-        self.want_relaxed = params.relaxed
+        self.commands = []
+        self.relaxed = params.relaxed
+        self.topdirs = []
+
+        cmds = read_commands(CMDS_FILENAME)
+
+        for topdir in params.topdir:
+            self.commands.append(cmds)
+            self.topdirs.append(topdir)
 
         self.smiles_type = "lilly_smiles"
 
     @normalize_smiles
-    def __call__(self, smilies: List[str]) -> np.array:
+    def __call__(self, smilies: List[str]) -> ComponentResults:
         scores = []
 
-        for want_relaxed in self.want_relaxed:
-            cmd = [CMD]
-
-            if want_relaxed:
-                cmd.append("-relaxed")
-
+        for cmds, relaxed, topdir in zip(self.commands, self.relaxed, self.topdirs):
             with (tempfile.NamedTemporaryFile(mode="w+", suffix=".smi", delete=True) as in_smi,):
                 for num, smiles in enumerate(smilies):
                     in_smi.write(f"{smiles} ID{num}\n")
 
                 in_smi.flush()
 
-                cmd.append(in_smi.name)
-                result = run_command(cmd)
+                result = run_pipeline(cmds, topdir, in_smi.name, PARAMS[relaxed])
 
-            demerits = parse_output(result.stdout, smilies)
+            demerits = parse_output(result, smilies)
 
             scores.append(demerits)
 
@@ -83,7 +90,7 @@ def parse_output(lines: str, smilies: List[str]) -> np.ndarray[float]:
           chemistry model!  Hence match by ID.
     """
 
-    # bad0.smi: mc_first_pass
+    # bad0.smi: mc_first_pass - perception, standardisation, validation, etc.
     mc_smilies = {}
 
     with open("bad0.smi", "r") as mc_bad:
@@ -101,15 +108,12 @@ def parse_output(lines: str, smilies: List[str]) -> np.ndarray[float]:
                 mc_smilies[ID] = UNWANTED
 
     # bad3.smi: iwdemerit
+    #           SMILES >= threshold (-f flag) end up here
     with open("bad3.smi", "r") as mc_bad:
         for line in mc_bad:
             match = DEMERIT_PATTERN.match(line)
             ID = match.group(2)
             demerit = match.group(4)
-
-            # FIXME: this needs reconsideration because the demerits may
-            #        actually be very low but the compounds was rejected
-            #        maybe increase demerit? user adjustable?
             mc_smilies[ID] = int(demerit)
 
     good = []
@@ -119,16 +123,13 @@ def parse_output(lines: str, smilies: List[str]) -> np.ndarray[float]:
         ID = match.group(2)
         demerit = match.group(4)
 
-        if not match.group(3):  # not demerits
+        if not match.group(3):  # no demerits
             mc_smilies[ID] = 0
         else:
             mc_smilies[ID] = int(demerit)
 
         good.append(demerit)
 
-    # FIXME: prefill array as Lilly_Medchem_Rules drops SMILES in mc_first_pass
-    #        that in can't interpret e.g. because of aromaticity (there are many
-    #        options how to deal with this but probably no universal one)
     scores = np.full(len(smilies), np.nan)
 
     for i, score in mc_smilies.items():
@@ -136,3 +137,44 @@ def parse_output(lines: str, smilies: List[str]) -> np.ndarray[float]:
         scores[idx] = score
 
     return scores
+
+
+def read_commands(cmd_filename: str) -> List[str]:
+    """Read the list of commands from file"""
+
+    cmds = []
+
+    with open(cmd_filename, "r") as cfile:
+        for line in cfile:
+            cmd = line.strip()
+
+            if not cmd or cmd.startswith("#"):
+                continue
+
+            cmds.append(cmd)
+
+    return cmds
+
+
+class SafeDict(dict):
+    def __missing__(self, key):
+        return "{" + key + "}"
+
+
+def run_pipeline(cmds: List, topdir: str, in_smi: str, demerit_params: str) -> str:
+    """Run the pipeline of commands"""
+
+    results = None
+
+    for n, cmd in enumerate(cmds):
+        if n == 0:
+            instr = None
+        else:
+            instr = results.stdout
+
+        cmds_string = cmd.format_map(
+            SafeDict(topdir=topdir, in_smi=in_smi, demerit_params=demerit_params)
+        )
+        results = run_command(shlex.split(cmds_string), input=instr)
+
+    return results.stdout
