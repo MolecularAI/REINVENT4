@@ -13,7 +13,7 @@ considered as experimental and for demonstration purposes.
 
 * LillyMedchemRules: an interface to the [Lilly Medchem rules](https://github.com/IanAWatson/Lilly-Medchem-Rules) authored by Ian Watson while at Ely Lilly.  This is implementated as a scoring so will need a transform like the inverse sigmoid.  The parameters is whether the relaxed rules should be used and the top directory of the Lilly-Medchem-Rules installation,
 
-* LillyDescripts: 259 descriptors from Ely Lilly's library of Chemoinformatics [LillyMol](https://github.com/EliLillyCo/LillyMol).  The parameters are a list of wanted descriptors used and the top directory of the LillyMol installation.  Unfortunately, there is little documentation available.  Descriptor groups:
+* LillyDescripts: 259 descriptors from Ely Lilly's library of Chemoinformatics [LillyMol](https://github.com/EliLillyCo/LillyMol).  The parameters are the wanted descriptors (one per endpoint) and the top directory of the LillyMol installation.  Unfortunately, there is little documentation available.  Descriptor groups:
     * adjacent to ring fusion descriptors
     * bonds between rings descriptors
     * all formal charge descriptors
