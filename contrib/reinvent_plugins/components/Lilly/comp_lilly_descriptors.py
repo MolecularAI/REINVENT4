@@ -59,12 +59,20 @@ def parse_output(lines: str, cols: List[str], nsmilies: int) -> List[np.ndarray[
     header = file.readline().strip().split(" ")
     idx = [header.index(col) for col in cols if col in header]
 
+    if not idx:
+        raise RuntimeError(f"{__name__}: unknown descriptor")
+
+    if len(idx) > 1:
+        get_rows = lambda row: [float(item) for item in operator.itemgetter(*idx)(row)]
+    else:
+        get_rows = lambda row: [float(row[idx[0]])]
+
     reader = csv.reader(file, delimiter=" ")
     rows = {}
 
     for row in reader:
         ID = int(row[0].replace("IWD", "")) - 1
-        rows[ID] = [float(item) for item in operator.itemgetter(*idx)(row)]
+        rows[ID] = get_rows(row)
 
     for i in range(nsmilies):
         if i not in rows.keys():
