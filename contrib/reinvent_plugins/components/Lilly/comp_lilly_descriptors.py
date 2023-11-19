@@ -22,6 +22,7 @@ from ..add_tag import add_tag
 
 logger = logging.getLogger("reinvent")
 
+# -O controls which descriptor subset is computed but only one allowed
 DESCR_CMD = "{topdir}/bin/Linux/iwdescr -E autocreate -A D -g all -O all -i smi -"  # assume in path
 
 
