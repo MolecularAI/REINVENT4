@@ -23,7 +23,7 @@ from ..add_tag import add_tag
 logger = logging.getLogger("reinvent")
 
 CMDS_FILENAME = os.path.join(os.path.dirname(__file__), "lcm_commands.lst")
-PARAMS = ["-c smax=25 -c hmax=40", "-c smax=26 -c hmax=50 -f 160"]
+PARAMS = ["-c smax=25 -c hmax=40", "-c smax=26 -c hmax=50 -f 160"]  # default, relaxed
 
 
 @add_tag("__parameters")
