@@ -30,7 +30,7 @@ DESCR_CMD = "{topdir}/bin/Linux/iwdescr -E autocreate -A D -g all -O all -i smi 
 @dataclass
 class Parameters:
     descriptors: List[List[str]]
-    topddir: List[str]
+    topdir: List[str]
 
 
 @add_tag("__component", "filter")
@@ -38,7 +38,7 @@ class LillyDescriptors:
     def __init__(self, params: Parameters):
         self.descriptors = params.descriptors[0]  # does not make sense to have multiple endpoints
 
-        descr_cmd = DESCR_CMD.format(topdir=params.topddir[0])
+        descr_cmd = DESCR_CMD.format(topdir=params.topdir[0])
         self.descr_cmd = shlex.split(descr_cmd)
 
         self.smiles_type = "lilly_smiles"
