@@ -29,14 +29,15 @@ DESCR_CMD = "{topdir}/bin/Linux/iwdescr -E autocreate -A D -g all -O all -i smi 
 @add_tag("__parameters")
 @dataclass
 class Parameters:
-    descriptors: List[List[str]]
+    descriptors: List[str]
     topdir: List[str]
 
 
-@add_tag("__component", "filter")
+@add_tag("__component")
 class LillyDescriptors:
     def __init__(self, params: Parameters):
-        self.descriptors = params.descriptors[0]  # does not make sense to have multiple endpoints
+        # collect descriptor from all endpoints: only one descriptor per endpoint
+        self.descriptors = params.descriptors
 
         descr_cmd = DESCR_CMD.format(topdir=params.topdir[0])
         self.descr_cmd = shlex.split(descr_cmd)
