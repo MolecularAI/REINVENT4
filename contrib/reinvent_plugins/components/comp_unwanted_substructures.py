@@ -57,4 +57,4 @@ class UnwantedSubstructures:
 
             scores.append(score)
 
-        return ComponentResults([np.array(scores, dtype=bool)])
+        return ComponentResults([np.array(scores, dtype=int)])
