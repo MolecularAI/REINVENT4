@@ -1,0 +1,114 @@
+run_type = "scoring"
+output_csv = "scoring.csv"
+json_out_config = "_scoring.json"
+
+[parameters]
+
+smiles_file = "tests/chembl_random_100.smi"
+
+
+[scoring]
+
+type = "geometric_mean"
+parallel = false
+
+# filters
+[[scoring.component]]
+[scoring.component.UnwantedSubstructures]
+
+[[scoring.component.UnwantedSubstructures.endpoint]]
+name = "PAINS/CHEMBL_Glaxo"
+
+#params.catalogs = ['ALL']
+params.catalogs = ['PAINS', "CHEMBL_Glaxo"]
+
+
+[[scoring.component]]
+[scoring.component.UnwantedSubstructures]
+
+[[scoring.component.UnwantedSubstructures.endpoint]]
+name = "PAINS"
+
+params.catalogs = ['PAINS']
+
+
+[[scoring.component]]
+[scoring.component.UnwantedSubstructures]
+
+[[scoring.component.UnwantedSubstructures.endpoint]]
+name = "CHEMBL_Glaxo"
+
+params.catalogs = ["CHEMBL_Glaxo"]
+
+
+[[scoring.component]]
+[scoring.component.NIBRSubstructureFilters]
+
+[[scoring.component.NIBRSubstructureFilters.endpoint]]
+name = "NIBR"
+
+params.cutoff = 10
+
+
+# "normal" scoring components
+[[scoring.component]]
+[scoring.component.QED]
+
+[[scoring.component.QED.endpoint]]
+name = "QED"
+weight = 0.2
+
+
+[[scoring.component]]
+[scoring.component.LillyMedchemRules]
+
+[[scoring.component.LillyMedchemRules.endpoint]]
+name = "LillyMedchem"
+
+params.relaxed = false
+params.topdir = "/usr/local/src/Lilly-Medchem-Rules"
+
+transform.type = "reverse_sigmoid"
+transform.high = 200
+transform.low = 0.0
+transform.k = 0.2
+
+
+[[scoring.component]]
+[scoring.component.TPSA]
+
+[[scoring.component.TPSA.endpoint]]
+name = "RDKit TPSA"
+
+transform.type = "double_sigmoid"
+transform.low = 50
+transform.high = 180
+transform.coef_div = 100
+transform.coef_si = 150
+transform.coef_se = 150
+
+
+[[scoring.component]]
+[scoring.component.LillyDescriptors]
+
+[[scoring.component.LillyDescriptors.endpoint]]
+name = "Novartis PSA"
+
+params.descriptors = "w_nvrtspsa"
+params.topdir = "/usr/local/src/LillyMol"
+
+transform.type = "double_sigmoid"
+transform.low = 50
+transform.high = 180
+transform.coef_div = 100
+transform.coef_si = 150
+transform.coef_se = 150
+
+[[scoring.component.LillyDescriptors.endpoint]]
+name = "RO5 OHNH"
+
+params.descriptors = "w_ro5_ohnh"
+params.topdir = "/usr/local/src/LillyMol"
+
+transform.type = "left_step"
+transform.high = 10
