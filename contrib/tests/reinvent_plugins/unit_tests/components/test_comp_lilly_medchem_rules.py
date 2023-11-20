@@ -21,14 +21,16 @@ SMILIES = [
 @pytest.mark.parametrize(
     "relaxed, expected_results",
     [
-        ([False], [999, 6, 0, 40, 0, 70, 50, 253, 153]),
-        ([True],  [999, 0, 0, 40, 0, 70, 50, 229, 189]),
+        (([False], ["/usr/local/src/Lilly-Medchem-Rules"]),
+         [153, 999, 6, 0, 40, 0, 70, 50, 253]),
+        (([True], ["/usr/local/src/Lilly-Medchem-Rules"]),
+         [189, 999, 0, 0, 40, 0, 70, 50, 229]),
     ],
 )
 def test_comp_lilly_medchem_rules(relaxed, expected_results):
-    params = Parameters(relaxed)
+    params = Parameters(*relaxed)
     rules = LillyMedchemRules(params)
     results = rules(SMILIES)
     expected = np.array(expected_results)
 
-    assert ((results.scores == expected) | (np.isnan(results.scores) & np.isnan(expected))).all()
+    assert (results.scores == np.array(expected_results)).all()
