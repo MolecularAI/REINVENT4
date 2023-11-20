@@ -68,7 +68,11 @@ reinvent -l sampling.log sampling.toml
 
 This writes logging information to the file `sampling.log`.  If you wish to write
 this to the screen, leave out the `-l sampling.log` part. `sampling.toml` is the
-configuration file.  A sample (including samples for the other run modes) is
+configuration file.  The main user format is [TOML](https://toml.io/en/) as it is
+tends to be more use friendly.  JSON can be used too but a specialised editor is
+recommended as the format is very sensitive to minor changes.
+
+A sample configutation file (including samples for the other run modes) is
 located in `config/toml` of the repository and file paths therein would need to be
 adjusted to your local installation.  In particular, ready made prior models are
 located in `priors` in the Github repository and you would choose a model and the
@@ -97,20 +101,22 @@ different `conda` environment to execute, so you have to set up a separate envir
 Updating dependencies
 ---------------------
 
-Update the lock files with [pip-tools](https://github.com/jazzband/pip-tools) (please, do not edit the files manually):
+Update the lock files with [pip-tools](https://pypi.org/project/pip-tools/) (please, do not edit the files manually):
 ```shell
 pip-compile --extra-index-url=https://download.pytorch.org/whl/cu113 --extra-index-url=https://pypi.anaconda.org/OpenEye/simple --resolver=backtracking pyproject.toml
 ```
 To update a single package, use `pip-compile --upgrade-package somepackage`
-(see the documentation for [pip-tools](https://pypi.org/project/pip-tools/)).
+(see the documentation for pip-tools).
 
 
 Scoring Plugins
 ---------------
 
-The scoring subsystem a simple plugin mechanism (Python namespace packages).  If you
-wish to write your own, follow the instructions below.  The public repository contains
-a [contrib](https://github.com/MolecularAI/REINVENT4/tree/main/contrib/reinvent_plugins/components)
+The scoring subsystem uses a simple plugin mechanism (Python
+[native namespace packages](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/#native-namespace-packages)).  If you
+wish to write your own plugin, follow the instructions below.  The public repository
+contains a
+[contrib](https://github.com/MolecularAI/REINVENT4/tree/main/contrib/reinvent_plugins/components)
 directory with some useful examples.
 
 1. Create `/top/dir/somewhere/reinvent\_plugins/components` where `/top/dir/somewhere` is a convenient location for you.
