@@ -9,11 +9,15 @@ from dotenv import load_dotenv
 import platform
 import getpass
 import random
-import resource  # Unix only
 import logging
 import datetime
 import subprocess as sp
 from typing import List, Optional
+
+SYSTEM = platform.system()
+
+if SYSTEM != "Windows":
+    import resource  # Unix only
 
 from rdkit import rdBase, RDLogger
 import numpy as np
@@ -253,6 +257,10 @@ def main():
         current_device = torch.cuda.current_device()
         device_name = torch.cuda.get_device_name(current_device)
         logger.info(f"Using CUDA device:{current_device} {device_name}")
+
+        free_memory, total_memory = torch.cuda.mem_get_info()
+        logger.info(f"GPU memory: {free_memory // 1024**2} MiB free, "
+                    f"{total_memory // 1024**2} MiB total")
     else:
         logger.info(f"Using CPU {platform.processor()}")
 
@@ -283,15 +291,17 @@ def main():
 
     runner(input_config, actual_device, tb_logdir, responder_config)
 
-    uname = platform.uname()
-    maxrss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    if SYSTEM != "Windows":
+        maxrss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        peak_mem = 0
 
-    if uname.system == "Linux":
-        peak_mem = maxrss / 1024**2
-    else:  # assume MacOSX
-        peak_mem = maxrss / 1024**3
+        if SYSTEM == "Linux":
+            peak_mem = maxrss / 1024
+        elif SYSTEM == "Darwin":  # MacOSX
+            peak_mem = maxrss / 1024**2
 
-    logger.info(f"Peak memory usage: {peak_mem:.3f} GB")
+        if peak_mem:
+            logger.info(f"Peak main memory usage: {peak_mem:.3f} MiB")
 
     logger.info(
         f"Finished {version.__progname__} on {datetime.datetime.now().strftime('%Y-%m-%d')}"

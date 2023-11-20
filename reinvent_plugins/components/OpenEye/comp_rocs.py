@@ -10,7 +10,7 @@ params.similarity_measure = "Tanimoto"
 params.max_stereocenters = 4
 params.ewindow = 10
 params.maxconfs = 200
-params.rocs_input = "/projects/cc/ksmv348/Hannes_rnv_scripts/S58.sq"
+params.rocs_input = ""
 
 """
 
