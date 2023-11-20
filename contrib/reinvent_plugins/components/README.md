@@ -11,9 +11,9 @@ considered as experimental and for demonstration purposes.
 
 * NIBRSubstructureFilters: simple demo to show how to write one's own RDKit filter catalog.  The specific example was taken from [Contrib](https://github.com/rdkit/rdkit/tree/master/Contrib/NIBRSubstructureFilters) in the RDKit source.  The only parameter is a cutoff which serves as a delineation between "good" and "bad" molecules.  This is a rather simplistic approach and various improvements are possible.
 
-* LillyMedchemRules: an interface to the [Lilly Medchem rules](https://github.com/IanAWatson/Lilly-Medchem-Rules) authored by Ian Watson while at Ely Lilly.  This is implementated as a scoring so will need a transform like the inverse sigmoid.  The parameters is whether the relaxed rules should be used and the top directory of the Lilly-Medchem-Rules installation,
+* LillyMedchemRules: an interface to the [Lilly Medchem rules](https://github.com/IanAWatson/Lilly-Medchem-Rules) authored by Ian Watson while at Ely Lilly.  This is implementated as a scoring so will need a transform like the inverse sigmoid.  The only parameter is whether the relaxed rules should be used.  Needs to have the `LILLY_MEDCHEM_RULES_ROOT` environment variable set to the top directory of the Lilly-Medchem-Rules installation.
 
-* LillyDescripts: 259 descriptors from Ely Lilly's library of Chemoinformatics [LillyMol](https://github.com/EliLillyCo/LillyMol).  The parameters are the wanted descriptors (one per endpoint) and the top directory of the LillyMol installation.  Unfortunately, there is little documentation available.  Descriptor groups:
+* LillyDescripts: 259 descriptors from Ely Lilly's library of Chemoinformatics [LillyMol](https://github.com/EliLillyCo/LillyMol).  The only parameter is the wanted descriptors (one per endpoint).  The `LILLY_MOL_ROOT` needs to be set to the top directory of the LillyMol installation.  Unfortunately, there is little documentation available.  Descriptor groups:
     * adjacent to ring fusion descriptors
     * bonds between rings descriptors
     * all formal charge descriptors

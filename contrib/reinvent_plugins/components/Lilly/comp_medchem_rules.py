@@ -22,6 +22,7 @@ from ..add_tag import add_tag
 
 logger = logging.getLogger("reinvent")
 
+LILLY_HOME = "LILLY_MEDCHEM_RULES_ROOT"
 CMDS_FILENAME = os.path.join(os.path.dirname(__file__), "lcm_commands.lst")
 PARAMS = ["-c smax=25 -c hmax=40", "-c smax=26 -c hmax=50 -f 160"]  # default, relaxed
 
@@ -30,21 +31,21 @@ PARAMS = ["-c smax=25 -c hmax=40", "-c smax=26 -c hmax=50 -f 160"]  # default, r
 @dataclass
 class Parameters:
     relaxed: List[bool]  # could be used for filter
-    topdir: List[str]  # root directory of LillyMedchemRules repository
 
 
 @add_tag("__component")
 class LillyMedchemRules:
     def __init__(self, params: Parameters):
-        self.commands = []
         self.relaxed = params.relaxed
-        self.topdirs = []
+        self.commands = []
+
+        if LILLY_HOME not in os.environ:
+            raise RuntimeError(f"{__name__}: {LILLY_HOME} not in environment")
+
+        self.topdir = os.environ[LILLY_HOME]
 
         cmds = read_commands(CMDS_FILENAME)
-
-        for topdir in params.topdir:
-            self.commands.append(cmds)
-            self.topdirs.append(topdir)
+        self.commands = [cmds] * len(self.relaxed)
 
         self.smiles_type = "lilly_smiles"
 
@@ -52,14 +53,14 @@ class LillyMedchemRules:
     def __call__(self, smilies: List[str]) -> ComponentResults:
         scores = []
 
-        for cmds, relaxed, topdir in zip(self.commands, self.relaxed, self.topdirs):
+        for cmds, relaxed in zip(self.commands, self.relaxed):
             with (tempfile.NamedTemporaryFile(mode="w+", suffix=".smi", delete=True) as in_smi,):
                 for num, smiles in enumerate(smilies):
                     in_smi.write(f"{smiles} ID{num}\n")
 
                 in_smi.flush()
 
-                result = run_pipeline(cmds, topdir, in_smi.name, PARAMS[relaxed])
+                result = run_pipeline(cmds, self.topdir, in_smi.name, PARAMS[relaxed])
 
             demerits = parse_output(result, smilies)
 
