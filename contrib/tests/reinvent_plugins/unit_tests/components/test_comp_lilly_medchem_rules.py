@@ -21,9 +21,9 @@ SMILIES = [
 @pytest.mark.parametrize(
     "relaxed, expected_results",
     [
-        (([False], ["/usr/local/src/Lilly-Medchem-Rules"]),
+        (([False],),
          [153, 999, 6, 0, 40, 0, 70, 50, 253]),
-        (([True], ["/usr/local/src/Lilly-Medchem-Rules"]),
+        (([True],),
          [189, 999, 0, 0, 40, 0, 70, 50, 229]),
     ],
 )
