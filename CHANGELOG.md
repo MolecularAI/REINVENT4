@@ -11,6 +11,20 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 - Fragment generators using transformers
 
 
+## [4.0.19] 2023-11-20
+
+### Changed
+
+- Contidional import of `resource` to allow running on Windows
+
+
+## [4.0.18] 2023-11-17
+
+### Added
+
+- Some rudimentary information on GPU memory usage in staged learning
+
+
 ## [4.0.17] 2023-11-17
 
 ### Fixed
