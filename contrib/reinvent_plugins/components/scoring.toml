@@ -66,7 +66,6 @@ weight = 0.2
 name = "LillyMedchem"
 
 params.relaxed = false
-params.topdir = "/usr/local/src/Lilly-Medchem-Rules"
 
 transform.type = "reverse_sigmoid"
 transform.high = 200
@@ -95,7 +94,6 @@ transform.coef_se = 150
 name = "Novartis PSA"
 
 params.descriptors = "w_nvrtspsa"
-params.topdir = "/usr/local/src/LillyMol"
 
 transform.type = "double_sigmoid"
 transform.low = 50
@@ -108,7 +106,6 @@ transform.coef_se = 150
 name = "RO5 OHNH"
 
 params.descriptors = "w_ro5_ohnh"
-params.topdir = "/usr/local/src/LillyMol"
 
 transform.type = "left_step"
 transform.high = 10

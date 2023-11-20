@@ -5,6 +5,7 @@ NOTE: iwdescr will terminate on the first invalid SMILES
 
 __all__ = ["LillyDescriptors"]
 
+import os
 import csv
 import shlex
 from io import StringIO
@@ -22,6 +23,8 @@ from ..add_tag import add_tag
 
 logger = logging.getLogger("reinvent")
 
+LILLY_HOME = "LILLY_MOL_ROOT"
+
 # -O controls which descriptor subset is computed but only one allowed
 DESCR_CMD = "{topdir}/bin/Linux/iwdescr -E autocreate -A D -g all -O all -i smi -"  # assume in path
 
@@ -30,7 +33,6 @@ DESCR_CMD = "{topdir}/bin/Linux/iwdescr -E autocreate -A D -g all -O all -i smi 
 @dataclass
 class Parameters:
     descriptors: List[str]
-    topdir: List[str]
 
 
 @add_tag("__component")
@@ -39,7 +41,10 @@ class LillyDescriptors:
         # collect descriptor from all endpoints: only one descriptor per endpoint
         self.descriptors = params.descriptors
 
-        descr_cmd = DESCR_CMD.format(topdir=params.topdir[0])
+        if LILLY_HOME not in os.environ:
+            raise RuntimeError(f"{__name__}: {LILLY_HOME} not in environment")
+
+        descr_cmd = DESCR_CMD.format(topdir=os.environ[LILLY_HOME])
         self.descr_cmd = shlex.split(descr_cmd)
 
         self.smiles_type = "lilly_smiles"
