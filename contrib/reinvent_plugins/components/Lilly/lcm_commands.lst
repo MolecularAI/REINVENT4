@@ -1,0 +1,11 @@
+#
+{topdir}/bin/mc_first_pass -c 4 -C 100 -I 0 -A I -E autocreate -V -g all -g ltltr -i ICTE -o smi -L bad0 -K TP1 -a -S - {in_smi}
+
+#
+{topdir}/bin/tsubstructure -E autocreate -b -u -i smi -o smi -A D -m bad1 -m QDT -n - -q F:{topdir}/queries/reject1 -
+
+#
+{topdir}/bin/tsubstructure -E autocreate -b -u -i smi -o smi -A D -m bad2 -m QDT -n - -q F:{topdir}/queries/reject2 -
+
+# demerit threshold (-f) and atom count cutoffs (-c) can affect the demerit
+{topdir}/bin/iwdemerit {demerit_params} -E autocreate -A D -i smi -o smi -t -x -N F:{topdir}/charge_assigner/queries -q F:{topdir}/queries/demerits -R bad3 -G - -
