@@ -12,9 +12,8 @@ catalogs are available depend on the specific RDKit release.  The only parameter
 [catalogs](https://www.rdkit.org/docs/source/rdkit.Chem.rdfiltercatalog.html#rdkit.Chem.rdfiltercatalog.FilterCatalogParams.FilterCatalogs)
 one can choose from.
 
-* NIBRSubstructureFilters: simple demo to show how to write one's own RDKit filter catalog.
-The specific example was taken from
-* [Contrib](https://github.com/rdkit/rdkit/tree/master/Contrib/NIBRSubstructureFilters) in
+* NIBRSubstructureFilters: simple demo to show how to write one's own RDKit filter catalog.  The specific example was taken from
+[Contrib](https://github.com/rdkit/rdkit/tree/master/Contrib/NIBRSubstructureFilters) in
 the RDKit source.  The only parameter is a cutoff which serves as a delineation between
 "good" and "bad" molecules.  This is a rather simplistic approach and various improvements
 are possible.
