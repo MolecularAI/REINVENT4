@@ -46,9 +46,9 @@ are possible.
     * xlogp
 
 * LillyPAINS: uses tsubstructure from LillyMol to match input SMILES with PAINS patterns.
-Multiple matches are not handled specially at the moment.  There are only 63
+Multiple matches are not handled at the moment.  There are only 63
 patterns available which is less than the RDKit PAINS filter has but the advantage is that
-this component provides scores for 12 different assays and 3 enrichnents rather than just a
+this component provides scores for 12 different assays and 3 enrichments rather than just a
 single yes/no score.  The only parameter is the assay name (one per endpoint).
     * Alpha
     * ELISA
