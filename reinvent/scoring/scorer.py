@@ -11,7 +11,6 @@ A scorer can be call through API, REST API or subprocess.
 from __future__ import annotations
 
 __all__ = ["Scorer"]
-from collections import defaultdict
 from typing import List, Optional
 import logging
 
@@ -44,20 +43,25 @@ class Scorer:
     def compute_results(
         self,
         smilies: List[str],
-        mask: np.ndarray,
+        invalid_mask: np.ndarray,
+        duplicate_mask: np.ndarray,
         fragments: Optional[List[str]] = None,
     ) -> ScoreResults:
         """Compute the score from a list of SMILES
 
         :param smilies: list of SMILES
-        :param mask: mask to filter invalid and duplicate SMILES
+        :param invalid_mask: mask for invalid SMILES
+        :param duplicate_mask: mask for duplicate SMILES
         :param fragments: optional fragment SMILES
         :return: all results for the SMILES
         """
+
         # needs to be list for duplicate comps, name change for clearity
         completed_components = []
         filters_to_report = []
         # ntasks = len(self.components.scorers)
+
+        valid_mask = np.logical_and(invalid_mask, duplicate_mask)
 
         # if self.parallel and ntasks > 1:
         if False:
@@ -78,11 +82,16 @@ class Scorer:
             # second loop over the non-filter components below
             for component in self.components.filters:
                 transform_result = compute_transform(
-                    component.component_type, component.params, smilies, component.cache, mask
+                    component.component_type,
+                    component.params,
+                    smilies,
+                    component.cache,
+                    invalid_mask,
+                    valid_mask,
                 )
 
                 for scores in transform_result.transformed_scores:
-                    mask = np.logical_and(scores, mask)
+                    mask = np.logical_and(scores, invalid_mask)
                 # NOTE: filters are NOT also used as components as in REINVENT3
 
                 filters_to_report.append(transform_result)
@@ -94,7 +103,12 @@ class Scorer:
                     pass_smilies = smilies
 
                 transform_result = compute_transform(
-                    component.component_type, component.params, pass_smilies, component.cache, mask
+                    component.component_type,
+                    component.params,
+                    pass_smilies,
+                    component.cache,
+                    invalid_mask,
+                    valid_mask,
                 )
 
                 completed_components.append(transform_result)
@@ -111,7 +125,12 @@ class Scorer:
 
         for component in self.components.penalties:
             transform_result = compute_transform(
-                component.component_type, component.params, smilies, component.cache, mask
+                component.component_type,
+                component.params,
+                smilies,
+                component.cache,
+                invalid_mask,
+                valid_mask,
             )
 
             for scores in transform_result.transformed_scores:

@@ -88,6 +88,8 @@ class Learning(ABC):
         # Pass on the sampling results to the specific RL class:
         # needed in scoring and updating
         self.sampled = None
+        self.invalid_mask = None
+        self.duplicate_mask = None
 
         self.logging_frequency = 1
 
@@ -121,20 +123,19 @@ class Learning(ABC):
 
         for step in range(self.max_steps):
             self.sampled = self.sampling_model.sample(self.seed_smilies)
+            self.invalid_mask = np.where(self.sampled.states == SmilesState.INVALID, False, True)
+            self.duplicate_mask = np.where(
+                self.sampled.states == SmilesState.DUPLICATE, False, True
+            )
 
             results = self.score()
 
-            # FIXME: move this to scoring too?
+            # FIXME: move this to scoring
             if self._state.diversity_filter:
-                mask = np.where(
-                    (self.sampled.states == SmilesState.VALID)
-                    | (self.sampled.states == SmilesState.DUPLICATE),
-                    True,
-                    False,
-                )
+                df_mask = np.where(self.invalid_mask, True, False)
 
                 scaffolds = self._state.diversity_filter.update_score(
-                    results.total_scores, results.smilies, mask
+                    results.total_scores, results.smilies, df_mask
                 )
 
             # FIXME: check for NaNs
@@ -156,7 +157,7 @@ class Learning(ABC):
                 agent_lls=agent_lls,
                 prior_lls=prior_lls,
                 augmented_nll=augmented_nll,
-                loss=float(loss)
+                loss=float(loss),
             )
 
             if converged(mean_scores, step):
@@ -200,8 +201,9 @@ class Learning(ABC):
     def score(self):
         """Compute the score for the SMILES strings."""
 
-        mask = np.where(self.sampled.states == SmilesState.VALID, True, False)
-        results = self.scoring_function(self.sampled.smilies, mask)
+        results = self.scoring_function(
+            self.sampled.smilies, self.invalid_mask, self.duplicate_mask
+        )
 
         return results
 
@@ -249,7 +251,7 @@ class Learning(ABC):
         agent_lls: torch.tensor,
         prior_lls: torch.tensor,
         augmented_nll: torch.tensor,
-        loss: float
+        loss: float,
     ):
         """Log the results"""
 

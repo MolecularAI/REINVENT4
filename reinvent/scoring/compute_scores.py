@@ -16,7 +16,10 @@ SCORE_FUNC = Callable[[List[str]], ComponentResults]
 
 
 def compute_component_scores(
-    smilies: List[str], scoring_function: SCORE_FUNC, cache, filter_mask: Optional[np.ndarray[bool]]
+    smilies: List[str],
+    scoring_function: SCORE_FUNC,
+    cache,
+    filter_mask: Optional[np.ndarray[bool]],
 ) -> ComponentResults:
     """Compute a single component's scores and cache the results
 
@@ -27,7 +30,7 @@ def compute_component_scores(
     :param smilies: list of SMILES
     :param scoring_function: the component callable
     :param cache: the cache for the component (will be modified)
-    :param filter_mask: array mask to filter out SMILES
+    :param filter_mask: array mask to filter out invalid and duplicate SMILES
     :returns: the scores
     """
 
@@ -38,7 +41,12 @@ def compute_component_scores(
         if not value:  # the SMILES will not be passed to scoring_function
             masked_scores[i] = (0.0,)
 
-    scores = {smiles: score for smiles, score in zip(smilies, masked_scores)}  # initialize
+    scores = {}  # keep track of scores for each SMILES as there may be duplicates
+
+    for smiles, score in zip(smilies, masked_scores):
+        if smiles not in scores:  # do not overwrite duplicates with zeroes
+            scores[smiles] = score
+
     smilies_non_cached = []
 
     for smiles, score in scores.items():
@@ -65,14 +73,19 @@ def compute_component_scores(
     cache.update(((k, v) for k, v in scores.items()))
 
     # add cached scores to ComponentResults
-    scores_values = [scores[smiles] for smiles in smilies]
+    scores_values = [scores[smiles] for smiles in smilies]  # expand scores
     component_results.scores = [np.array(arr) for arr in zip(*scores_values)]
 
     return component_results
 
 
 def compute_transform(
-    component_type, params: Tuple, smilies: List[str], caches: dict, filter_mask: np.ndarray[bool]
+    component_type,
+    params: Tuple,
+    smilies: List[str],
+    caches: dict,
+    invalid_mask: np.ndarray[bool],
+    valid_mask: np.ndarray[bool],
 ) -> TransformResults:
     """Compute the component score and transform of it
 
@@ -80,26 +93,32 @@ def compute_transform(
     :param params: parameters for the component
     :param smilies: list of SMILES
     :param caches: the component's cache
-    :param filter_mask: filter to mask out zero scored SMILES
+    :param invalid_mask: mask for invalid SMILES
+    :param valid_mask: mask for valid SMILES
     :returns: dataclass with transformed results
     """
 
     names, scoring_function, transforms, weights = params
 
     component_results = compute_component_scores(
-        smilies, scoring_function, caches[component_type], filter_mask
+        smilies, scoring_function, caches[component_type], valid_mask
     )
 
     transformed_scores = []
 
     for scores, transform in zip(component_results.scores, transforms):
         transformed = transform(scores) if transform else scores
-        transformed_scores.append(transformed * filter_mask)
+        transformed_scores.append(transformed * invalid_mask)
 
     transform_types = [transform.params.type if transform else None for transform in transforms]
 
     transform_result = TransformResults(
-        component_type, names, transform_types, transformed_scores, component_results, weights
+        component_type,
+        names,
+        transform_types,
+        transformed_scores,
+        component_results,
+        weights,
     )
 
     return transform_result

@@ -53,8 +53,9 @@ def set_torch_device(device: str = None, use_cuda: bool = True) -> torch.device:
     else:  # we assume there are no other devices...
         actual_device = torch.device("cpu")
 
-    # FIXME: check if this can be replaced
-    # See https://github.com/pytorch/pytorch/issues/82296
+    # FIXME: as of PyTorch 2.1 this should be replaced with
+    #        torch.set_default_dtype() and torch.set_default_device()
+    #        The dtype can be set to torch.float32 for both CPU and GPU
     if actual_device.type == "cuda":
         torch.set_default_tensor_type(torch.cuda.FloatTensor)
     else:  # assume CPU...
