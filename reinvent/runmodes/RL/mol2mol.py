@@ -41,8 +41,9 @@ class Mol2MolLearning(Learning):
         prior_nll = self.prior.likelihood_smiles(self.sampled).likelihood
         distance_penalty = get_distance_to_prior(prior_nll, self.distance_threshold)
 
-        mask = np.where(self.sampled.states == SmilesState.VALID, True, False)
-        results = self.scoring_function(self.sampled.smilies, mask)
+        results = self.scoring_function(
+            self.sampled.smilies, self.invalid_mask, self.duplicate_mask
+        )
         results.total_scores *= distance_penalty
 
         return results

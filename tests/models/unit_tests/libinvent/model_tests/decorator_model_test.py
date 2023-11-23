@@ -1,18 +1,28 @@
+import pytest
 import unittest
 
+import torch
 import torch.utils.data as tud
 
 from reinvent.models.libinvent.models.dataset import Dataset
+from reinvent.runmodes.utils.helpers import set_torch_device
 from tests.test_data import SCAFFOLD_SUZUKI
 from tests.models.unit_tests.libinvent.fixtures import mocked_decorator_model
 
 
+@pytest.mark.usefixtures("device")
 class TestDecoratorModel(unittest.TestCase):
     def setUp(self):
         input_scaffold = SCAFFOLD_SUZUKI
         scaffold_list_2 = [input_scaffold, input_scaffold]
         scaffold_list_3 = [input_scaffold, input_scaffold, input_scaffold]
+
+        device = torch.device(self.device)
         self._decorator = mocked_decorator_model()
+        self._decorator.network.to(device)
+        self._decorator.device = device
+
+        set_torch_device(device)
 
         dataset_2 = Dataset(
             scaffold_list_2,

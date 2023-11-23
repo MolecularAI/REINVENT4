@@ -47,6 +47,6 @@ def score_smiles_from_file(
 
     mask = np.full(len(smilies), True, dtype=bool)
     scorer = Scorer(config)
-    results = scorer(smilies, mask)
+    results = scorer(smilies, mask, mask)
 
     return results

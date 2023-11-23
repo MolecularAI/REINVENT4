@@ -1,20 +1,29 @@
+import pytest
 import unittest
 
 import numpy as np
 import numpy.testing as npt
+import torch
 import torch.utils.data as tud
 
 from reinvent.models import Mol2MolAdapter
 from reinvent.models.mol2mol.dataset.dataset import Dataset
 from reinvent.models.mol2mol.enums import SamplingModesEnum
 from reinvent.models.mol2mol.models.vocabulary import SMILESTokenizer
+from reinvent.runmodes.utils.helpers import set_torch_device
 from tests.models.unit_tests.molformer.fixtures import mocked_molformer_model
 from tests.test_data import BENZENE, TOLUENE, ANILINE
 
 
+@pytest.mark.usefixtures("device")
 class TestSampleLikelihoodSMILES(unittest.TestCase):
     def setUp(self):
+        device = torch.device(self.device)
         molformer_model = mocked_molformer_model()
+        molformer_model.network.to(device)
+        molformer_model.device = device
+
+        set_torch_device(device)
         self._model = Mol2MolAdapter(molformer_model)
 
         self._sample_mode_enum = SamplingModesEnum()

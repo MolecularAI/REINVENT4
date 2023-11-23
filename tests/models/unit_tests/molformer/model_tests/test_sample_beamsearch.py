@@ -1,18 +1,26 @@
+import pytest
 import unittest
 
+import torch
 import torch.utils.data as tud
 
 from reinvent.models.mol2mol.dataset.dataset import Dataset
 from reinvent.models.mol2mol.enums import SamplingModesEnum
 from reinvent.models.mol2mol.models.vocabulary import SMILESTokenizer
+from reinvent.runmodes.utils.helpers import set_torch_device
 from tests.test_data import BENZENE, TOLUENE, ANILINE
 from tests.models.unit_tests.molformer.fixtures import mocked_molformer_model
 
 
+@pytest.mark.usefixtures("device")
 class TestModelSampling(unittest.TestCase):
     def setUp(self):
-
+        device = torch.device(self.device)
         self._model = mocked_molformer_model()
+        self._model.network.to(device)
+        self._model.device = device
+
+        set_torch_device(device)
         self._sample_mode_enum = SamplingModesEnum()
 
         smiles_list = [BENZENE]
