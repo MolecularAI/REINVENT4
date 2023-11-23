@@ -109,3 +109,37 @@ params.descriptors = "w_ro5_ohnh"
 
 transform.type = "left_step"
 transform.high = 10
+
+
+[[scoring.component]]
+[scoring.component.LillyPAINS]
+
+[[scoring.component.LillyPAINS.endpoint]]
+name = "Alpha"
+
+params.assay = 'Alpha'
+
+transform.type = "sigmoid"
+transform.high = 100
+transform.low = 0.0
+transform.k = 0.2
+
+[[scoring.component.LillyPAINS.endpoint]]
+name = "FRET_HS"
+
+params.assay = "FRET_HS"
+
+transform.type = "sigmoid"
+transform.high = 100
+transform.low = 0.0
+transform.k = 0.2
+
+[[scoring.component.LillyPAINS.endpoint]]
+name = "QCEnrichment"
+
+params.assay = "QCEnrichment"
+
+transform.type = "sigmoid"
+transform.high = 100
+transform.low = 0.0
+transform.k = 0.2
