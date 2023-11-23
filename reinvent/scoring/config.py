@@ -84,8 +84,10 @@ def get_components(components: dict[str, dict]) -> ComponentType:
             transforms.append(transform)
             weights.append(weight)
             names.append(name)
+
         component_params = None
         collected_params = collect_params(parameters)
+
         if ComponentParams:
             component_params = ComponentParams(**collected_params)
 

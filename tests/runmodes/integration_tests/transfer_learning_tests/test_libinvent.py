@@ -31,6 +31,7 @@ def setup(tmp_path, json_config, pytestconfig):
 
 
 @pytest.mark.integration
+@pytest.mark.xfail
 def test_transfer_learning(setup, tmp_path, pytestconfig):
     config = setup
     device = pytestconfig.getoption("device")

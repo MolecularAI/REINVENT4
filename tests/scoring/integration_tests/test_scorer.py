@@ -7,6 +7,9 @@ from numpy.testing import assert_array_almost_equal
 @pytest.mark.integration
 def test_geo_scorer():
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
+    invalid_mask = np.array([True, True, True, True])
+    duplicate_mask = np.array([True, True, True, True])
+
     scorer_config_geo_mean = {
         "type": "geometric_mean",
         "component": [
@@ -50,9 +53,9 @@ def test_geo_scorer():
         ],
     }
 
-    expected_result_geo_mean = [0.414360615, 0.810667745, 0, 0]
+    expected_result_geo_mean = [0.414361, 0.810668, 0.425256, 0.796556]
     geo_scorer = Scorer(scorer_config_geo_mean)
-    geo_results = geo_scorer.compute_results(smiles, np.full(len(smiles), True, dtype=bool))
+    geo_results = geo_scorer.compute_results(smiles, invalid_mask, duplicate_mask)
 
     assert_array_almost_equal(geo_results.total_scores, expected_result_geo_mean)
     assert (
@@ -62,6 +65,9 @@ def test_geo_scorer():
 
 def test_arth_scorer():
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
+    invalid_mask = np.array([True, True, True, True])
+    duplicate_mask = np.array([True, True, True, True])
+
     scorer_config_arth_mean = {
         "type": "arithmetic_mean",
         "component": [
@@ -105,9 +111,9 @@ def test_arth_scorer():
         ],
     }
 
-    expected_result_arth_mean = [0.427841757, 0.819208403, 0, 0]
+    expected_result_arth_mean = [0.427842, 0.819208, 0.431715, 0.804572]
     arth_scorer = Scorer(scorer_config_arth_mean)
-    arth_results = arth_scorer.compute_results(smiles, np.full(len(smiles), True, dtype=bool))
+    arth_results = arth_scorer.compute_results(smiles, invalid_mask, duplicate_mask)
     assert_array_almost_equal(arth_results.total_scores, expected_result_arth_mean)
     assert (
         len(arth_results.completed_components) == 4

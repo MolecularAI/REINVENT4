@@ -1,9 +1,10 @@
-"""Patch for tensorboard add_histogram for PyTorch 1.12.x and 1.13.x"""
+"""
+Patch for tensorboard add_histogram
+"""
 
 
 from tensorboard.compat.proto.summary_pb2 import HistogramProto
 from torch.utils.tensorboard import SummaryWriter
-import torch.utils.tensorboard.summary
 import numpy as np
 
 
@@ -60,4 +61,4 @@ def make_histogram(values, bins, max_bins=None):
     )
 
 
-torch.utils.tensorboard.summary.make_histogram = make_histogram
+SummaryWriter.make_histogram = make_histogram
