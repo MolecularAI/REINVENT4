@@ -2,8 +2,8 @@ import pytest
 
 import numpy as np
 
-from reinvent_plugins.components.Lilly.comp_medchem_rules import Parameters
-from reinvent_plugins.components.Lilly.comp_medchem_rules import LillyMedchemRules
+from reinvent_plugins.components.Lilly.comp_lilly_pains import Parameters
+from reinvent_plugins.components.Lilly.comp_lilly_pains import LillyPAINS
 
 SMILIES = [
     "Cc1ccc(-n2[nH]c(C)c(N=Nc3cccc(-c4cccc(C(=O)O)c4)c3O)c2=O)cc1C",
@@ -19,18 +19,20 @@ SMILIES = [
 
 
 @pytest.mark.parametrize(
-    "relaxed, expected_results",
+    "params, expected_results",
     [
-        (([False],),
-         [153, 999, 6, 0, 40, 0, 70, 50, 253]),
-        (([True],),
-         [189, 999, 0, 0, 40, 0, 70, 50, 229]),
+        ((["Alpha", "HSEnrichment", "FRET_HS"],),
+         [
+             np.array([260, 0, 0, 0, 0, 0, 0, 0, 0]),
+             np.array([10, 0, 0, 0, 0, 0, 0, 0, 0]),
+             np.array([0, 0, 0, 0, 0, 0, 0, 0, 0])
+         ])
     ],
 )
-def test_comp_lilly_medchem_rules(relaxed, expected_results):
-    params = Parameters(*relaxed)
-    rules = LillyMedchemRules(params)
-    results = rules(SMILIES)
+def test_comp_lilly_pains(params, expected_results):
+    params = Parameters(*params)
+    pains_score = LillyPAINS(params)
+    results = pains_score(SMILIES)
     expected = np.array(expected_results)
 
     assert (results.scores == np.array(expected_results)).all()

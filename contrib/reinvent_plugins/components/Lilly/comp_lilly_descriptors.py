@@ -4,7 +4,6 @@ NOTE: iwdescr will terminate on the first invalid SMILES
 """
 
 __all__ = ["LillyDescriptors"]
-
 import os
 import csv
 import shlex
@@ -26,7 +25,7 @@ logger = logging.getLogger("reinvent")
 LILLY_HOME = "LILLY_MOL_ROOT"
 
 # -O controls which descriptor subset is computed but only one allowed
-DESCR_CMD = "{topdir}/bin/Linux/iwdescr -E autocreate -A D -g all -O all -i smi -"  # assume in path
+DESCR_CMD = "{topdir}/bin/Linux/iwdescr -E autocreate -A D -g all -O all -i smi -"
 
 
 @add_tag("__parameters")
@@ -85,7 +84,7 @@ def parse_output(lines: str, cols: List[str], nsmilies: int) -> List[np.ndarray[
             rows[i] = np.full(len(idx), np.nan)
 
     if len(rows) != nsmilies:
-        logger.warning(f"{__name__}: Processed only {len(row)} of {nsmiles} SMILES")
+        logger.warning(f"{__name__}: Processed only {len(rows)} of {nsmilies} SMILES")
 
     scores = []
 

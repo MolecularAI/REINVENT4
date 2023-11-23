@@ -21,7 +21,7 @@ SMILIES = [
 @pytest.mark.parametrize(
     "params, expected_results",
     [
-        ((["w_nvrtspsa", "w_ro5_ohnh", "w_nrings5"], ["/usr/local/src/LillyMol"]),
+        ((["w_nvrtspsa", "w_ro5_ohnh", "w_nrings5"],),
          [
              np.array([120.04, 63.6, 86.36, 37.3, 92.92, 61.82, 55.84, 36.86, 199.73]),
              np.array([3, 1, 2, 1, 1, 0, 0, 1, 11]),
