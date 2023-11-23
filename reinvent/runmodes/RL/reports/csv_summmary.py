@@ -34,10 +34,10 @@ def write_summary(data: CSVSummary, write_header=False) -> tuple:
     results = data.score_results
 
     columns = [
-        data.agent_nll,
-        data.prior_nll,
-        data.augmented_nll,
-        results.total_scores,
+        [f"{score:.4f}" for score in data.agent_nll],
+        [f"{score:.4f}" for score in data.prior_nll],
+        [f"{score:.4f}" for score in data.augmented_nll],
+        [f"{score:.7f}" for score in results.total_scores],
         results.smilies,
     ]
 
@@ -53,10 +53,26 @@ def write_summary(data: CSVSummary, write_header=False) -> tuple:
         names.extend(transformed_result.component_names)
 
         for transformed_scores in transformed_result.transformed_scores:
-            scores.append(transformed_scores)
+            _scores = []
+
+            for score in transformed_scores:
+                try:
+                    _scores.append(f"{float(score):.7f}")
+                except ValueError:
+                    _scores.append(score)
+
+            scores.append(_scores)
 
         for original_scores in transformed_result.component_result.scores:
-            raw_scores.append(original_scores)    
+            _scores = []
+
+            for score in original_scores:
+                try:
+                    _scores.append(f"{float(score):.4f}")
+                except ValueError:
+                    _scores.append(score)
+
+            raw_scores.append(_scores)
 
     for name, score, raw_score in zip(names, scores, raw_scores):
         header.extend((name, f"{name} (raw)"))

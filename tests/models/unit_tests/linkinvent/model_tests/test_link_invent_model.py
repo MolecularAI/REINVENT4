@@ -1,17 +1,28 @@
+import pytest
 import unittest
+
+import torch
+
 
 import torch.utils.data as tud
 
 from reinvent.models.linkinvent.dataset.dataset import Dataset
+from reinvent.runmodes.utils.helpers import set_torch_device
 from tests.test_data import WARHEAD_PAIR
 from tests.models.unit_tests.linkinvent.fixtures import mocked_linkinvent_model
 
 
+@pytest.mark.usefixtures("device")
 class TestLinkInventModel(unittest.TestCase):
     def setUp(self):
 
         self.smiles = WARHEAD_PAIR
+        device = torch.device(self.device)
         self._model = mocked_linkinvent_model()
+        self._model.network.to(device)
+        self._model.device = device
+
+        set_torch_device(device)
 
         ds1 = Dataset([self.smiles], self._model.vocabulary.input)
         self.data_loader_1 = tud.DataLoader(

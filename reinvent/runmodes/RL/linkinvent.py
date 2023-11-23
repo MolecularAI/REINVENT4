@@ -23,10 +23,11 @@ class LinkinventLearning(Learning):
         Overwrites generic method to pass on fragments.
         """
 
-        mask = np.where(self.sampled.states == SmilesState.VALID, True, False)
         fragments = self.sampled.items2
 
-        results = self.scoring_function(self.sampled.smilies, mask, fragments)
+        results = self.scoring_function(
+            self.sampled.smilies, self.invalid_mask, self.duplicate_mask, fragments
+        )
 
         return results
 

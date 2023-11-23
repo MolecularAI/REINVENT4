@@ -10,7 +10,6 @@ import torch
 from reinvent.models.mol2mol.dto.mol2mol_batch_dto import Mol2MolBatchDTO
 from reinvent.models.mol2mol.models.module.subsequent_mask import subsequent_mask
 
-DEVICE = "cpu"
 logger = logging.getLogger(__name__)
 
 
@@ -18,18 +17,27 @@ class PairedDataset(tud.Dataset):
     """Dataset that takes a list of (input, output) pairs."""
 
     # TODO check None for en_input, en_output
-    def __init__(self, smiles_input: List[str], smiles_output: List[str], vocabulary, tokenizer, tanimoto_similarities: List[float]=None):
+    def __init__(
+        self,
+        smiles_input: List[str],
+        smiles_output: List[str],
+        vocabulary,
+        tokenizer,
+        tanimoto_similarities: List[float] = None,
+    ):
         self.vocabulary = vocabulary
         self._tokenizer = tokenizer
 
         self._encoded_input_list = []
         self._encoded_output_list = []
         self._tanimoto_similarities = []
-        
+
         if tanimoto_similarities is None:
             tanimoto_similarities = np.zeros(len(smiles_input), dtype=np.float32)
-        
-        for input_smi, output_smi, tanimoto in zip(smiles_input, smiles_output, tanimoto_similarities):
+
+        for input_smi, output_smi, tanimoto in zip(
+            smiles_input, smiles_output, tanimoto_similarities
+        ):
             ok_input, ok_output = True, True
             try:
                 tokenized_input = self._tokenizer.tokenize(input_smi)
@@ -56,9 +64,9 @@ class PairedDataset(tud.Dataset):
         en_input, en_output = self._encoded_input_list[i], self._encoded_output_list[i]
         tanimoto = self._tanimoto_similarities[i]
         return (
-            torch.tensor(en_input, dtype=torch.long, device=DEVICE),
-            torch.tensor(en_output, dtype=torch.long, device=DEVICE),
-            torch.tensor(tanimoto, dtype=torch.float, device=DEVICE).view(1),
+            torch.tensor(en_input).long(),
+            torch.tensor(en_output).long(),
+            torch.tensor(tanimoto).float().view(1),
         )  # pylint: disable=E1102
 
     def __len__(self):
@@ -87,7 +95,7 @@ class PairedDataset(tud.Dataset):
             src_mask,
             collated_arr_target,
             trg_mask,
-            torch.cat(tanimoto_similarities)
+            torch.cat(tanimoto_similarities),
         )
         return dto
 
@@ -103,10 +111,8 @@ def _mask_batch(encoded_seqs: List) -> Tuple[Tensor, Tensor]:
     max_length_source = max([seq.size(0) for seq in encoded_seqs])
 
     # padded source sequences with zeroes
-    collated_arr_seq = torch.zeros(
-        len(encoded_seqs), max_length_source, dtype=torch.long, device=DEVICE
-    )
-    seq_mask = torch.zeros(len(encoded_seqs), 1, max_length_source, dtype=torch.bool, device=DEVICE)
+    collated_arr_seq = torch.zeros(len(encoded_seqs), max_length_source).long()
+    seq_mask = torch.zeros(len(encoded_seqs), 1, max_length_source).bool()
 
     for i, seq in enumerate(encoded_seqs):
         collated_arr_seq[i, : len(seq)] = seq

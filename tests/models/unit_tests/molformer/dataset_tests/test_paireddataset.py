@@ -1,3 +1,4 @@
+import pytest
 import unittest
 
 import torch
@@ -5,15 +6,19 @@ import torch.utils.data as tud
 
 from reinvent.models.mol2mol.dataset.paired_dataset import PairedDataset
 from reinvent.models.mol2mol.models.vocabulary import SMILESTokenizer
+from reinvent.runmodes.utils.helpers import set_torch_device
 from tests.test_data import ETHANE, HEXANE, PROPANE, BUTANE
 from tests.models.unit_tests.molformer.fixtures import mocked_vocabulary
 
 
+@pytest.mark.usefixtures("device")
 class TestPairedDataset(unittest.TestCase):
     def setUp(self):
         self.smiles_input = [ETHANE, PROPANE]
         self.smiles_output = [HEXANE, BUTANE]
         self.vocabulary = mocked_vocabulary()
+        device = torch.device(self.device)
+        set_torch_device(device)
         self.data_loader = self.initialize_dataloader(self.smiles_input, self.smiles_output)
 
     def initialize_dataloader(self, smiles_input, smiles_output):
@@ -24,7 +29,11 @@ class TestPairedDataset(unittest.TestCase):
             tokenizer=SMILESTokenizer(),
         )
         dataloader = tud.DataLoader(
-            dataset, len(dataset), shuffle=False, collate_fn=PairedDataset.collate_fn
+            dataset,
+            len(dataset),
+            shuffle=False,
+            collate_fn=PairedDataset.collate_fn,
+            generator=torch.Generator(self.device),
         )
         return dataloader
 
@@ -77,12 +86,12 @@ class TestPairedDataset(unittest.TestCase):
         self.assertEqual(list(result), [2, 7, 7])
 
     def test_src_content(self):
-        result = self._get_src().cpu()
+        result = self._get_src()
         comparison = torch.equal(result, torch.tensor([[1, 5, 5, 2, 0], [1, 5, 5, 5, 2]]))
         self.assertTrue(comparison)
 
     def test_src_mask_content(self):
-        result = self._get_src_mask().cpu()
+        result = self._get_src_mask()
         comparison = torch.equal(
             result,
             torch.tensor([[[True, True, True, True, False]], [[True, True, True, True, True]]]),
@@ -90,14 +99,14 @@ class TestPairedDataset(unittest.TestCase):
         self.assertTrue(comparison)
 
     def test_trg_content(self):
-        result = self._get_trg().cpu()
+        result = self._get_trg()
         comparison = torch.equal(
             result, torch.tensor([[1, 5, 5, 5, 5, 5, 5, 2], [1, 5, 5, 5, 5, 2, 0, 0]])
         )
         self.assertTrue(comparison)
 
     def test_trg_mask_content(self):
-        result = self._get_trg_mask().cpu()
+        result = self._get_trg_mask()
         comparison = torch.equal(
             result,
             torch.tensor(

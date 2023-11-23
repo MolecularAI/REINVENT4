@@ -11,6 +11,25 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 - Fragment generators using transformers
 
 
+## [4.0.21] 2023-11-23
+
+### Changed
+
+- The CSV file from RL has controlled output precision: 7 for total score and transformed scores, 4 for all other floating point values
+
+### Fixed
+
+- Critical: all scores of duplicate SMILES including the first occurence where set to zero rather than the computed value
+- Scores of duplicates are now correctly copied over from first occurence
+
+
+## [4.0.20] 2023-11-20
+
+### Fixed
+
+- All tests support both cpu and gpu
+
+
 ## [4.0.19] 2023-11-20
 
 ### Changed
@@ -29,7 +48,7 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 
 ### Fixed
 
-- Bug in sampling related to the way the sampled.nlls object was treated. Now it is always pytorch tensor object without gradient on cpu.
+- Bug in sampling related to the way the sampled.nlls object was treated. Now it is always pytorch tensor object without gradient on cpu
 
 
 ## [4.0.16] 2023-11-15
