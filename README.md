@@ -21,15 +21,15 @@ Requirements
 ------------
 
 REINVENT is being developed on and for Linux but is also known to work on
-MacOSX.  Windows is not directly supported and so far we only know that sampling
-works on the CPU.  The code is written in Python 3 (>= 3.10).  The list of
+MacOSX.  Windows is not directly supported but so far we know that the software works on the CPU.
+
+The code is written in Python 3 (>= 3.10).  The list of
 dependencies can be found in the repository (see also Installation below).
 
-A GPU is not strictly necessary but strongly recommended for performance reasons.
-Note that if no GPU is installed in your computer the code will run on the CPU
-automatically.  REINVENT [supports](https://pytorch.org/get-started/locally/)
+A GPU is not strictly necessary but strongly recommended for performance reasons especially for transfer learning/model training.
+Note that if no GPU is installed in your computer the code will run on the CPU automatically.  REINVENT [supports](https://pytorch.org/get-started/locally/)
 NVIDIA and also some AMD GPUs.  For most design tasks a memory of about
-8 GiB for both CPU main memory and GPU memory are sufficient.
+8 GiB for both CPU main memory and GPU memory is sufficient.
 
 
 Installation
@@ -49,7 +49,7 @@ Installation
    ```shell
    pip install torch==1.13.1+rocm5.2 torchvision==0.14.1+rocm5.2 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/rocm5.2
    ```
-5. Install the tool. The dependencies were already installed in the previous step, no need to install them again (flag `--no-deps).  If you want to install in editable mode (changes to the code are automatically picked up) add -e before the dot.
+5. Install the tool. The dependencies were already installed in the previous step, so thete is no need to install them again (flag `--no-deps).  If you want to install in editable mode (changes to the code are automatically picked up) add -e before the dot.
     ```shell
     pip install --no-deps . 
     ```
@@ -68,11 +68,10 @@ reinvent -l sampling.log sampling.toml
 
 This writes logging information to the file `sampling.log`.  If you wish to write
 this to the screen, leave out the `-l sampling.log` part. `sampling.toml` is the
-configuration file.  The main user format is [TOML](https://toml.io/en/) as it is
-tends to be more use friendly.  JSON can be used too but a specialised editor is
+configuration file.  The main user format is [TOML](https://toml.io/en/) as it tends to be more use friendly.  JSON can be used too, add `-f json`, but a specialised editor is
 recommended as the format is very sensitive to minor changes.
 
-A sample configutation file (including samples for the other run modes) is
+A sample configuration file (including samples for the other run modes) is
 located in `config/toml` of the repository and file paths therein would need to be
 adjusted to your local installation.  In particular, ready made prior models are
 located in `priors` in the Github repository and you would choose a model and the
