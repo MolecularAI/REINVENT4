@@ -49,7 +49,7 @@ Installation
    ```shell
    pip install torch==1.13.1+rocm5.2 torchvision==0.14.1+rocm5.2 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/rocm5.2
    ```
-5. Install the tool. The dependencies were already installed in the previous step, so thete is no need to install them again (flag `--no-deps).  If you want to install in editable mode (changes to the code are automatically picked up) add -e before the dot.
+5. Install the tool. The dependencies were already installed in the previous step, so there is no need to install them again (flag `--no-deps).  If you want to install in editable mode (changes to the code are automatically picked up) add -e before the dot.
     ```shell
     pip install --no-deps . 
     ```
