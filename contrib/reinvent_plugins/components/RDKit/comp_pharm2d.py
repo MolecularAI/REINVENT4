@@ -33,6 +33,7 @@ class Parameters:
     min_point_count: List[int]
     max_point_count: List[int]
     similarity: List[str]
+    similarity_params: List[dict]
 
 
 @add_tag("__component")
@@ -41,14 +42,16 @@ class Pharm2DFP:
         self.ref_fps = []
         self.signature_factories = []
         self.similarities = []
+        self.similarities_params = []
 
-        for smiles, fdef, bins, minp, maxp, sim in zip(
+        for smiles, fdef, bins, minp, maxp, sim, sim_params in zip(
             params.ref_smiles,
             params.feature_definition,
             params.bins,
             params.min_point_count,
             params.max_point_count,
             params.similarity,
+            params.similarity_params,
         ):
             fdef_name = fdef.capitalize()
 
@@ -80,6 +83,7 @@ class Pharm2DFP:
 
             try:
                 self.similarities.append(getattr(DataStructs, f"Bulk{sim_name}Similarity"))
+                self.similarities_params.append(sim_params)
             except:
                 raise RuntimeError(f"{__name__}: {sim_name} similarity not supported by RDKit")
 
@@ -87,14 +91,14 @@ class Pharm2DFP:
     def __call__(self, mols: List[Chem.Mol]) -> np.array:
         scores = []
 
-        for ref_fp, signature_factory, similarity in zip(
-            self.ref_fps, self.signature_factories, self.similarities
+        for ref_fp, signature_factory, similarity, sim_params in zip(
+            self.ref_fps, self.signature_factories, self.similarities, self.similarities_params
         ):
             target_fps = []
 
             for mol in mols:
                 target_fps.append(Generate.Gen2DFingerprint(mol, signature_factory))
 
-            scores.append(np.array(similarity(ref_fp, target_fps), dtype=float))
+            scores.append(np.array(similarity(ref_fp, target_fps, **sim_params), dtype=float))
 
         return ComponentResults(scores)

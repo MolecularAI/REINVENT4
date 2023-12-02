@@ -73,6 +73,7 @@ single yes/no score.  The only parameter is the assay name (one per endpoint).
   * min\_point\_count 
   * max\_point\_count
   * similarity: any that RDKit supports e.g. `tanimoto`, `dice`, etc.
+  * similarity\_params: similarity parameters e.g. `a` and `b` for ´tversky`
 
 Requirements
 ------------
