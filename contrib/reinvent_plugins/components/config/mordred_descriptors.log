@@ -1,0 +1,217 @@
+17:45:21 <INFO> Started REINVENT 4.0.21 (C) AstraZeneca 2017, 2023 on 2023-12-04
+17:45:21 <INFO> Command line: /data/conda/envs/reinvent4/bin/reinvent -l mordred_descriptors.log mordred_descriptors.toml
+17:45:21 <INFO> Environment loaded from dotenv file
+17:45:21 <INFO> User hhl on host OFFICE
+17:45:21 <INFO> Python version 3.10.13
+17:45:21 <INFO> PyTorch version 1.13.1+cu117, git 49444c3e546bf240bed24a101e747422d1f8a0ee
+17:45:21 <INFO> PyTorch compiled with CUDA version 11.7
+17:45:21 <INFO> RDKit version 2023.09.1
+17:45:21 <INFO> Platform Linux-6.5.0-0.deb12.1-amd64-x86_64-with-glibc2.36
+17:45:21 <INFO> CUDA driver version 535.129.03
+17:45:21 <INFO> Number of PyTorch CUDA devices 1
+17:45:21 <INFO> Using CUDA device:0 NVIDIA GeForce RTX 3060 Ti
+17:45:22 <INFO> GPU memory: 6834 MiB free, 7972 MiB total
+17:45:22 <INFO> Writing JSON config file to /home/hhl/projects/reinvent/_mordred_descriptors.json
+17:45:22 <INFO> Scoring SMILES from file /home/hhl/projects/reinvent/tests/chembl_random_1000.smi
+17:45:22 <WARN> "default" filter: CCCCCCCC[C@H](NC(=O)[C@H](CCCNC(=N)N)NC(=O)[C@H](Cc1c[nH]c2ccccc12)NC(=O)[C@H](Cc1ccc(O)cc1)NC(=O)[C@H](CS)NC(=O)[C@H](CCC(N)=O)NC(=O)[C@H](Cc1c[nH]c2ccccc12)NC(=O)[C@@H](NC(=O)[C@H](CCC(N)=O)NC(=O)[C@H](CS)NC(C)=O)[C@@H](C)O)C(=O)N[C@@H](Cc1ccccc1)C(=O)NCC(=O)NCCOCC(=O)N[C@H](CCCCN)C(N)=O is invalid
+17:45:22 <WARN> "default" filter: CCCCCCCCNc1nc(=O)c2ncn([C@@H]3O[C@H](CO)[C@@H](O)[C@H]3O)c2c(=O)[nH]1 is invalid
+17:45:22 <WARN> "default" filter: CC(=O)O[C@H](C[C@@H](OC(C)=O)C(C)(C)O)[C@@H](C)[C@H]1CC[C@@]2(C)[C@@H]3CC=C4[C@@H](CCC(=O)C4(C)C)[C@]3(C)CC[C@]12CO is invalid
+17:45:22 <WARN> "default" filter: CN[C@@H](C)C(=O)N[C@@H](C(=O)N1CCC[C@H]1c1nc(C(=O)c2cccc(OCCOCCOCc3cn(CCCC(=O)N4CCN(CC[C@H](CSc5ccccc5)Nc5ccc(S(=O)(=O)NC(=O)c6ccc(N7CCN(CC8=C(c9ccc(Cl)cc9)CCC(C)(C)C8)CC7)cc6)cc5S(=O)(=O)C(F)(F)F)CC4)nn3)c2)cs1)C1CCCCC1 is invalid
+17:45:22 <WARN> "default" filter: CSc1ccc(CS[C@H]2CC[C@@H](C(=O)O)N2C(=O)[C@H](C)CS)cc1 is invalid
+17:45:22 <WARN> "default" filter: O=C(NCc1nnc(S)n1-c1cccc(C(F)(F)F)c1)c1ccc(S(=O)(=O)N2CCCCC2)cc1 is invalid
+17:45:22 <WARN> "default" filter: CC(C)CC(C(=O)NCC#N)c1cccc(-c2ccc3[nH]ccc3c2)c1 is invalid
+17:45:22 <WARN> "default" filter: CC(C)[C@H](C(=O)N[C@H]1C(O)=Cc2ccccc21)[C@H](O)[C@@H](O)[C@H](CC1CCCCC1)NC(=O)[C@H](Cc1c[nH]cn1)NC(=O)COc1cccc2ccccc12 is invalid
+17:45:22 <WARN> "default" filter: CC(=O)N[C@H](CCCN)C(=O)NC(=O)[C@H](CCCNC(=N)N)NCCCC1CCN(CC(=O)N2c3ccccc3NC(=O)c3ccccc32)CC1.O=C(O)C(F)(F)F.O=C(O)C(F)(F)F.O=C(O)C(F)(F)F is invalid
+17:45:22 <WARN> "default" filter: Cc1c(OCc2ccccc2)c(=O)ccn1CCCCCCNc1ccnc(Cl)n1 is invalid
+17:45:22 <WARN> "default" filter: NC(=O)c1ccc(-c2cnc(C(=O)CCCCCCc3ccccc3)o2)nc1 is invalid
+17:45:22 <WARN> "default" filter: COc1ccc(C(=O)NCCCCC/C=[N+](\[O-])C(C)(C)C)cc1 is invalid
+17:45:22 <WARN> "default" filter: CCCC[C@H](NC(=O)[C@H](CCC(=O)O)NC(=O)[C@H](CC(C)C)NC(=O)[C@@H](NC(=O)[C@H](CCC(=O)O)NC(=O)[C@H](CCCN=C(N)N)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](Cc1c[nH]cn1)NC(=O)[C@H](Cc1ccccc1)NC(=O)[C@@H](NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CC(=O)O)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CO)NC(=O)[C@@H](NC(C)=O)[C@@H](C)CC)[C@@H](C)O)C(C)C)C(=O)N[C@@H](C)C(=O)N[C@@H](CCCN=C(N)N)C(=O)N[C@@H](C)C(=O)N[C@@H](CCC(=O)O)C(=O)N[C@@H](CCC(N)=O)C(=O)N[C@@H](CC(C)C)C(=O)N[C@@H](C)C(=O)N[C@@H](CCC(N)=O)C(=O)N[C@@H]1CCC(=O)NCCCC[C@H](C(=O)N[C@@H](CC(N)=O)C(=O)N[C@@H](CCCN=C(N)N)C(=O)N[C@@H](CCCCN)C(=O)N[C@@H](CC(C)C)C(=O)N[C@@H](CCCC)C(=O)N[C@@H](CCC(=O)O)C(=O)N[C@H](C(=O)N[C@H](C(N)=O)[C@@H](C)CC)[C@@H](C)CC)NC(=O)[C@@H](Cc2c[nH]cn2)NC(=O)[C@H](C)NC1=O is invalid
+17:45:22 <WARN> "default" filter: CCCC(N)C(=O)NC1CCN(c2c(F)c(N)c3c(=O)c(C(=O)O)cn4c3c2Oc2ccccc2-4)C1.Cl is invalid
+17:45:22 <WARN> "default" filter: NC(=O)CC[C@H](NC(=O)[C@H](Cc1ccccc1)NC(=O)[C@H](CO)NC(=O)CCc1ccccc1)C(=O)Nc1ccc(F)cc1F is invalid
+17:45:22 <WARN> "default" filter: COc1ccccc1NC(=O)CCCCCCC(=O)Nc1ccccc1 is invalid
+17:45:22 <WARN> "default" filter: CC(=O)N[C@@H](CS)C(=O)N[C@@H](CCC(N)=O)C(=O)N[C@H](C(=O)N[C@@H](Cc1c[nH]c2ccccc12)C(=O)N[C@@H](CCC(=O)O)C(=O)N[C@@H](CS)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@@H](Cc1c[nH]c2ccccc12)C(=O)N[C@@H](CCC(=O)O)C(=O)N[C@@H](CC(C)C)C(=O)N[C@@H](CC(N)=O)C(=O)NCC(N)=O)[C@@H](C)O is invalid
+17:45:22 <WARN> "default" filter: COc1cc(OC)cc(C(=O)O[C@@H]2C=CC(=O)[C@@]3(CC(=O)O[C@@H]3/C=C(\C)CCC=C(C)C)C2)c1 is invalid
+17:45:22 <WARN> "default" filter: O=C(CN1C=CN(c2ccccc2)C(=O)C(Cc2n[nH]c3ccccc23)C1=O)CP(=O)(O)Oc1ccccc1 is invalid
+17:45:22 <WARN> "default" filter: CCCCCCCCOC(=O)C[C@H](C[N+](C)(C)C)OC(=O)CCCCCCCC.[Cl-] is invalid
+17:45:22 <WARN> "default" filter: CC[C@@H]1OC(=O)[C@H](C)[C@@H](O[C@H]2C[C@@](C)(OC)[C@@H](OC(=O)NNC(=O)/C=C/c3cccs3)[C@H](C)O2)[C@@H](C)[C@@H](O[C@@H]2O[C@H](C)C[C@H](N(C)C)[C@H]2O)[C@](C)(O)C[C@@H](C)CN(C)[C@H](C)[C@@H](OC(=O)NCc2ccccc2)[C@]1(C)O is invalid
+17:45:22 <WARN> "default" filter: CC1(C)CC2(CC(c3ccccc3)Oc3cc(O)ccc32)N=C(S)N1 is invalid
+17:45:22 <WARN> "default" filter: C#C[C@@H]1O[C@@H]2COP(=O)(S)O[C@H]3[C@@H](F)[C@H](n4cnc5c(N)ncnc54)O[C@@H]3COP(=O)(S)O[C@@H]1[C@@H]2O is invalid
+17:45:22 <WARN> "default" filter: CCCCCc1ccc(C(=O)N(CCN(CCCC)CCCC)Cc2ccc(-n3ccc4ccccc43)cc2)cc1 is invalid
+17:45:22 <WARN> "default" filter: CN[C@H](CC(C)C)C(=O)N[C@H]1C(=O)N[C@@H](CC(N)=O)C(=O)N[C@H]2C(=O)N[C@H]3C(=O)NC(C(=O)N[C@@H](C(=O)O)c4cc(O)c(CN5CCc6cncn6C5)c(O)c4-c4cc3ccc4O)[C@H](OC3C[C@](C)(NCc4cccc(/C=C/c5ccc(Cl)cc5)c4)[C@@H](O)[C@H](C)O3)c3ccc(c(Cl)c3)Oc3cc2cc(c3O[C@@H]2O[C@H](CO)[C@@H](O)[C@H](O)[C@H]2O)Oc2ccc(cc2Cl)[C@H]1O is invalid
+17:45:22 <WARN> "default" filter: Oc1c2nc(S)nc-2nc2n1CCS2 is invalid
+17:45:22 <WARN> "default" filter: CC(=O)N[C@@H](Cc1ccccc1)C(=O)N[C@@H](CCC(N)=O)C(=O)N[C@@H](CO)C(=O)N[C@@H](CCCCN)C(=O)NCC(=O)N[C@@H](CC(N)=O)C(=O)N[C@H](C(=O)N[C@@H](Cc1ccccc1)C(=O)N[C@H](C(=O)N[C@@H](CC(=O)O)C(=O)NCC(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@@H](Cc1ccccc1)C(=O)N[C@@H](CCC(=O)O)C(=O)N[C@@H](CCCNC(=N)N)C(=O)N[C@@H](CC(C)C)C(=O)N[C@@H](CCCNC(=N)N)C(=O)N[C@@H](C)C(=O)N[C@@H](CCCCN)C(=O)N[C@@H](Cc1ccc(O)cc1)C(N)=O)C(C)C)C(C)C is invalid
+17:45:22 <WARN> "default" filter: NC(=O)CC[C@H](NC(=O)[C@H](CCC(=O)O)NC(=O)CCc1ccc(-c2cccs2)cc1)C(N)=O is invalid
+17:45:22 <WARN> "default" filter: CCC[C@@H](NC(=O)c1cncc2[nH]c(=O)[nH]c12)[C@@H](O)c1cccc(Cl)c1C is invalid
+17:45:22 <WARN> "default" filter: Cl.NCCCC[C@H](NC(=O)c1ccc(F)c(F)c1)C(=O)c1noc(Cc2ccc(OCCc3ccc(Cl)c(Cl)c3)cc2)n1 is invalid
+17:45:22 <WARN> "default" filter: CC(C)C[C@H](NC(=O)OCc1ccccc1)C(=O)N[C@@H](C)C(=O)NCc1ccc(C(=O)NO)cc1 is invalid
+17:45:22 <WARN> "default" filter: CC(C)C(NC(=O)Cn1c(-c2ccc(F)cc2)ncc(NS(=O)(=O)C2CCCCC2)c1=O)C(=O)C(F)(F)F is invalid
+17:45:22 <WARN> "default" filter: CC(C)[C@H](NC(=O)[C@H](CCCN=C(N)N)NC(=O)CCO)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@H](C(=O)N[C@@H](Cc1c[nH]cn1)C(=O)N1CCC[C@H]1C(=O)N[C@@H](Cc1ccccc1)C(=O)O)C(C)C is invalid
+17:45:22 <WARN> "default" filter: Cc1ncsc1-c1ccc([C@H](C)NC(=O)[C@@H]2C[C@@H](O)CN2C(=O)[C@@H](NC(=O)COCCOCCOCCN(C)CC[C@H](CSc2ccccc2)Nc2ccc(S(=O)(=O)NC(=O)c3ccc(N4CCN(CC5=C(c6ccc(Cl)cc6)CCC(C)(C)C5)CC4)cc3)cc2S(=O)(=O)C(F)(F)F)C(C)(C)C)cc1 is invalid
+17:45:22 <WARN> "default" filter: CC1CCCC(C)N1CCCCCN1C(=O)C(c2ccc(Cl)cc2)Oc2ccccc21 is invalid
+17:45:22 <WARN> "default" filter: CCCCCCCCCn1c(-c2cccc(Cl)c2)n[nH]c1=S is invalid
+17:45:22 <WARN> "default" filter: COc1ccccc1N1CCN(CCCCCC(=O)NCc2ccc(OS(C)(=O)=O)cc2)CC1 is invalid
+17:45:22 <WARN> "default" filter: O=C(O)COC(COCP(=O)(O)O)Cn1cnc2c(=O)[nH]cnc21 is invalid
+17:45:22 <WARN> "default" filter: CCCCCCc1c(C(=O)OC)cn(Cc2ccccc2)c1CC(=O)OC is invalid
+17:45:22 <WARN> "default" filter: O=C(O)C[C@](O)(C[C@@H](O)CCCCCn1c2ccccc2c2cc(Cl)ccc21)C(=O)O is invalid
+17:45:22 <WARN> "default" filter: O=C(/C=C/c1ccc(I)cc1)c1ccc(O)cc1 is invalid
+17:45:22 <WARN> "default" filter: CSCC(=O)N[C@H]1Cc2ccc(SC)c(C(=O)O)c2OB1O is invalid
+17:45:22 <WARN> "default" filter: CCCCCCCCS(=O)(=O)NS(C)(=O)=O is invalid
+17:45:22 <WARN> "default" filter: N=C1NCC[C@H]([C@@H]2NC(=O)/C(=C/NC(N)=O)NC(=O)[C@H](CNC(=O)C[C@@H](N)CCCN)NC(=O)[C@H](CO)NC(=O)[C@H](N)CNC2=O)N1 is invalid
+17:45:22 <WARN> "default" filter: COc1ccc(C[C@H]2C(=O)O[C@H](C)[C@H](NC(=O)[C@@H](CC(C)C)N(C)C(=O)C3CCCN3C(=O)[C@H](C)O)C(=O)N[C@H](C(C)C)[C@@H](O)CC(=O)O[C@@H](C(C)C)C(=O)[C@H](C)C(=O)N[C@@H](CC(C)C)C(=O)N3CCCC3C(=O)N2C)cc1 is invalid
+17:45:22 <WARN> "default" filter: CCCCCC(=O)OC1=C(C)[C@@H]2C[C@H]3OC(=O)[C@H](O)[C@H]4[C@]5(C(=O)OC)OC[C@]34[C@H]([C@@H](O)[C@@H]5O)[C@@]2(C)CC1=O is invalid
+17:45:22 <WARN> "default" filter: C[C@H](NC(=O)[C@H](Cc1cnc[nH]1)NC(=O)[C@@H]1CCCN1C(=O)[C@@H](CCCN)NC(=O)CNC(=O)[C@@H](NC(=O)[C@@H](NC(=O)[C@@H](N)CCCCN)[C@@H](O)CN)[C@@H](O)CN)C(=O)N/C(=C\CCNC(=N)N)C(=O)N[C@@H](CCCCN)C(=O)NCCCCN is invalid
+17:45:22 <WARN> "default" filter: Cc1ccc2c(c1)Nc1ccccc1P2(=O)O is invalid
+17:45:22 <WARN> "default" filter: CC[C@H](C)[C@H](NC(=O)[C@@H](NC(=O)[C@H](CC(=O)O)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CCCN=C(N)N)NC(=O)[C@H](CC(N)=O)NC(=O)[C@H](CC(N)=O)NC(=O)[C@H](C)NC(=O)[C@H](C)NC(=O)[C@H](CCC(N)=O)NC(=O)[C@H](CCC(N)=O)NC(=O)[C@H](CCCCN)NC(=O)[C@H](CCC(=O)O)NC(=O)[C@H](CCCCN)NC(=O)[C@H](CCC(=O)O)NC(=O)[C@H](CCC(N)=O)NC(=O)[C@H](CCCCN)NC(=O)[C@H](CCC(=O)O)NC(=O)[C@@H](NC(=O)[C@H](CCC(=O)O)NC(=O)[C@@H](NC(=O)[C@H](CCSC)NC(=O)[C@H](CCCCN)NC(=O)[C@H](CCCN=C(N)N)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CCC(N)=O)NC(=O)[C@H](Cc1ccccc1)NC(=O)[C@@H]1CCCN1C(=O)[C@H](CC(C)C)NC(=O)[C@H](CC(=O)O)NC(=O)[C@@H](NC(=O)[C@H](CO)NC(=O)[C@@H](NC(=O)[C@@H]1CCCN1C(=O)[C@@H]1CCCN1C(=O)CNC(=O)[C@@H]1CCC(=O)N1)[C@@H](C)CC)[C@@H](C)CC)[C@@H](C)CC)[C@@H](C)CC)[C@@H](C)O)C(=O)O is invalid
+17:45:22 <WARN> "default" filter: CCCCB(O)CCc1ccccc1 is invalid
+17:45:22 <WARN> "default" filter: CCCCCCCCCCC(=O)NNC(=O)c1c(O)c2ccccc2n(CC)c1=O is invalid
+17:45:22 <WARN> "default" filter: CCCCC[C@H]1CC[C@H](C(=O)Nc2c(C(=O)NCC)noc2-c2cc(C(C)C)c(O)cc2O)CC1 is invalid
+17:45:22 <WARN> "default" filter: CC(C)(C)c1cc2c(OCc3cn(CCN)nn3)c(c1)Cc1cc(C(C)(C)C)cc(c1OCc1cn(CCN)nn1)Cc1cc(C(C)(C)C)cc(c1OCc1cn(CCN)nn1)Cc1cc(C(C)(C)C)cc(c1OCc1cn(CCN)nn1)C2 is invalid
+17:45:22 <WARN> "default" filter: O=C(c1ccc(F)c(F)c1N[14c]1[14cH][14cH][14c](I)[14cH][14c]1F)N1CC(O)([C@@H]2CCCCN2)C1 is invalid
+17:45:22 <WARN> "default" filter: C=CCc1ccc(OCCCCC)c(-c2ccc(O)c(CC=C)c2)c1 is invalid
+17:45:22 <WARN> "default" filter: COC(=O)CCC(=O)CNC(=O)[C@H](Cc1c[nH]c2ccccc12)NC(C)=O is invalid
+17:45:22 <WARN> "default" filter: CCCC[C@H](OC(=O)CN1CCN(C)CC1)c1ccccc1C(=O)O[C@H]1CO[C@H]2[C@@H]1OC[C@H]2O is invalid
+17:45:22 <WARN> "default" filter: CC[C@H](C)[C@H](NC(=O)[C@@H](NC(=O)[C@H](C)NC(=O)[C@H](CCCNC(=N)N)NC(=O)[C@H](CS)NC(=O)[C@H](Cc1ccccc1)NC(=O)[C@H](CCC(=O)O)NC(=O)[C@H](CCCNC(=N)N)NC(=O)CNC(=O)[C@H](CO)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CCCNC(=N)N)NC(=O)[C@@H](NC(=O)CNC(=O)[C@H](Cc1ccc(O)cc1)NC(=O)[C@@H]1CCCN1C(=O)[C@H](C)NC(=O)[C@H](C)NC(=O)[C@@H](N)CCCNC(=N)N)C(C)C)C(C)C)C(=O)N[C@@H](Cc1ccccc1)C(=O)N[C@H](C(=O)N[C@@H](CS)C(=O)NCC(=O)NCC(=O)N[C@@H](CO)C(=O)N[C@@H](CCCNC(=N)N)C(=O)N[C@@H](Cc1c[nH]c2ccccc12)C(=O)O)[C@@H](C)O is invalid
+17:45:22 <WARN> "default" filter: C[C@]12CC[C@@H]3c4ccc(B(O)O)cc4CC[C@H]3[C@@H]1CC[C@@]2(O)Cc1ccccc1 is invalid
+17:45:22 <WARN> "default" filter: N[C@@H](CCC(=O)OCc1ccccc1)C(=O)NCCCCCCCCCCCCNC(=O)[C@@H](N)CCC(=O)OCc1ccccc1 is invalid
+17:45:22 <WARN> "default" filter: CCCCCCCCNCCS(=O)(=O)NCc1ccc(OC)cc1 is invalid
+17:45:22 <WARN> "default" filter: NCCN(CCNC(=O)CCC(=O)NCCCCCCNC(=O)/N=C(/N)NCCC[C@@H](NC(=O)C(c1ccccc1)c1ccccc1)C(=O)NCc1ccc(O)cc1)CCNC(=O)CCC(=O)NCCCCCCNC(=O)/N=C(/N)NCCC[C@@H](NC(=O)C(c1ccccc1)c1ccccc1)C(=O)NCc1ccc(O)cc1 is invalid
+17:45:22 <WARN> "default" filter: O=c1ccn([C@@]23C[C@H](O)[C@@H](COP(=O)(O)OP(=O)(O)O[C@H]4O[C@H](CO)[C@@H](O)[C@H](O)[C@H]4O)[C@@H]2C3)c(=O)[nH]1 is invalid
+17:45:22 <WARN> "default" filter: O=CNc1ccc(OP(=O)(Oc2ccccc2)Oc2ccccc2)cc1 is invalid
+17:45:22 <WARN> "default" filter: C[C@@H](NC(=O)c1ccc2ccccc2c1)B(O)O is invalid
+17:45:22 <WARN> "default" filter: CC(C)C[C@H](NC(=O)[C@H](CO)NC(=O)[C@H](C)NC(=O)[C@H](Cc1ccc(O)cc1)NC(=O)[C@H](Cc1ccc(O)cc1)NC(=O)[C@H](CCCNC(=N)N)NC(=O)[C@H](CC(N)=O)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CCC(=O)O)NC(=O)[C@H](CCC(=O)O)NC(=O)[C@@H]1CCCN1C(=O)[C@H](CO)NC(=O)c1cccnc1SCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)C(=O)N[C@@H](CCCNC(=N)N)C(=O)N[C@@H](Cc1cnc[nH]1)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@@H](CC(C)C)C(=O)N[C@@H](CC(N)=O)C(=O)N[C@@H](CC(C)C)C(=O)N[C@H](C(=O)N[C@H](C(=O)N[C@@H](CCCNC(=N)N)C(=O)N[C@@H](CCC(N)=O)C(=O)N[C@@H](CCCNC(=N)N)C(=O)N[C@@H](Cc1ccc(O)cc1)C(N)=O)[C@@H](C)O)C(C)C is invalid
+17:45:22 <WARN> "default" filter: CC[C@@](C)(CC(=O)O)NC(=O)c1ccc(F)c(C)c1 is invalid
+17:45:22 <WARN> "default" filter: Cc1ccc(OP(=O)(OCCSc2ccccc2)OC[C@H]2O[C@@H](n3cc(C)c(=O)[nH]c3=O)C[C@@H]2N=[N+]=[N-])cc1 is invalid
+17:45:22 <WARN> "default" filter: CCC(CC)c1nnc(NC(C)=O)s1 is invalid
+17:45:22 <WARN> "default" filter: O=C(O)CCCCC1SCC(NC(=O)c2ccccc2)C1NC(=O)c1ccccc1 is invalid
+17:45:22 <WARN> "default" filter: CCC(=O)NCCOCCOCCNC(=O)/N=C(\N)NCCC[C@H](N)C(=O)N[C@@H](CCCNC(=N)N)C(=O)N1CCC[C@H]1C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@H](C(=O)N[C@@H](CC(C)C)C(=O)O)[C@@H](C)CC is invalid
+17:45:22 <WARN> "default" filter: CCCCCCCCCC[P+](C)(C)CCCCCCCCCC is invalid
+17:45:22 <WARN> "default" filter: CCCCC[C@H]1OC(=O)c2c(O)c(CC=C(C)C)cc(O)c2[C@H]1OC is invalid
+17:45:22 <WARN> "default" filter: NC(N)=NCCC[C@H](N)C(=O)NCC(=O)N[C@@H](CC(=O)O)C(=O)O is invalid
+17:45:22 <WARN> "default" filter: CCOP(=O)(Cn1cc(Cn2cnc3cc(C)c(C)cc32)nn1)OCC is invalid
+17:45:22 <WARN> "default" filter: Cc1cn(CCC[n+]2ccc(-c3cc[n+](Cc4cc(C[n+]5ccc(-c6cc[n+](CCCn7cc(C)c(=O)[nH]c7=O)cc6)cc5)cc(C[n+]5ccc(-c6cc[n+](Cc7cc(C[n+]8ccc(-c9cc[n+](Cc%10cc(C[n+]%11ccc(-c%12cc[n+](CCCn%13cc(C)c(=O)[nH]c%13=O)cc%12)cc%11)cc(C[n+]%11ccc(-c%12cc[n+](CCCn%13cc(C)c(=O)[nH]c%13=O)cc%12)cc%11)c%10)cc9)cc8)cc(C[n+]8ccc(-c9cc[n+](Cc%10cc(C[n+]%11ccc(-c%12cc[n+](Cc%13cc(C[n+]%14ccc(-c%15cc[n+](Cc%16cc(C[n+]%17ccc(-c%18cc[n+](CCCn%19cc(C)c(=O)[nH]c%19=O)cc%18)cc%17)cc(C[n+]%17ccc(-c%18cc[n+](CCCn%19cc(C)c(=O)[nH]c%19=O)cc%18)cc%17)c%16)cc%15)cc%14)cc(C[n+]%14ccc(-c%15cc[n+](Cc%16cc(C[n+]%17ccc(-c%18cc[n+](CCCn%19cc(C)c(=O)[nH]c%19=O)cc%18)cc%17)cc(C[n+]%17ccc(-c%18cc[n+](CCCn%19cc(C)c(=O)[nH]c%19=O)cc%18)cc%17)c%16)cc%15)cc%14)c%13)cc%12)cc%11)cc(C[n+]%11ccc(-c%12cc[n+](Cc%13cc(C[n+]%14ccc(-c%15cc[n+](Cc%16cc(C[n+]%17ccc(-c%18cc[n+](CCCn%19cc(C)c(=O)[nH]c%19=O)cc%18)cc%17)cc(C[n+]%17ccc(-c%18cc[n+](CCCn%19cc(C)c(=O)[nH]c%19=O)cc%18)cc%17)c%16)cc%15)cc%14)cc(C[n+]%14ccc(-c%15cc[n+](Cc%16cc(C[n+]%17ccc(-c%18cc[n+](CCCn%19cc(C)c(=O)[nH]c%19=O)cc%18)cc%17)cc(C[n+]%17ccc(-c%18cc[n+](CCCn%19cc(C)c(=O)[nH]c%19=O)cc%18)cc%17)c%16)cc%15)cc%14)c%13)cc%12)cc%11)c%10)cc9)cc8)c7)cc6)cc5)c4)cc3)cc2)c(=O)[nH]c1=O.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F.F[P-](F)(F)(F)(F)F is invalid
+17:45:22 <WARN> "default" filter: C[C@H](N)C(=O)N[C@@H](CCCNC(=N)N)C(=O)N[C@@H](CCC(N)=O)C(=O)N[C@@H](CCCNC(=N)N)C(=O)N[C@@H](C)C(=O)N[C@@H](CO)C(=O)N[C@@H](C)C(=O)O is invalid
+17:45:22 <WARN> "default" filter: CS[C@H]1O[C@@H](COC2O[C@@H](OC([C@H](O)CO)[C@H](O)[C@@H](NC(C)=O)C(C)=O)[C@H](O)[C@@H](O)[C@H]2O)[C@H](O)[C@@H](NC(=O)c2ccc3ccccc3c2)[C@@H]1O is invalid
+17:45:22 <WARN> "default" filter: O=[N+]([O-])c1ccc(NCCCCCCOc2cccc3c2CCCC3CCCN2CCN(C3CCCCC3)CC2)c2nonc12 is invalid
+17:45:22 <WARN> "default" filter: C=C(C)[C@@H]1CC[C@]2(C(=O)OCCCCCC)CC[C@]3(C)[C@H](CC[C@@H]4[C@@]5(C)CC[C@H](O)C(C)(C)[C@@H]5CC[C@]43C)[C@@H]12 is invalid
+17:45:22 <WARN> "default" filter: N=C(N)NCCC[C@H](NC(=O)c1ccccc1)C(=O)N[C@@H](CCCCN)C(=O)N[C@@H](C(N)=O)c1ccc(OCc2cccc(Cl)c2)cc1 is invalid
+17:45:22 <WARN> "default" filter: CCCN(NC(=O)[C@@H]1C[C@@H](OCc2ccccc2)CN1C(=O)[C@@H](NC(=O)[C@@H](NC(=O)[C@@H](CCC(=O)O)NC(=O)[C@H](CC(=O)O)NC(C)=O)[C@@H](C)CC)C(C)C)C(=O)N1CCc2ccccc21 is invalid
+17:45:22 <WARN> "default" filter: O=C(CCCCc1cc(/C=N/O)no1)Nc1ccccc1 is invalid
+17:45:22 <WARN> "default" filter: OC[C@H]1[C@H](O)C=CCN1CCCCCOCC12CC3CC(CC(C3)C1)C2 is invalid
+17:45:22 <WARN> "default" filter: CCN(CC)CC.CCN(CC)CC.Cn1cc2c(nc(NC(=O)CCCc3cn(CCCCCCNC(=O)c4ccc(-c5c6ccc(=N)c(S(=O)(=O)O)c-6oc6c(S(=O)(=O)O)c(N)ccc56)c(C(=O)O)c4)nn3)n3nc(-c4ccco4)nc23)n1 is invalid
+17:45:22 <WARN> "default" filter: CNC(=O)[C@H](Cc1ccccc1)NC(=O)[C@H](Cc1ccccc1S)CC(C)C is invalid
+17:45:23 <WARN> "default" filter: Nc1ncnc2c1ncn2[C@@H]1O[C@H](CO)[C@@H](OP(=O)(O)O[C@H]2[C@H](O)[C@H](n3cnc4c(N)ncnc43)O[C@@H]2CO)[C@@H]1O is invalid
+17:45:23 <WARN> "default" filter: CCCCCCCCCCCCCCCC(=O)N[C@H](C(=O)N[C@H](C(=O)N[C@@H](CC(C)C)C(=O)N1CCC[C@H]1C(=O)N[C@@H](CC(C)C)C(=O)N[C@@H](Cc1c[nH]c2ccccc12)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@H](C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@@H](CCCNC(=N)N)C(N)=O)[C@@H](C)O)[C@@H](C)O)C(C)C is invalid
+17:45:23 <WARN> "default" filter: CN(CCC1CCCCC1)C(=O)[C@H]1CCCC[C@H]1C(=O)N[C@@H](C=O)CCCN=C(N)N is invalid
+17:45:23 <WARN> "default" filter: COc1ccccc1-c1cc(NC(=O)CCCCN2CCCCC2)[nH]n1 is invalid
+17:45:23 <WARN> "default" filter: CCCCCCCCCCCCCCCCOC(=O)Oc1ccc(COP(=O)(OCc2ccc(OC(=O)CC)cc2)OP(=O)(O)OP(=O)(O)OC[C@@H]2C=C[C@H](n3cc(C)c(=O)[nH]c3=O)O2)cc1 is invalid
+17:45:23 <WARN> "default" filter: CCOP(=O)(OCC)[C@@H]1C[C@@H](n2cc(-c3ccccn3)nn2)ON1C is invalid
+17:45:23 <WARN> "default" filter: Cc1ncsc1-c1ccc(CNC(=O)[C@@H]2C[C@@H](O)CN2C(=O)[C@@H](NC(=O)C2(F)CC2)C(C)(C)C)c(OCCOCCOCCOCCOc2ccc(NC(=O)[C@H](C)[C@H]3CC[C@@H](c4ccnc5ccc(F)cc54)CC3)cc2)c1 is invalid
+17:45:23 <WARN> "default" filter: CC[C@H](C)[C@@H](C(=O)O[C@@H](CC(C)C)C(=O)N[C@@H](CC(C)C)C(=O)N[C@@H](/C=C/C(=O)N1C(=O)C=C(OC)[C@H]1Cc1ccccc1)Cc1ccccc1)N(C)C is invalid
+17:45:23 <WARN> "default" filter: COCCOCCOc1ccc(-c2c3nc(c(-c4ccc(OCCOCCOC)cc4)c4ccc([nH]4)c(-c4ccc(OC(C(=O)O)C(=O)O)cc4)c4nc(c(-c5ccc(OCCOCCOC)cc5)c5ccc2[nH]5)C=C4)C=C3)cc1 is invalid
+17:45:23 <WARN> "default" filter: CC[C@H](C)[C@H](NC(=O)[C@H](CC(C)C)NC(=O)c1nc(N)n[nH]1)C(=O)NCC(=O)N[C@@H](CCCNC(=N)N)C(=O)N[C@@H](CC(C)C)C(N)=O is invalid
+17:45:23 <WARN> "default" filter: COC(=O)CCCCCCC(=O)Nc1ccc2c(c1)-c1ccccc1C(=O)C2=O is invalid
+17:45:23 <WARN> "default" filter: CC[C@@H](C(C)C)[C@H](O)[C@@H](O)[C@@H](C)[C@H]1CC[C@H]2[C@@H]3CC(=O)[C@H]4C[C@H](F)CC[C@]4(C)[C@H]3CC[C@]12C is invalid
+17:45:23 <WARN> "default" filter: CC[C@H](C)[C@H](NC(=O)[C@H](CC(=O)O)NC(=O)[C@H](Cc1ccccc1)NC(=O)[C@H](CC(C)C)NC(=O)CN)C(=O)N[C@@]1(C)CCC/C=C\CCC[C@@](C)(C(=O)N[C@@H](CCC(=O)O)C(=O)N[C@@H](CO)C(=O)N[C@@H](Cc2ccccc2)C(N)=O)NC(=O)[C@H]([C@@H](C)CC)NC(=O)[C@H](CCCCN)NC(=O)[C@H](CCCCN)NC1=O is invalid
+17:45:23 <WARN> "default" filter: CSCC[C@H](NC(=O)[C@@H](CC(C)C)NC(=O)CNC(=O)[C@@H](Cc1ccccc1)NC(=O)[C@@H](Cc1ccccc1)NC(=O)[C@@H](CCC(N)=O)NC(=O)[C@@H](CCC(N)=O)NC(=O)[C@@H]1CCCN1C(=O)[C@H](CCCCN)NC(=O)[C@@H]1CCCN1C(=O)[C@H](N)CCCN=C(N)N)C(N)=O is invalid
+17:45:23 <WARN> "default" filter: CCCCCC(=O)N(c1ccc(OCC)cc1)S(=O)(=O)c1ccc2c(c1)n(C)c(=O)n2C is invalid
+17:45:23 <WARN> "default" filter: CN(C/C(=N\OCCO)C(CCN1CCC(N2CCCCC2=O)CC1)c1ccc(Cl)c(Cl)c1)C(=O)c1cc(Cl)cc(Cl)c1 is invalid
+17:45:23 <WARN> "default" filter: COCCNC(=O)Cn1c(=O)n(CCCCCC(=O)NCc2ccccc2Cl)c(=O)c2sccc21 is invalid
+17:45:23 <WARN> "default" filter: CN(C)NC(=S)Nc1ccc(-c2nnc(S)o2)cc1 is invalid
+17:45:23 <WARN> "default" filter: CCC(CC(C)(C)O)C(=O)NN=C(S)Nc1ccccc1 is invalid
+17:45:23 <WARN> "default" filter: CCCNC(=O)CC[C@@H](C)[C@H]1CC[C@H]2[C@@H]3CC[C@@H]4C[C@@H](N=[N+]=[N-])CC[C@]4(C)[C@H]3C[C@H](O)[C@]12C is invalid
+17:45:23 <WARN> "default" filter: NC(N)=NCCCC(N)C(=O)N[C@H](CCCN=C(N)N)C(=O)N1CCC[C@H]1C(=O)N1CC(O)C[C@H]1C(=O)NCC(=O)NC(C(=O)N[C@@H](CO)C(=O)N[C@@H]1CSc2ccccc2N(CC(=O)O)C1=O)C1Cc2ccccc2C1 is invalid
+17:45:23 <WARN> "default" filter: CCCCCCCC(=O)OC[C@@]1(CCl)O[C@@H](n2ccc(N)nc2=O)[C@H](F)[C@@H]1OC(=O)CCCCCCC is invalid
+17:45:23 <WARN> "default" filter: CCC(C)[C@H](NC[C@@H](NC(=O)[C@@H](N)CS)C(C)CC)C(=O)N[C@@H](CCO)C(=O)O is invalid
+17:45:23 <WARN> "default" filter: O=C([O-])P(=O)([O-])Oc1ccccc1.[Na+].[Na+] is invalid
+17:45:23 <WARN> "default" filter: CCCCCCCC[C@H]1NC(=N)N2CCCC2=C1C(=O)OCCCCNC(=N)N is invalid
+17:45:23 <WARN> "default" filter: COc1cc(N2CCN(CCCCCCCCCC(=O)NCCNc3cccc4c3C(=O)N(C3CCC(=O)NC3=O)C4=O)CC2)ccc1-c1ncnc(Nc2cccc(CS(C)(=N)=O)c2)n1 is invalid
+17:45:23 <WARN> "default" filter: C[C@@H](c1ccccc1)C1NC(=O)CNC(=O)[C@H](CO)NC(=O)[C@@H]([C@@H](O)[C@@H]2CN=C(N)N2[C@H]2O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]2O)NC(=O)[C@H]([C@@H](O)[C@@H]2CN=C(N)N2)NC(=O)[C@@H](Cc2ccc(O[C@H]3O[C@H](CO)[C@@H](O[C@H]4O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]4O)[C@H](O)[C@@H]3O)cc2)NC1=O is invalid
+17:45:23 <WARN> "default" filter: CCCCCCCCCCCCC/C=C/C(=O)[C@H](COC)NC(C)=O is invalid
+17:45:23 <WARN> "default" filter: C#CCOCCOCCOCCNc1nc(N2CCN(C(=O)Cn3cc(CCCN=C(N)N)nn3)CC2)nc(N2CCN(C(=O)[C@H]([C@@H](C)CC)n3cc(CCC(=O)O)nn3)CC2)n1.Cl is invalid
+17:45:23 <WARN> "default" filter: CCCCCCCC/C=C\CCCCCCCCOC[C@@H]1C[C@@H](O)CN1.Cl is invalid
+17:45:23 <WARN> "default" filter: CC(C)[C@H](NC(=O)[C@H]1CC(=O)NCC(=O)NCC[C@@H](NC(=O)[C@H](CCCCN)NC(=O)[C@@H](N)Cc2ccc(O)cc2)C(=O)N[C@H]([C@H](C)O)C(=O)N1)C(=O)O is invalid
+17:45:23 <WARN> "default" filter: CCOc1ccc(C[C@@H](NC(=O)CC23CC4CC(CC(C4)C2)C3)C(=O)N[C@@H](Cc2ccccc2)C(=O)N[C@H](C(=O)N[C@@H](CC(N)=O)C(=O)N[C@@H](CCCCN)C(=O)N2CCC[C@@H]2C(=O)N[C@@H](CCCN=C(N)N)C(=O)N[C@@H](CCCN=C(N)N)C(N)=O)C(C)C)cc1 is invalid
+17:45:23 <WARN> "default" filter: N#CCCC(C#N)(C#N)CCC#N is invalid
+17:45:23 <WARN> "default" filter: C/C=C/C/C=C(/C)C(=O)CC/C(C)=C/C=C(\C)C(=O)c1c(O)cc([C@H](C)CC/C=C/NC(=O)OC)oc1=O is invalid
+17:45:23 <WARN> "default" filter: CCC(CC)NC(=O)CO/N=C/c1ccccc1OC(F)F is invalid
+17:45:23 <WARN> "default" filter: CCCCCCCC(=O)N[C@@H](c1cccc(OC)c1)[C@H](C)OP(=O)(O)O is invalid
+17:45:23 <WARN> "default" filter: COc1ccc2ccc(S(=O)(=O)NC(CCCN=C(N)N)C(=O)N3CCC(C)CC3C(=O)O)cc2c1 is invalid
+17:45:23 <WARN> "default" filter: Cc1ccc[n+](CCCCCCCCCCCC[n+]2cccc(C)c2N)c1N.[Br-].[Br-] is invalid
+17:45:23 <WARN> "default" filter: COC(=O)CNC(=O)[C@H](CSCc1ccc(Br)cc1)NC(=O)CC[C@H](NC(=O)OCc1ccccc1)C(=O)OC is invalid
+17:45:23 <WARN> "default" filter: CCCCC(C)(O)CC[C@@H]1[C@H]2Cc3ccc(O)cc3[C@@]1(C)CCN2CC1CC1.CS(=O)(=O)O is invalid
+17:45:23 <WARN> "default" filter: COC(=O)C(Cc1ccccc1)NP(=O)(OCCN(C)c1cc(=O)oc2c(C)cccc12)Oc1ccccc1 is invalid
+17:45:23 <WARN> "default" filter: CCOC(=O)CCCCCOc1cccc2cc(-c3cn4nc(CC)sc4n3)oc12 is invalid
+17:45:23 <WARN> "default" filter: C=CC[Si](C#C[C@]1(O)CC[C@H]2[C@@H]3CCc4cc(O)ccc4[C@H]3CC[C@@]21C)(CC)CC is invalid
+17:45:23 <WARN> "default" filter: CC[C@@H](C(=O)[C@@H](C)[C@@H](O)[C@H](C)[C@@H]1O[C@@H]([C@@H](CC)C(=O)ONC(=O)c2ccccc2O)CC[C@@H]1C)[C@H]1O[C@]2(C=C[C@H](O)[C@]3(CC[C@@](C)([C@H]4CC[C@](O)(CC)[C@H](C)O4)O3)O2)[C@H](C)C[C@@H]1C is invalid
+17:45:23 <WARN> "default" filter: CC[C@@]12C=C(C(=O)OCCCCCCO[N+](=O)[O-])n3c4c(c5ccccc53)CCN(CCC1)[C@H]42 is invalid
+17:45:23 <WARN> "default" filter: COC(=O)CCC/C=C\C/C=C\C/C=C\CCOC(=O)Nc1cccc(Cl)c1 is invalid
+17:45:23 <INFO> Registered scoring component LillyDescriptors
+17:45:23 <INFO> Registered scoring component LillyPAINS
+17:45:23 <INFO> Registered scoring component LillyMedchemRules
+17:45:23 <INFO> Registered scoring component NIBRSubstructureFilters
+17:45:23 <INFO> Registered scoring component Pharm2DFP
+17:45:23 <INFO> Registered scoring component RDKitDescriptors
+17:45:23 <INFO> Registered scoring component MordredDescriptors
+17:45:23 <INFO> Registered scoring component UnwantedSubstructures
+17:45:23 <INFO> Registered scoring component ROCSSimilarity
+17:45:23 <INFO> Registered scoring component GroupCount
+17:45:23 <INFO> Registered scoring component FragmentQed
+17:45:23 <INFO> Registered scoring component FragmentSlogP
+17:45:23 <INFO> Registered scoring component FragmentMolecularWeight
+17:45:23 <INFO> Registered scoring component FragmentTPSA
+17:45:23 <INFO> Registered scoring component FragmentDistanceMatrix
+17:45:23 <INFO> Registered scoring component FragmentNumAtomStereoCenters
+17:45:23 <INFO> Registered scoring component FragmentHBondAcceptors
+17:45:23 <INFO> Registered scoring component FragmentHBondDonors
+17:45:23 <INFO> Registered scoring component FragmentNumRotBond
+17:45:23 <INFO> Registered scoring component FragmentCsp3
+17:45:23 <INFO> Registered scoring component Fragmentnumsp
+17:45:23 <INFO> Registered scoring component Fragmentnumsp2
+17:45:23 <INFO> Registered scoring component Fragmentnumsp3
+17:45:23 <INFO> Registered scoring component FragmentEffectiveLength
+17:45:23 <INFO> Registered scoring component FragmentGraphLength
+17:45:23 <INFO> Registered scoring component FragmentLengthRatio
+17:45:23 <INFO> Registered scoring component FragmentNumHeavyAtoms
+17:45:23 <INFO> Registered scoring component FragmentNumHeteroAtoms
+17:45:23 <INFO> Registered scoring component FragmentNumRings
+17:45:23 <INFO> Registered scoring component FragmentNumAromaticRings
+17:45:23 <INFO> Registered scoring component FragmentNumAliphaticRings
+17:45:23 <INFO> Registered scoring component FragmentSlogP
+17:45:23 <INFO> Registered scoring component MatchingSubstructure
+17:45:23 <INFO> Registered scoring component Qed
+17:45:23 <INFO> Registered scoring component SlogP
+17:45:23 <INFO> Registered scoring component MolecularWeight
+17:45:23 <INFO> Registered scoring component GraphLength
+17:45:23 <INFO> Registered scoring component NumAtomStereoCenters
+17:45:23 <INFO> Registered scoring component HBondAcceptors
+17:45:23 <INFO> Registered scoring component HBondDonors
+17:45:23 <INFO> Registered scoring component NumRotBond
+17:45:23 <INFO> Registered scoring component Csp3
+17:45:23 <INFO> Registered scoring component numsp
+17:45:23 <INFO> Registered scoring component numsp2
+17:45:23 <INFO> Registered scoring component numsp3
+17:45:23 <INFO> Registered scoring component NumHeavyAtoms
+17:45:23 <INFO> Registered scoring component NumHeteroAtoms
+17:45:23 <INFO> Registered scoring component NumRings
+17:45:23 <INFO> Registered scoring component NumAromaticRings
+17:45:23 <INFO> Registered scoring component NumAliphaticRings
+17:45:23 <INFO> Registered scoring component SlogP
+17:45:23 <INFO> Registered scoring component PMI
+17:45:23 <INFO> Registered scoring component TanimotoDistance
+17:45:23 <INFO> Registered scoring component TPSA
+17:45:23 <INFO> Registered scoring component SAScore
+17:45:24 <INFO> Registered scoring component ChemProp
+17:45:24 <INFO> Registered scoring component CustomAlerts
+17:45:24 <INFO> Registered scoring component DockStream
+17:45:24 <INFO> Registered scoring component ExternalProcess
+17:45:24 <INFO> Registered scoring component REST
+17:45:24 <INFO> Registered scoring component Icolos
+17:45:24 <INFO> Registered scoring component Maize
+17:45:24 <INFO> Registered scoring component MMP
+17:45:24 <INFO> Registered scoring component Qptuna
+17:45:24 <INFO> Registered scoring component ReactionFilter
+17:45:24 <INFO> Creating scoring component MordredDescriptors
+17:46:28 <INFO> Number of SMILES processed: 868
+17:46:28 <INFO> Writing scoring results to /home/hhl/projects/reinvent/mordred_descriptors.csv
+17:46:28 <INFO> Peak main memory usage: 772.234 MiB
+17:46:28 <INFO> Finished REINVENT on 2023-12-04
