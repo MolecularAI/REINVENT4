@@ -1,16 +1,12 @@
-"""Compute all the 210 RDKit descriptors and extract the desired one
-
-NOTE: individual functions are available for these descriptors
-"""
+"""Compute a desired list of RDKit descriptors up to a total of 210"""
 
 __all__ = ["RDKitDescriptors"]
-from collections import defaultdict
 from dataclasses import dataclass
 from typing import List
 import logging
 
 from rdkit import Chem
-from rdkit.Chem.Descriptors import CalcMolDescriptors
+from rdkit.ML.Descriptors.MoleculeDescriptors import MolecularDescriptorCalculator
 import numpy as np
 
 from ..component_results import ComponentResults
@@ -30,19 +26,16 @@ class Parameters:
 class RDKitDescriptors:
     def __init__(self, params: Parameters):
         # collect descriptor from all endpoints: only one descriptor per endpoint
-        self.descriptors = params.descriptor
+        self.calc = MolecularDescriptorCalculator(params.descriptor).CalcDescriptors
 
     @molcache
     def __call__(self, mols: List[Chem.Mol]) -> ComponentResults:
         scores = []
-        descriptor_scores = defaultdict(list)
 
-        for descriptor in self.descriptors:
-            for mol in mols:
-                result = CalcMolDescriptors(mol, missingVal=np.NaN)
-                descriptor_scores[descriptor].append(result[descriptor])
+        for mol in mols:
+            result = self.calc(mol, missingVal=np.NaN)
+            scores.append(np.array(result))
 
-        for _scores in descriptor_scores.values():
-            scores.append(np.array(_scores, dtype=float))
+        scores = np.array(scores).transpose()
 
-        return ComponentResults(scores)
+        return ComponentResults(list(scores))
