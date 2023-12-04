@@ -80,7 +80,7 @@ single yes/no score.  The only parameter is the assay name (one per endpoint).
 
 * Mordred Descriptors: Computes all 1613 2D Mordred descriptors. Each endpoint selects one descriptor.
   * `descriptor`: descriptor name
-  * `nrpocs`: number of processors
+  * `nprocs`: number of processors
 
 
 Examples
