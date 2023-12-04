@@ -1,6 +1,6 @@
-"""Compute the 210 RDKit descriptors and extract the desired one
+"""Compute all the 210 RDKit descriptors and extract the desired one
 
-NOTE: individual function are available for these descriptors
+NOTE: individual functions are available for these descriptors
 """
 
 __all__ = ["RDKitDescriptors"]
@@ -33,7 +33,7 @@ class RDKitDescriptors:
         self.descriptors = params.descriptor
 
     @molcache
-    def __call__(self, mols: List[Chem.Mol]) -> np.array:
+    def __call__(self, mols: List[Chem.Mol]) -> ComponentResults:
         scores = []
         descriptor_scores = defaultdict(list)
 
