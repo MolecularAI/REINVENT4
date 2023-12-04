@@ -1,0 +1,44 @@
+# Test the RDKit descriptor scoring componen/
+
+run_type = "scoring"
+output_csv = "rdkit_descriptors.csv"
+json_out_config = "_rdkit_descriptors.json"
+
+[parameters]
+
+smiles_file = "tests/chembl_random_100.smi"
+
+
+[scoring]
+
+type = "geometric_mean"
+parallel = false
+
+[[scoring.component]]
+[scoring.component.RDKitDescriptors]
+
+[[scoring.component.RDKitDescriptors.endpoint]]
+name = "RDKit/Nacc"
+
+params.descriptor = "NumHAcceptors"
+
+[[scoring.component.RDKitDescriptors.endpoint]]
+name = "RDKit/NHeavy"
+
+params.descriptor = "HeavyAtomMolWt"
+
+[[scoring.component.RDKitDescriptors.endpoint]]
+name = "RDKit/TPSA"
+
+params.descriptor = "TPSA"
+
+[[scoring.component.RDKitDescriptors.endpoint]]
+name = "RDKit/BertzCT"
+
+params.descriptor = "BertzCT"
+
+[[scoring.component.RDKitDescriptors.endpoint]]
+name = "RDKit/fr_amide"
+
+params.descriptor = "fr_amide"
+
