@@ -1,0 +1,159 @@
+# Test the Mordred descriptor scoring component
+
+run_type = "scoring"
+output_csv = "mordred_descriptors.csv"
+json_out_config = "_mordred_descriptors.json"
+
+[parameters]
+
+smiles_file = "tests/chembl_random_10.smi"
+
+
+[scoring]
+
+type = "geometric_mean"
+parallel = false
+
+[[scoring.component]]
+[scoring.component.MordredDescriptors]
+
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/ABC"
+params.descriptor = "ABC"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/ABCGG"
+params.descriptor = "ABCGG"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nAcid"
+params.descriptor = "nAcid"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nBase"
+params.descriptor = "nBase"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/SpAbs_A"
+params.descriptor = "SpAbs_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/SpMax_A"
+params.descriptor = "SpMax_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/SpDiam_A"
+params.descriptor = "SpDiam_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/SpAD_A"
+params.descriptor = "SpAD_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/SpMAD_A"
+params.descriptor = "SpMAD_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/LogEE_A"
+params.descriptor = "LogEE_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/VE1_A"
+params.descriptor = "VE1_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/VE2_A"
+params.descriptor = "VE2_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/VE3_A"
+params.descriptor = "VE3_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/VR1_A"
+params.descriptor = "VR1_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/VR2_A"
+params.descriptor = "VR2_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/VR3_A"
+params.descriptor = "VR3_A"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nAromAtom"
+params.descriptor = "nAromAtom"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nAromBond"
+params.descriptor = "nAromBond"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nAtom"
+params.descriptor = "nAtom"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nHeavyAtom"
+params.descriptor = "nHeavyAtom"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nSpiro"
+params.descriptor = "nSpiro"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nBridgehead"
+params.descriptor = "nBridgehead"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nHetero"
+params.descriptor = "nHetero"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nH"
+params.descriptor = "nH"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nB"
+params.descriptor = "nB"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nC"
+params.descriptor = "nC"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nN"
+params.descriptor = "nN"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nO"
+params.descriptor = "nO"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nS"
+params.descriptor = "nS"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nP"
+params.descriptor = "nP"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nF"
+params.descriptor = "nF"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nCl"
+params.descriptor = "nCl"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nBr"
+params.descriptor = "nBr"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nI"
+params.descriptor = "nI"
+params.nprocs = 8 
+[[scoring.component.MordredDescriptors.endpoint]]
+name = "Mordred/nX"
+params.descriptor = "nX"
+params.nprocs = 8 

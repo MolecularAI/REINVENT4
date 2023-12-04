@@ -38,6 +38,7 @@ class MordredDescriptors:
     @molcache
     def __call__(self, mols: List[Chem.Mol]) -> ComponentResults:
         df = self.calc.pandas(mols, nproc=self.nprocs, quiet=True)  # Pandas DataFrame
+        df = df.astype(float)  # will turn Missing into NaN
         scores = df[self.descriptors].T.to_numpy()
 
         return ComponentResults(scores)
