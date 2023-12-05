@@ -49,22 +49,44 @@ Multiple matches are not handled at the moment.  There are only 63
 patterns available which is less than the RDKit PAINS filter has but the advantage is that
 this component provides scores for 12 different assays and 3 enrichments rather than just a
 single yes/no score.  The only parameter is the assay name (one per endpoint).
-    * Alpha
-    * ELISA
-    * FB
-    * FP
-    * FRET
-    * SPA
-    * Alpha_HS
-    * ELISA_HS
-    * FB_HS
-    * FP_HS
-    * FRET_HS
-    * SPA_HS
-    * OverallActivityEnrichment
-    * QCEnrichment
-    * HSEnrichment
-    * TotalScore
+  * Alpha
+  * ELISA
+  * FB
+  * FP
+  * FRET
+  * SPA
+  * Alpha_HS
+  * ELISA_HS
+  * FB_HS
+  * FP_HS
+  * FRET_HS
+  * SPA_HS
+  * OverallActivityEnrichment
+  * QCEnrichment
+  * HSEnrichment
+  * TotalScore
+
+* Pharm2DFP: RDKit 2D Pharmacophore Fingerprints (still very much a prototype). Parameters:
+  * `ref_smiles`: reference (query) SMILES
+  * `feature_definition`: feature definition list, one of `base`, `minimal`, `gobbi`
+  * `bins`: list of distance pairs, `[0, 2, 2, 4, 4, 8]` means `[(0,2), (2,4), (4,8)]`
+  * `min_point_count`
+  * `max_point_count`
+  * `similarity`: any that RDKit supports e.g. `tanimoto`, `dice`, etc.
+  * `similarity_params`: similarity parameters e.g. `a` and `b` for ´tversky`
+
+* RDKit Descriptors: Computes desired RDKit descriptors (up to 210). Each endpoint selects one descriptor.
+  * `descriptor`: descriptor name
+
+* Mordred Descriptors: Computes all 1613 2D Mordred descriptors. Each endpoint selects one descriptor.
+  * `descriptor`: descriptor name
+  * `nprocs`: number of processors
+
+
+Examples
+--------
+
+See `config/` for configuration input examples in TOML format.
 
 
 Requirements
