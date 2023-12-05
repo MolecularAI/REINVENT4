@@ -3,15 +3,13 @@ import unittest
 from reinvent.chemistry import Conversions
 from reinvent.chemistry.standardization.rdkit_standardizer import RDKitStandardizer
 from tests.chemistry.fixtures.test_data import CELECOXIB2
-from tests.chemistry.standardization.fixtures import MockLogger
 
 
 class TestRDKitStandardizerNoConfig(unittest.TestCase):
     def setUp(self):
         self.chemistry = Conversions()
-        logger = MockLogger()
         filter_configs = []
-        self.standardizer = RDKitStandardizer(filter_configs, logger)
+        self.standardizer = RDKitStandardizer(filter_configs)
 
         self.compound_1 = CELECOXIB2
 

@@ -5,7 +5,6 @@ from dataclasses import fields
 from reinvent.chemistry import Conversions
 from reinvent.chemistry.standardization.filter_configuration import FilterConfiguration
 from reinvent.chemistry.standardization.rdkit_standardizer import RDKitStandardizer
-from tests.chemistry.standardization.fixtures import MockLogger
 
 
 def classFromArgs(className, argDict):
@@ -17,7 +16,6 @@ def classFromArgs(className, argDict):
 class BaseRDKitStandardizer(unittest.TestCase):
     def setUp(self):
         self.chemistry = Conversions()
-        logger = MockLogger()
         self.raw_config = None if None else self.raw_config
         if not self.raw_config:
             raise NotImplemented(
@@ -25,4 +23,4 @@ class BaseRDKitStandardizer(unittest.TestCase):
             )
         config = classFromArgs(FilterConfiguration, self.raw_config)
         filter_configs = [config]
-        self.standardizer = RDKitStandardizer(filter_configs, logger)
+        self.standardizer = RDKitStandardizer(filter_configs)
