@@ -20,8 +20,9 @@ json_out_config = "_staged_learning.json"  # write this TOML to JSON
 # be continued after termination, the agent_file would have to be replaced
 # with the checkpoint file.
 
-use_checkpoint = false  # if true read diversity filter from agent_file
 summary_csv_prefix = "staged_learning"  # prefix for the CSV file
+use_checkpoint = false  # if true read diversity filter from agent_file
+purge_memories = false  # if true purge all diversity filter memories after each stage
 
 ## Reinvent
 prior_file = "priors/reinvent.prior"

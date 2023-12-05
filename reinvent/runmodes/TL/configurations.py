@@ -35,6 +35,7 @@ class Configuration:
     optimizer: Optimizer
     learning_rate_scheduler: StepLR
     learning_rate_config: StepLRConfiguration
+    n_cpus: int
     validation_smilies: Optional[str] = None
     save_every_n_epochs: int = 1
     batch_size: int = 128
@@ -68,6 +69,7 @@ class Mol2MolConfiguration:
     optimizer: Optimizer
     learning_rate_scheduler: LambdaLR
     learning_rate_config: StepLRConfiguration
+    n_cpus: int
     validation_smilies: Optional[str] = None
     save_every_n_epochs: int = 0
     batch_size: int = 128

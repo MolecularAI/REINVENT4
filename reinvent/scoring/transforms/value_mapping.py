@@ -43,7 +43,7 @@ class ValueMapping(Transform, param_cls=Parameters):
 
             logger.warning(
                 f"The key{'s' if len_miss > 1 else ''} "
-                f"'{', '.join(list(missmatches))}' have "
+                f"'{', '.join([str(s) for s in list(missmatches)])}' have "
                 "not been found in your provided mapping. The "
                 "values have been substituted with NaNs."
             )

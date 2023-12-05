@@ -28,7 +28,7 @@ class PMI:
         self.properties = params.property
 
         if not "npr1" in self.properties and not "npr2" in self.properties:
-            raise RuntimeError("Need npr1 and or npr2")
+            raise RuntimeError(f"{__name__}: need one or both of: 'npr1', 'npr2'")
 
     @molcache
     def __call__(self, mols: List[Chem.Mol]) -> np.array:

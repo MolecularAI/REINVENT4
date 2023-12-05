@@ -7,10 +7,19 @@ torch.save is used to pickle the data.
 """
 
 import signal
+import platform
 from pathlib import Path
 from typing import Callable, Dict
 
 import torch
+
+
+if platform.system() != "Windows":
+    # NOTE: SIGTERM (signal 15) seems to be triggered by terminating processes.  So
+    #       multiprocessing triggers the handler for every terminating child.
+    SUPPORTED_SIGNALS = (signal.SIGINT, signal.SIGQUIT)
+else:
+    SUPPORTED_SIGNALS = (signal.SIGINT,)
 
 
 class StageInterrupted(Exception):
@@ -29,23 +38,19 @@ class Handler:
         self._checkpoint = None
         self._callback = None
         self._out_filename = None
+        self._default_handlers = []
 
     def __enter__(self):
         """Set the signal handler
 
-        Catch SIGINT (Ctrl-C) and SIGQUIT (Ctrl-\). 
-
-        NOTE: SIGTERM (signal 15) is triggered by terminating processes.  So
-              multiprocessing would trigger the handler for every child.
+        Catch SIGINT (Ctrl-C) and SIGQUIT (Ctrl-\).
 
         FIXME: need to replace this with a better signalling method
         """
 
-        self._default_int_handler = signal.getsignal(signal.SIGINT)
-        self._default_quit_handler = signal.getsignal(signal.SIGQUIT)
-
-        signal.signal(signal.SIGINT, self._signal_handler)
-        signal.signal(signal.SIGQUIT, self._signal_handler)
+        for _signal in SUPPORTED_SIGNALS:
+            self._default_handlers.append((_signal, signal.getsignal(_signal)))
+            signal.signal(_signal, self._signal_handler)
 
         return self
 
@@ -54,13 +59,13 @@ class Handler:
 
         # FIXME: check if exc_type is really the one we want?
 
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
-        signal.signal(signal.SIGQUIT, signal.SIG_IGN)
+        for _signal in SUPPORTED_SIGNALS:
+            signal.signal(_signal, signal.SIG_IGN)
 
         self.save()
 
-        signal.signal(signal.SIGINT, self._default_int_handler)
-        signal.signal(signal.SIGQUIT, self._default_int_handler)
+        for _signal, _handler in self._default_handlers:
+            signal.signal(_signal, _handler)
 
         # prevent exception from bubbling up
         # return True

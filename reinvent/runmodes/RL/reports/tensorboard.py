@@ -72,6 +72,8 @@ def write_report(reporter, data: TBData) -> None:
 
     reporter.add_scalar(f"Loss", data.loss, step)    
 
+    # NOTE: for some reason this breaks on Windows because the necessary
+    #       subdirectory cannot be created
     reporter.add_scalars(
         "Loss: likelihood averages",
         {

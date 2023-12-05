@@ -56,8 +56,16 @@ def compute_component_scores(
             smilies_non_cached.append(smiles)
         # If score is zero we do not need to compute the score
 
-    component_results = scoring_function(smilies_non_cached)
-    number_of_components = len(component_results.scores)
+    if smilies_non_cached:
+        component_results = scoring_function(smilies_non_cached)
+        number_of_components = len(component_results.scores)
+    else:  # only duplicates: need to set yp "empty" ComponentResults
+        key0 = next(iter(cache))
+        number_of_components = len(cache[key0])
+
+        # this is probably more elaborate than it needs to be
+        _scores = [[] for _ in range(number_of_components)]
+        component_results = ComponentResults(_scores)
 
     for data in zip(smilies_non_cached, *component_results.scores):
         smiles = data[0]

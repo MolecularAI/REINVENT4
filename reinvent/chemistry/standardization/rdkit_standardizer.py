@@ -7,31 +7,23 @@ from reinvent.chemistry import Conversions
 from reinvent.chemistry.standardization.filter_configuration import FilterConfiguration
 from reinvent.chemistry.standardization.filter_registry import FilterRegistry
 
+
 logger = logging.getLogger(__name__)
 
 
-def disable_rdkit_logging():
-    """
-    Disables RDKit whiny logging.
-    """
-    import rdkit.RDLogger as rkl
-
-    logger = rkl.logger()
-    logger.setLevel(rkl.ERROR)
-
-    import rdkit.rdBase as rkrb
-
-    rkrb.DisableLog("rdApp.error")
-
-
-disable_rdkit_logging()
-
-
 class RDKitStandardizer:
-    def __init__(self, filter_configs: Optional[List[FilterConfiguration]], *args, **kwargs):
+    def __init__(self, filter_configs: Optional[List[FilterConfiguration]], isomeric=False, *args,
+    **kwargs):
         self._conversions = Conversions()
         self._filter_configs = self._set_filter_configs(filter_configs)
         self._filters = self._load_filters(self._filter_configs)
+        self.isomeric = isomeric
+
+        for config in self._filter_configs:
+            logger.info(f"Applying filter {config.name} to input SMILES")
+
+        if self.isomeric:
+            logger.info("Stereochemistry kept in input SMILES")
 
     def apply_filter(self, smile: str) -> str:
         molecule = self._conversions.smile_to_mol(smile)
@@ -53,7 +45,8 @@ class RDKitStandardizer:
             logger.warning(message)
             return None
 
-        valid_smile = MolToSmiles(molecule, isomericSmiles=False)
+        valid_smile = MolToSmiles(molecule, isomericSmiles=self.isomeric)
+
         return valid_smile
 
     def _set_filter_configs(self, filter_configs):
@@ -65,6 +58,7 @@ class RDKitStandardizer:
 
     def _load_filters(self, filter_configs: List[FilterConfiguration]) -> Dict:
         registry = FilterRegistry()
+
         return {
             filter_config.name: registry.get_filter(filter_config.name)
             for filter_config in filter_configs

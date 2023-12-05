@@ -302,6 +302,13 @@ def run_staged_learning(
             df_section, chemistry.conversions, rdkit_smiles_flags2
         )
 
+    purge_diversity_filter = parameters.get("purge_memories", False)
+
+    if purge_diversity_filter:
+        logger.info("Purging diversity filter memories after each stage")
+    else:
+        logger.info("Diversity filter memories are retained between stages")
+
     inception = None
 
     # Inception only set up for the very first step
@@ -355,10 +362,11 @@ def run_staged_learning(
                 tb_logdir=logdir,
             )
 
-            free_memory, total_memory = torch.cuda.mem_get_info()
-            free_memory //= 1024**2
-            used_memory = total_memory // 1024**2  - free_memory
-            logger.info(f"Current GPU memory usage: {used_memory} MiB used, {free_memory} MiB free")
+            if torch.cuda.is_available():
+                free_memory, total_memory = torch.cuda.mem_get_info()
+                free_memory //= 1024**2
+                used_memory = total_memory // 1024**2  - free_memory
+                logger.info(f"Current GPU memory usage: {used_memory} MiB used, {free_memory} MiB free")
 
             handler.out_filename = package.out_state_filename
             handler.register_callback(optimize.get_state_dict)
@@ -368,6 +376,11 @@ def run_staged_learning(
 
             terminate = optimize(package.terminator)
             state = optimize.state
+
+            if purge_diversity_filter:
+                logger.info(f"Purging diversity filter memories in stage {stage_no}")
+                state.diversity_filter.purge_memories()
+
             handler.save()
 
             if terminate:
