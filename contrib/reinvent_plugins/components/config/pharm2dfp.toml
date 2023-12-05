@@ -1,0 +1,51 @@
+# Test the Pharm2D fingerprint scoring component
+
+run_type = "scoring"
+output_csv = "pharm2dfp.csv"
+json_out_config = "_pharm2dfp.json"
+
+[parameters]
+
+smiles_file = "tests/chembl_random_10.smi"
+
+
+[scoring]
+
+type = "geometric_mean"
+parallel = false
+
+[[scoring.component]]
+[scoring.component.Pharm2DFP]
+
+[[scoring.component.Pharm2DFP.endpoint]]
+name = "Pharm2DFP/Tanimoto"
+
+params.ref_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"  # Aspirin
+params.feature_definition = "base"
+params.bins = [0, 2, 2, 4, 4, 8]  # means [(0,2), (2,4), (4,8)]
+params.min_point_count = 2
+params.max_point_count = 3
+params.similarity = "tanimoto"
+params.similarity_params = {}
+
+[[scoring.component.Pharm2DFP.endpoint]]
+name = "Pharm2DFP/Dice"
+
+params.ref_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"  # Aspirin
+params.feature_definition = "base"
+params.bins = [0, 2, 2, 4, 4, 8]  # means [(0,2), (2,4), (4,8)]
+params.min_point_count = 2
+params.max_point_count = 3
+params.similarity = "dice"
+params.similarity_params = {}
+
+[[scoring.component.Pharm2DFP.endpoint]]
+name = "Pharm2DFP/Tversky"
+
+params.ref_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"  # Aspirin
+params.feature_definition = "base"
+params.bins = [0, 2, 2, 4, 4, 8]  # means [(0,2), (2,4), (4,8)]
+params.min_point_count = 2
+params.max_point_count = 3
+params.similarity = "tversky"
+params.similarity_params = {a = 0.95, b = 0.05}
