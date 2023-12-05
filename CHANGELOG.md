@@ -6,9 +6,60 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 ## [Unreleased]
 
 ### Changed
-
 - Additional functionality for Mol2Mol sampling
 - Fragment generators using transformers
+
+
+## [4.0.28] 2023-12-05
+
+### Fixed
+
+- Handle the case when there are no non-cached SMILES and thus the scpring function does not need to run.
+- Improved type safety in `value_mapping`
+
+
+## [4.0.27] 2023-12-01
+
+### Added
+
+- Number of cpus can be specified in toml/json config files for TL jobs
+
+
+## [4.0.26] 2023-12-01
+
+### Fixed
+
+- Check for CUDA before checking GPU memory otherwise will fail on CPU
+- Removed obsolete code which broke TL with Reinvent
+- Windows support: correct signal handling
+
+
+## [4.0.25] 2023-11-29
+
+### Added
+
+- Scoring component MolVolume to compure molecular volume via RDKit
+
+
+## [4.0.24] 2023-11-28
+
+### Changed
+
+- Minimal SMILES pre-processing for scoring to allow keeping of stereochemistry and only choose largest fragment, and use the general RDKit cleanup/sanitation/hydrogen.  Skip heavy filtering on molecules size, allowed atoms, tokens, vocabulary, etc.  This faciliates situation where only scoring is desired.
+
+
+## [4.0.23] 2023-11-28
+
+### Changed
+
+- Allow zero weights to only display a component score.  This will have no effect on aggregation but the component score is still computed. So, be careful with computationally expensive components.
+
+
+## [4.0.22] 2023-11-28
+
+### Changed
+
+- Flag to purge diversity filter memories after each staged learning stage.  This is useful in multiple stage runs and is equivalent to `use_checkpoint` for single stage reruns.
 
 
 ## [4.0.21] 2023-11-23

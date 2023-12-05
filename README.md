@@ -10,7 +10,8 @@ R-group replacement, linker design, molecule optimization, and other small
 molecule design tasks.  At its heart, REINVENT uses a Reinforcement Learning
 (RL) algorithm to generate optimized molecules compliant with a user defined
 property profile defined as a multi-component score.  Transfer Learning (TL)
-can be used to create a model closer to a set of input molecules. 
+can be used to create or pre-train a model that generates molecules closer
+to a set of input molecules. 
 
 A preprint with more details is available on ChemRxiv:
 [REINVENT4: Modern AI-Driven Generative Molecule Design](https://chemrxiv.org/engage/chemrxiv/article-details/65463cafc573f893f1cae33a).
@@ -21,22 +22,29 @@ Requirements
 ------------
 
 REINVENT is being developed on and for Linux but is also known to work on
-MacOSX.  Windows is not directly supported but so far we know that the software works on the CPU.
+MacOSX.  Windows is not directly supported but so far we know that all
+run modes work on the CPU.
 
 The code is written in Python 3 (>= 3.10).  The list of
 dependencies can be found in the repository (see also Installation below).
 
-A GPU is not strictly necessary but strongly recommended for performance reasons especially for transfer learning/model training.
-Note that if no GPU is installed in your computer the code will run on the CPU automatically.  REINVENT [supports](https://pytorch.org/get-started/locally/)
-NVIDIA and also some AMD GPUs.  For most design tasks a memory of about
-8 GiB for both CPU main memory and GPU memory is sufficient.
+A GPU is not strictly necessary but strongly recommended for performance
+reasons especially for transfer learning/model training.  It should be noted
+that reinforcement learning (RL) requires the computation of scores.  Most scoring
+components run on the CPU thus a GPU is of less importance for RL depending
+on how much time is spent on the CPU.
+
+Note that if no GPU is installed in your computer the code will run on the
+CPU automatically.  REINVENT [supports](https://pytorch.org/get-started/locally/) NVIDIA and also some AMD GPUs.
+For most design tasks a memory of about 8 GiB for both CPU main memory and
+GPU memory is sufficient.
 
 
 Installation
 ------------
 
 1. Clone this Git repository.
-2. Install a compatible version of Python, for example with [Conda](https://conda.io/projects/conda/en/latest/index.html) (Docker, pyenv, or system package manager would work too).
+2. Install a compatible version of Python, for example with [Conda](https://conda.io/projects/conda/en/latest/index.html) (other virtual environments like Docker, pyenv, or the system package manager would work too).
     ```shell
     conda create --name reinvent4 python=3.10
     conda activate reinvent4
@@ -68,13 +76,14 @@ reinvent -l sampling.log sampling.toml
 
 This writes logging information to the file `sampling.log`.  If you wish to write
 this to the screen, leave out the `-l sampling.log` part. `sampling.toml` is the
-configuration file.  The main user format is [TOML](https://toml.io/en/) as it tends to be more use friendly.  JSON can be used too, add `-f json`, but a specialised editor is
+configuration file.  The main user format is [TOML](https://toml.io/en/) as it tends to be more
+use friendly.  JSON can be used too, add `-f json`, but a specialised editor is
 recommended as the format is very sensitive to minor changes.
 
-A sample configuration file (including samples for the other run modes) is
+Sample configuration files for all run modes are
 located in `config/toml` of the repository and file paths therein would need to be
 adjusted to your local installation.  In particular, ready made prior models are
-located in `priors` in the Github repository and you would choose a model and the
+located in `priors` and you would choose a model and the
 appropriate run mode depending on the research problem you are trying to address.
 There is additional information in `config/toml` in several `*.md` files with
 instructions on how to configure the TOML file.
@@ -113,14 +122,12 @@ Scoring Plugins
 
 The scoring subsystem uses a simple plugin mechanism (Python
 [native namespace packages](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/#native-namespace-packages)).  If you
-wish to write your own plugin, follow the instructions below.  The public repository
-contains a
-[contrib](https://github.com/MolecularAI/REINVENT4/tree/main/contrib/reinvent_plugins/components)
-directory with some useful examples.
+wish to write your own plugin, follow the instructions below.  The public
+repository contains a [contrib](https://github.com/MolecularAI/REINVENT4/tree/main/contrib/reinvent_plugins/components) directory with some useful examples.
 
 1. Create `/top/dir/somewhere/reinvent\_plugins/components` where `/top/dir/somewhere` is a convenient location for you.
 2. Do **not** place a `__init__.py` in either `reinvent_plugins` or `components` as this would break the mechanism.  It is fine to create normal packages within `components` as long as you import those correctly.
-3. Place a file whose name starts with `comp_*` into `reinvent_plugins/components`.  The directory will be searched recursively so structure your code as needed.  Files with different names will be ignored.
+3. Place a file whose name starts with `comp_*` into `reinvent_plugins/components`.   Files with different names will be ignored i.e. not imported. The directory will be searched recursively so structure your code as needed but directory/package names must be unique.
 4. Tag the scoring component class(es) in that file with the @add\_tag decorator.  More than one component class can be added to the same *comp\_* file. See existing code.
 5. Tag at most one dataclass as parameter in the same file, see existing code.  This is optional.
 6. There is no need to touch any of the REINVENT code.

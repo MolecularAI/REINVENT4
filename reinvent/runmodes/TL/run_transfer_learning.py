@@ -4,6 +4,7 @@ Reads in a SMILES file and performs transfer learning.
 """
 
 import logging
+import os
 
 import torch
 import torch.optim as topt
@@ -17,13 +18,6 @@ from reinvent.chemistry.standardization.rdkit_standardizer import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-class FakeLogger:
-    """Mock-up for RDKit standardizer"""
-
-    def log_message(self, msg):
-        pass
 
 
 def run_transfer_learning(
@@ -57,7 +51,7 @@ def run_transfer_learning(
         conversions = Conversions()
 
         if model_type == "Reinvent":
-            standardizer = RDKitStandardizer(None, FakeLogger())
+            standardizer = RDKitStandardizer(None, isomeric=False)
             actions = [standardizer.apply_filter, conversions.randomize_smiles]
             logger.debug("Applying standardization and randomization of SMILES")
         elif model_type == "Mol2Mol":
@@ -96,6 +90,7 @@ def run_transfer_learning(
         num_epochs=parameters["num_epochs"],
         num_refs=parameters["num_refs"],
         save_every_n_epochs=parameters["save_every_n_epochs"],
+        n_cpus=config.get("cpus", os.cpu_count()),
     )
 
     if model_type == "Mol2Mol":

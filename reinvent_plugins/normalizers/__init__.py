@@ -1,1 +1,1 @@
-from . import rdkit_smiles, lilly_smiles
+from . import rdkit_smiles

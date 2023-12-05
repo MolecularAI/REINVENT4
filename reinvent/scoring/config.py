@@ -64,8 +64,8 @@ def get_components(components: dict[str, dict]) -> ComponentType:
             transform_params: Optional[dict] = endpoint.get("transform", None)
             weight: float = endpoint.get("weight", 1.0)
 
-            if weight <= 0:
-                raise RuntimeError(f"weight must be large than zero but is {weight}")
+            if weight < 0:
+                raise RuntimeError(f"weight must be equal to or larger than zero but is {weight}")
 
             parameters.append(params)
 

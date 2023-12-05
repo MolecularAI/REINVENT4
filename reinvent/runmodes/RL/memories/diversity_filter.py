@@ -41,13 +41,14 @@ class DiversityFilter(ABC):
         :param rdkit_smiles_flags: RDKit flags for canonicalization
         """
 
+        self.bucket_size = bucket_size
         self.minscore = minscore
         self.minsimilarity = minsimilarity
         self.penalty_multiplier = penalty_multiplier
         self.chemistry = conversions
         self.rdkit_smiles_flags = rdkit_smiles_flags
 
-        self.scaffold_memory = BucketCounter(bucket_size)
+        self.scaffold_memory = BucketCounter(self.bucket_size)
         self.smiles_memory = set()
 
     @abstractmethod
@@ -127,3 +128,9 @@ class DiversityFilter(ABC):
                 pass
 
         return scaffold_smiles
+
+    def purge_memories(self):
+        """Purge the internal scaffold and SMILES memories"""
+
+        self.scaffold_memory = BucketCounter(self.bucket_size)
+        self.smiles_memory = set()

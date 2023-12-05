@@ -20,7 +20,7 @@ import torch
 from torch.utils.data import DataLoader
 from torch.nn.utils import clip_grad_norm_
 
-# Uncomment this line for newer version of Pytorch.
+# Uncomment this line for newer versions of Pytorch.
 # There is a bug in version 1.12 / 1.13 that
 # causes an exception in SummaryWriter.add_histogram
 # from torch.utils.tensorboard import SummaryWriter
@@ -33,7 +33,9 @@ from reinvent.runmodes.setup_sampler import setup_sampler
 from .reports.tensorboard import write_report, TBData
 from .reports.remote import send_report, RemoteData
 
-# Patched SummaryWriter
+# Monkey-patched SummaryWriter
+# NOTE: for some reason this does not work on Windows, the original
+#       SummaryWriter is always used
 from reinvent.runmodes.utils.tensorboard import SummaryWriter
 from reinvent.runmodes.dtos import ChemistryHelpers
 from reinvent.chemistry import Conversions

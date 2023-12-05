@@ -3,18 +3,15 @@
 from __future__ import annotations
 
 __all__ = ["score_smiles_from_file"]
-from typing import List, TYPE_CHECKING
 
 import numpy as np
 
 from reinvent.scoring.scorer import Scorer
 from reinvent.config_parse import read_smiles_csv_file
 from reinvent.chemistry import Conversions
+from reinvent.chemistry.enums import FilterTypesEnum
+from reinvent.chemistry.standardization.filter_configuration import FilterConfiguration
 from reinvent.chemistry.standardization.rdkit_standardizer import RDKitStandardizer
-
-
-if TYPE_CHECKING:
-    from reinvent.chemistry.standardization.filter_configuration import FilterConfiguration
 
 
 def score_smiles_from_file(
@@ -33,8 +30,25 @@ def score_smiles_from_file(
 
     actions = []
     conversions = Conversions()
-    standardizer_config: List[FilterConfiguration] = []
-    standardizer = RDKitStandardizer(standardizer_config)
+
+    # DEFAULT = "default"  # all the below
+    # NEUTRALIZE_CHARGES = "neutralise_charges"
+    # GET_LARGEST_FRAGMENT = "get_largest_fragment"
+    # REMOVE_HYDROGENS = "remove_hydrogens"
+    # REMOVE_SALTS = "remove_salts"
+    # GENERAL_CLEANUP = "general_cleanup"
+    # TOKEN_FILTERS = "token_filters"
+    # VOCABULARY_FILTER = "vocabulary_filter"
+    # VALID_SIZE = "valid_size"
+    # HEAVY_ATOM_FILTER = "heavy_atom_filter"
+    # ALLOWED_ATOM_TYPE = "allowed_atom_type"
+    # ALIPHATIC_CHAIN_FILTER = "aliphatic_chain_filter"
+    filter_types = FilterTypesEnum()
+    standardizer_config = [  # this will need fine-tuning depending on downstream component
+        FilterConfiguration(filter_types.GET_LARGEST_FRAGMENT),
+        FilterConfiguration(filter_types.GENERAL_CLEANUP)
+    ]
+    standardizer = RDKitStandardizer(standardizer_config, isomeric=True)
 
     if standardize:
         actions.append(standardizer.apply_filter)

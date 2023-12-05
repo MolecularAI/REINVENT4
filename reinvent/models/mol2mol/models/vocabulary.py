@@ -57,6 +57,14 @@ class Vocabulary:
         """Encodes a list of tokens, encoding them in 1-hot encoded vectors."""
         ohe_vect = np.zeros(len(tokens), dtype=np.float32)
         for i, token in enumerate(tokens):
+            if token not in self._tokens:
+                raise KeyError(
+                    f"{token} is not part of the tokens "
+                    + "the model was trained on. "
+                    + f"The token {token} may have been generated "
+                    + "by the internal canonicalization, but "
+                    + "please check your input SMILES."
+                )
             ohe_vect[i] = self._tokens[token]
         return ohe_vect
 
@@ -88,12 +96,13 @@ class SMILESTokenizer:
     REGEXPS = {
         "brackets": re.compile(r"(\[[^\]]*\])"),
         "2_ring_nums": re.compile(r"(%\d{2})"),
-        "brcl": re.compile(r"(Br|Cl)")
+        "brcl": re.compile(r"(Br|Cl)"),
     }
     REGEXP_ORDER = ["brackets", "2_ring_nums", "brcl"]
 
     def tokenize(self, data, with_begin_and_end=True):
         """Tokenizes a SMILES string."""
+
         def split_by(data, regexps):
             if not regexps:
                 return list(data)

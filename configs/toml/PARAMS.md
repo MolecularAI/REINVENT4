@@ -80,8 +80,9 @@ Run reinforcement learning (RL) and/or curriculum learning (CL).  CL is simply a
 | json\_out\_config      | filename of the TOML file in JSON format                                                                                                   |
 | tb\_logdir           | if not empty string name of the TensorBoard logging directory                                                                              |
 | [parameters]         | starts the parameter section                                                                                                               |
-| use\_checkpoint      | if "true" use diversity filter from agent\_file if present                                                                                 |
 | summary\_csv\_prefix | prefix for output CSV filename                                                                                                             |
+| use\_checkpoint      | if "true" use diversity filter from agent\_file if present                                                                                 |
+| purge\_memories      | if "true" purge all diversity filter memories (scaffold, SMILES) after each stage |
 | prior\_file          | filename of the prior model file, serves as reference                                                                                      |
 | agent\_file          | filename of the agent model file, used for training, replace with checkpoint file from previous stage when needed                          |
 | batch\_size          | batch size, note: affects SGD                                                                                                              |

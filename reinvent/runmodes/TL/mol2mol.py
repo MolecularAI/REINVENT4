@@ -26,12 +26,8 @@ class Mol2Mol(Learning):
     """Handle Mol2Mol specifics"""
 
     def prepare_dataloader(self):
-        if self._config.ranking_loss_penalty and (
-            self._config.pairs["type"] != "tanimoto"
-        ):
-            raise ValueError(
-                "The ranking loss penalty is only supported for Tanimoto similarity"
-            )
+        if self._config.ranking_loss_penalty and (self._config.pairs["type"] != "tanimoto"):
+            raise ValueError("The ranking loss penalty is only supported for Tanimoto similarity")
 
         smilies = self.smilies
         if self.validation_smilies is None:
@@ -62,9 +58,7 @@ class Mol2Mol(Learning):
         if validation_mask.sum() > 0:
             validation_pairs = pairs.loc[validation_mask].reset_index(drop=True)
             validation_pairs.to_csv(
-                os.path.join(
-                    os.path.dirname(self._config.output_model_file), "valid.csv"
-                ),
+                os.path.join(os.path.dirname(self._config.output_model_file), "valid.csv"),
                 index=False,
             )
             logger.info("Indexing validation pairs...")
@@ -79,7 +73,7 @@ class Mol2Mol(Learning):
     def _generate_pairs(self, smilies):
         pair_config = self._config.pairs
         pair_generator = get_pair_generator(pair_config["type"], **pair_config)
-        pairs = pair_generator.build_pairs(smilies, processes=os.cpu_count())
+        pairs = pair_generator.build_pairs(smilies, processes=self._config.n_cpus)
 
         if len(pairs) == 0:
             raise IOError("No valid entries are present in the supplied file")
@@ -143,12 +137,8 @@ class Mol2Mol(Learning):
                 nll = torch.ravel(nll)
                 sim = torch.ravel(sim.to(self.device))
                 y = 2.0 * (sim[..., None] >= sim[None]) - 1
-                ranking_loss = torch.maximum(
-                    torch.zeros_like(y), y * (nll[..., None] - nll[None])
-                )
-                ranking_loss = ranking_loss.sum() / (
-                    len(ranking_loss) * (len(ranking_loss) - 1)
-                )
+                ranking_loss = torch.maximum(torch.zeros_like(y), y * (nll[..., None] - nll[None]))
+                ranking_loss = ranking_loss.sum() / (len(ranking_loss) * (len(ranking_loss) - 1))
                 # FIXME: ranking loss lambda must be
                 #        sent along with the other paramters
                 loss = nll.mean() + 10.0 * ranking_loss.mean()
