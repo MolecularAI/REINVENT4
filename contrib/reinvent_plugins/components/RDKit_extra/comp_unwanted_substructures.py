@@ -11,9 +11,9 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem.FilterCatalog import FilterCatalog, FilterCatalogParams
 
-from .component_results import ComponentResults
+from ..component_results import ComponentResults
+from ..add_tag import add_tag
 from reinvent_plugins.mol_cache import molcache
-from .add_tag import add_tag
 
 logger = logging.getLogger("reinvent")
 
