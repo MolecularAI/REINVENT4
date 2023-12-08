@@ -35,7 +35,7 @@ class Parameters:
     config_file: List[int]
 
 
-CMD = "{exe} --conf {config} --global_variables"
+CMD = "{exe} -conf {config} --global_variables"
 GLOBALS = "input_json_path:{inp} output_json_path:{out} step_id:{step}"
 
 
