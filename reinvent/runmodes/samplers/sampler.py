@@ -42,6 +42,8 @@ class Sampler(ABC):
     """Base class for samplers"""
 
     model: ModelAdapter
+    # number of smiles to be generated for each input,
+    # different from batch size used in dataloader which affect cuda memory
     batch_size: int
     sample_strategy: str = "multinomial"  # Mol2Mol
     isomeric: bool = False  # Mol2Mol
@@ -74,17 +76,16 @@ def remove_duplicate_sequences(
 
     if is_reinvent:
         seq_string = np.array(sampled.output)
-        sampled.items1 = sampled.items1.cpu()
     elif is_mol2mol:
         seq_string = np.array(sampled.output)
     else:
         seq_string = np.array([f"{a}{b}" for a, b in zip(sampled.input, sampled.output)])
 
-    sampled.items1 = np.array(sampled.items1)
     # order shouldn't matter here
     smilies, uniq_idx = np.unique(seq_string, return_index=True)
-
-    sampled.items1 = list(sampled.items1[uniq_idx])
+    if sampled.items1:
+        sampled.items1 = np.array(sampled.items1)
+        sampled.items1 = list(sampled.items1[uniq_idx])
     sampled.output = list(smilies)
     sampled.nlls = sampled.nlls[uniq_idx]
     sampled.items2 = list(np.array(sampled.items2)[uniq_idx])

@@ -172,11 +172,8 @@ def filter_valid(sampled: SampleBatch) -> SampleBatch:
     state = np.array(sampled.states)
     mask_idx = np.nonzero(state == SmilesState.VALID)[0]
 
-    try:
-        items1 = list(np.array(sampled.items1)[mask_idx])
-    except TypeError:  # Reinvent requires Tensor later
-        items1 = sampled.items1[mask_idx]
-
+    # For Reinvent, items1 is None
+    items1 = list(np.array(sampled.items1)[mask_idx]) if sampled.items1 else None
     items2 = list(np.array(sampled.items2)[mask_idx])
 
     nlls = sampled.nlls[mask_idx]

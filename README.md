@@ -21,9 +21,10 @@ See AUTHORS.md for references to previous papers.
 Requirements
 ------------
 
-REINVENT is being developed on and for Linux but is also known to work on
-MacOSX.  Windows is not directly supported but so far we know that all
-run modes work on the CPU.
+REINVENT is being developed on and primarily for Linux and supports both GPU
+and CPU.  The Linux version is fully validated.  REINVENT runs on Windows with
+both GPU and CPU but this platform is mostly untested.  MacOSX is only
+supported on the CPU.
 
 The code is written in Python 3 (>= 3.10).  The list of
 dependencies can be found in the repository (see also Installation below).

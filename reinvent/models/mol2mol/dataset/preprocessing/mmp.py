@@ -1,6 +1,7 @@
 __all__ = ["MmpPairGenerator"]
 from argparse import Namespace, RawDescriptionHelpFormatter, ArgumentParser
 from time import time
+import logging
 import tempfile
 
 from mmpdblib.do_fragment import fragment_command
@@ -10,6 +11,9 @@ import os
 import pandas as pd
 
 from .pair_generator import PairGenerator
+
+
+logger = logging.getLogger(__name__)
 
 
 class MmpPairGenerator(PairGenerator):
@@ -59,10 +63,9 @@ class MmpPairGenerator(PairGenerator):
         if len(smiles) == 0:
             raise ValueError("The smiles list is empty")
 
-        # smiles = [s[0] for s in smiles]
-        # data = self._standardize_smiles(smiles)
-        data = smiles
-        mmp_input_file = self._prepare_mmp_input(data)
+        logger.info(f"Creating MMP pairs with {processes:d} processes...")
+
+        mmp_input_file = self._prepare_mmp_input(smiles)
         mmp_fragments_file = self._mmp_fragments(mmp_input_file, num_jobs=processes)
         mmp_index_file = self._mmp_index(mmp_fragments_file)
 
@@ -90,11 +93,13 @@ class MmpPairGenerator(PairGenerator):
             df = pd.concat((df, df_same)).reset_index(drop=True)
         df = self.filter(df)
         self.tmp_folder.cleanup()
+
+        logger.info("MMP pairs created")
         return df
 
-    def _prepare_mmp_input(self, data):
+    def _prepare_mmp_input(self, smiles):
         df_output = pd.DataFrame(
-            np.hstack((data[:, None], np.arange(len(data))[:, None])),
+            np.hstack((np.array(smiles)[:, None], np.arange(len(smiles))[:, None])),
             columns=["smi", "id"],
         )
         out_file = f"{self.tmp_folder.name}/mmp_input_{time():.5f}.smi"
@@ -206,3 +211,12 @@ class MmpPairGenerator(PairGenerator):
             results = results.drop_duplicates(subset=["Source_Mol_ID", "Target_Mol_ID"])
             results = results.reset_index(drop=True)
         return results
+
+    def get_params(self):
+        params = {
+            "hac": self.hca,
+            "ratio": self.ratio,
+            "max_radius": self.max_radius,
+            "add_same": self.add_same,
+        }
+        return {*params, *super().get_params()}

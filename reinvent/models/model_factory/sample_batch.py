@@ -19,17 +19,11 @@ class SmilesState(Enum):
 
 @dataclass
 class BatchRow:
-    input: str | int
+    input: str
     output: str
     nll: float
     smiles: str
     state: SmilesState
-
-    def __post_init__(self):
-        """Set various aliases for the fields"""
-
-        # Reinvent
-        self.sequences = self.input
 
 
 @dataclass
@@ -38,11 +32,11 @@ class SampleBatch:
 
     This is a somewhat ugly unifying implementation for all generator sample
     methods which return different data.  All return a 3-tuple with the NLL last
-    but Reinvent returns the sequences plus SMILES list first while the others
+    but Reinvent returns one SMILES list while the others
     return two SMILES lists.
     """
 
-    items1: List[str] | Tensor[int]  # may be sequences (ints) for Reinvent, SMILES otherwise
+    items1: List[str]  # SMILES, None for Reinvent
     items2: List[str]  # SMILES
     nlls: Tensor[float]  # negative log likelihoods from the model
     smilies: List[str] = None  # processed SMILES
@@ -50,9 +44,6 @@ class SampleBatch:
 
     def __post_init__(self):
         """Set various aliases for the fields"""
-
-        # Reinvent
-        self.sequences = self.items1  # tensor of integers
 
         # Libinvent
         self.scaffolds = self.items1

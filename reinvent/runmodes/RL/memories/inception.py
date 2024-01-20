@@ -136,7 +136,7 @@ class Inception:
             # FIXME: validate in caller, check for duplicates
             filter_mask = np.full(len(standardized), True, dtype=bool)
 
-            score = self.scoring_function(self.smilies, filter_mask)
+            score = self.scoring_function(self.smilies, filter_mask, filter_mask)
 
             # TODO: likelihood_smiles() expects different data types
             #       depending on model e.g. List[str] for Reinvent and

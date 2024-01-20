@@ -66,8 +66,17 @@ class RemoteJSONReporter:
         if not isinstance(record, Mapping):
             raise TypeError("The record is expected to be a mapping")
 
-        json_msg = json.dumps(record)
-        response = requests.post(self.url, json=json_msg, headers=self.headers)
+        json_msg = json.dumps(record, indent=2)
+
+        logger.debug(
+            "Data sent to {url}\n\n{headers}\n\n{json_data}".format(
+                url=self.url,
+                headers="\n".join(f"{k}: {v}" for k, v in self.headers.items()),
+                json_data=json_msg,
+            )
+        )
+
+        response = requests.post(self.url, json=json.loads(json_msg), headers=self.headers)
 
         # alternative: check if response.status_code != request.codes.created
         if not response.ok and self.max_msg < MAX_ERR_MSG:
@@ -101,5 +110,5 @@ def setup_reporter(url, token=None) -> None:
     global _reporter
 
     if url:
-        # assume endpoint is just available...
+        # assume endpoint is readily available...
         _reporter = RemoteJSONReporter(url, token)

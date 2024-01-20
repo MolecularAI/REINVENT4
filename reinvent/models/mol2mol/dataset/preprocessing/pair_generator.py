@@ -2,16 +2,13 @@ __all__ = ["PairGenerator"]
 from abc import ABC, abstractmethod
 from collections import defaultdict
 
-from tqdm import tqdm
 import numpy as np
 import pandas as pd
-
-from reinvent.chemistry.conversions import Conversions
 
 
 class PairGenerator(ABC):
     def __init__(
-        self, min_cardinality: int = 0, max_cardinality: int = 500, *args, **kwargs
+        self, min_cardinality: int = 0, max_cardinality: int = np.inf, *args, **kwargs
     ) -> None:
         """__init__.
 
@@ -21,7 +18,7 @@ class PairGenerator(ABC):
         :type max_cardinality: int
         """
         if min_cardinality > max_cardinality:
-            raise ValueError("`min_cardinality` must be lower or equal than `max_cardinality`") 
+            raise ValueError("`min_cardinality` must be lower or equal than `max_cardinality`")
         self.min_cardinality = min_cardinality
         self.max_cardinality = max_cardinality
 
@@ -35,6 +32,12 @@ class PairGenerator(ABC):
         :type processes: int
         """
         pass
+
+    def get_params(self) -> dict:
+        """Returns the parameters the Generator was
+        initialized with
+        """
+        return {"min_cardinality": self.min_cardinality, "max_cardinality": self.max_cardinality}
 
     def filter(self, pairs: pd.DataFrame) -> pd.DataFrame:
         """Keeps all the pairs such that for each source s, min_cardinality <= | { (s, t_i) } | <= max_cardinality.
@@ -61,17 +64,6 @@ class PairGenerator(ABC):
                 good_locations += locations[k]
         good_locations = np.array(good_locations)
         return pairs.iloc[good_locations].reset_index(drop=True)
-
-    def _standardize_smiles(self, smiles):
-        conversions = Conversions()
-        std_smiles = set()
-        pbar = tqdm(smiles)
-        pbar.set_description("Standardizing smiles")
-        for smi in pbar:
-            std_smi = conversions.convert_to_standardized_smiles(smi)
-            if (std_smi is not None) and (len(std_smi) > 0):
-                std_smiles.add(std_smi)
-        return np.array(list(std_smiles))
 
     def __repr__(self):
         return self.__class__.__name__

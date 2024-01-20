@@ -54,6 +54,7 @@ Run transfer learning on a set of input SMILES.
 | use\_cuda              | "true" to use GPU, "false" to use CPU                         |
 | json\_out\_config        | filename of the TOML file in JSON format                      |
 | tb\_logdir             | if not empty string name of the TensorBoard logging directory |
+| number_of_cpus         | optional parameter to control number of cpus to generate pairs. if not provided the maximum cpus will be allocated. |
 | [parameters]           | starts the parameter section                                  |
 | num\_epochs            | number of epochs to run                                       |
 | save\_every\_n\_epochs | save checkpoint file every N epochs                           |
