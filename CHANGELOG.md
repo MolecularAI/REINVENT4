@@ -6,8 +6,62 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 ## [Unreleased]
 
 ### Changed
-- Additional functionality for Mol2Mol sampling
 - Fragment generators using transformers
+- CAZP scoring component
+
+
+## [4.0.35] 2024-01-19
+
+### Fixed
+
+- Filename issue on Windows which lead to termination
+
+
+## [4.0.34] 2024-01-17
+
+### Added
+
+- General scoring component for all 210 RDKit descriptors
+
+
+## [4.0.33] 2023-12-14
+
+### Added
+
+- Optional cwd for run\_command()
+
+
+## [4.0.32] 2023-12-12
+
+### Fixed
+
+- Collect _all_ names for remote monitoring\*
+
+
+## [4.0.31] 2023-12-08
+
+### Fixed
+
+- Pass data to request as dict rather than a JSON string
+
+
+## [4.0.30] 2023-12-07
+
+### Fixed
+
+- Pair generator multiprocessing in TL is supported on Linux, Windows, and MacOS
+
+### Changed
+
+- The number of cpus is optional and could be specified in the toml/json configuration file through the parameter `number_of_cpus`
+
+
+## [4.0.29] 2023-12-07
+
+### Fixed
+
+- Added missing second mask in inception call to scoring function
+- Fixed cuda out of memory for Reinvent batch sampling
 
 
 ## [4.0.28] 2023-12-05

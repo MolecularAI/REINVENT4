@@ -90,7 +90,7 @@ def run_transfer_learning(
         num_epochs=parameters["num_epochs"],
         num_refs=parameters["num_refs"],
         save_every_n_epochs=parameters["save_every_n_epochs"],
-        n_cpus=config.get("cpus", os.cpu_count()),
+        n_cpus=config.get("number_of_cpus", os.cpu_count()),
     )
 
     if model_type == "Mol2Mol":

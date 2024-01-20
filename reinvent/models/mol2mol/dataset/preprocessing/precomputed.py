@@ -26,3 +26,6 @@ class PrecomputedPairGenerator(PairGenerator):
         df = pd.DataFrame(smiles, columns=pd_cols)
         df = self.filter(df)
         return df
+
+    def get_params(self):
+        return super().get_params()

@@ -4,7 +4,7 @@ import subprocess as sp
 from typing import List
 
 
-def run_command(command: List[str], env: dict = None, input=None) -> sp.CompletedProcess:
+def run_command(command: List[str], env: dict = None, input=None, cwd=None) -> sp.CompletedProcess:
     """Run an external command in a subprocess.
 
     :params command: array of command line arguments
@@ -18,6 +18,9 @@ def run_command(command: List[str], env: dict = None, input=None) -> sp.Complete
 
     if input:
         args.update({"input": input})
+
+    if cwd:
+        args.update({"cwd": cwd})
 
     try:
         result = sp.run(command, **args)

@@ -23,11 +23,10 @@ class ReinventLearning(Learning):
     def update(self, results: ScoreResults):
         """Run the learning strategy"""
 
-        # NOTE: this line comes originally from the RL learning strategy
-        prior_nlls = self.prior.likelihood(self.sampled.sequences)  # Tensor
-
+        agent_nlls = self._state.agent.likelihood_smiles(self.sampled.items2)
+        prior_nlls = self.prior.likelihood_smiles(self.sampled.items2)
         return self.reward_nlls(
-            self.sampled.nlls,  # agent NLL
+            agent_nlls,  # agent NLL
             prior_nlls,  # prior NLL
             results.total_scores,
             self.inception,

@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 from typing import List, TYPE_CHECKING
 from dataclasses import dataclass
-from collections import defaultdict
 import logging
 
 import numpy as np
@@ -80,13 +79,14 @@ def score_summary(results: ScoreResults, mask_idx: np.ndarray) -> dict:
     :returns: dictionary with scoring results
     """
 
+    names = []
     scores = []
     raw_scores = []
     score_components = {}
 
     for transformed_result in results.completed_components:
         prefix = f"{transformed_result.component_type}"
-        names = [f"{prefix}:{name}" for name in transformed_result.component_names]
+        names.extend([f"{prefix}:{name}" for name in transformed_result.component_names])
 
         for transformed_scores in transformed_result.transformed_scores:
             scores.append(transformed_scores)

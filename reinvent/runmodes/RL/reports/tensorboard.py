@@ -70,12 +70,12 @@ def write_report(reporter, data: TBData) -> None:
 
         reporter.add_scalar(f"{name} (raw)", np.nanmean(_scores[mask_idx]), step)
 
-    reporter.add_scalar(f"Loss", data.loss, step)    
+    reporter.add_scalar(f"Loss", data.loss, step)
 
     # NOTE: for some reason this breaks on Windows because the necessary
     #       subdirectory cannot be created
     reporter.add_scalars(
-        "Loss: likelihood averages",
+        "Loss (likelihood averages)",
         {
             "prior NLL": data.prior_nll,
             "agent NLL": data.agent_nll,

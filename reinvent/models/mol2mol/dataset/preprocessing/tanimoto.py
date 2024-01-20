@@ -1,13 +1,17 @@
 __all__ = ["TanimotoPairGenerator"]
-from concurrent import futures
+from functools import partial
+import logging
 
-from tqdm import tqdm
 import numpy as np
 import pandas as pd
 from reinvent.chemistry.conversions import Conversions
 from reinvent.chemistry.similarity import Similarity
+from reinvent.models.utils.parallel import parallel
 
 from .pair_generator import PairGenerator
+
+
+logger = logging.getLogger(__name__)
 
 
 class TanimotoPairGenerator(PairGenerator):
@@ -54,25 +58,21 @@ class TanimotoPairGenerator(PairGenerator):
         """
         if len(smiles) == 0:
             raise ValueError("The smiles list is empty")
+
+        logger.info(f"Creating Tanimoto pairs with {processes:d} processes...")
+
         lth = self.lth
         uth = self.uth
-
-        data = smiles
-
-        # FIXME: this should really not be here
-        # data = self._standardize_smiles(smiles)
 
         conversions = Conversions()
         fsmiles, fmolecules = [], []
 
-        pbar = tqdm(data)
-        pbar.set_description("Smiles to Fingerprints")
-        for smi in pbar:
+        for smi in smiles:
             # FIXME: there are multiple ways to generate
             #        Morgan fingerprints. Here, the one
             #        used to train the prior based on PubChem.
             #        Those parameters should probably be saved
-            #        in the model checkpoint or passed 
+            #        in the model checkpoint or passed
             #        in the configuration file.
             mol = conversions.smiles_to_fingerprints(
                 [smi], radius=2, use_counts=True, use_features=False
@@ -81,49 +81,34 @@ class TanimotoPairGenerator(PairGenerator):
                 fmolecules.append(mol[0])
                 fsmiles.append(smi)
         fsmiles = np.array(fsmiles)
-        del data
+        del smiles
 
-        data_pool = []
-        mol_chunks = np.array_split(fmolecules, processes)
-        smile_chunks = np.array_split(fsmiles, processes)
-        for pid, (mchunk, schunk) in enumerate(zip(mol_chunks, smile_chunks)):
-            data_pool.append(
-                {
-                    "molecules": mchunk,
-                    "smiles": schunk,
-                    "mol_db": fmolecules,
-                    "smi_db": fsmiles,
-                    "lth": lth,
-                    "uth": uth,
-                    "pid": pid,
-                }
-            )
-        pool = futures.ProcessPoolExecutor(max_workers=processes)
-        res = list(pool.map(self._build_pairs, data_pool))
-        res = sorted(res, key=lambda x: x["pid"])
+        shared_data = {
+            "mol_db": fmolecules,
+            "smi_db": fsmiles,
+            "lth": lth,
+            "uth": uth,
+        }
+
+        parallel_build_pairs = partial(parallel, processes, shared_data, self._build_pairs)
+        res = parallel_build_pairs(fmolecules, fsmiles)
 
         pd_cols = ["Source_Mol", "Target_Mol", "Tanimoto"]
         pd_data = []
         for r in res:
-            pd_data = pd_data + r["table"]
+            pd_data = pd_data + r
         df = pd.DataFrame(pd_data, columns=pd_cols)
         df = df.drop_duplicates(subset=["Source_Mol", "Target_Mol"])
         df = self.filter(df)
+        logger.info("Tanimoto pairs created")
         return df
 
-    def _build_pairs(self, args):
-        mol_db = args["mol_db"]
-        smi_db = args["smi_db"]
-        mols = args["molecules"]
-        smiles = args["smiles"]
-        lth = args["lth"]
-        uth = args["uth"]
-        pid = args["pid"]
+    def _build_pairs(self, mols, smiles, *, mol_db, smi_db, lth, uth):
         similarity = Similarity()
 
         table = []
 
-        for i, mol in tqdm(enumerate(mols), total=len(mols)):
+        for i, mol in enumerate(mols):
             ts = similarity.calculate_tanimoto_batch(mol, mol_db)
             idx = (ts >= lth) & (ts <= uth)
             for smi, t in zip(smi_db[idx], ts[idx]):
@@ -132,4 +117,12 @@ class TanimotoPairGenerator(PairGenerator):
                 if self.add_same:
                     table.append([smi, smi, 1.0])
                     table.append([smiles[i], smiles[i], 1.0])
-        return {"table": table, "pid": pid}
+        return table
+
+    def get_params(self):
+        params = {
+            "lower_threshold": self.lth,
+            "upper_threshold": self.uth,
+            "add_same": self.add_same,
+        }
+        return {*params, *super().get_params()}
