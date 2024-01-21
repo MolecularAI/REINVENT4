@@ -75,9 +75,6 @@ single yes/no score.  The only parameter is the assay name (one per endpoint).
   * `similarity`: any that RDKit supports e.g. `tanimoto`, `dice`, etc.
   * `similarity_params`: similarity parameters e.g. `a` and `b` for ´tversky`
 
-* RDKit Descriptors: Computes desired RDKit descriptors (up to 210). Each endpoint selects one descriptor.
-  * `descriptor`: descriptor name
-
 * Mordred Descriptors: Computes all 1613 2D Mordred descriptors. Each endpoint selects one descriptor.
   * `descriptor`: descriptor name
   * `nprocs`: number of processors
