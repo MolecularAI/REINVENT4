@@ -113,7 +113,7 @@ def reinforce_loss(reward: torch.Tensor, agent_lls: torch.Tensor):
     :param agent_lls: agent (actor) log-likelihood
 
     :returns: the loss that can be used to calculate gradients"""
-    loss = -torch.mean(reward + reward.detach() * agent_lls)
+    loss = -torch.mean(reward + reward.detach() * agent_lls).view(-1)
     return loss
 
 
