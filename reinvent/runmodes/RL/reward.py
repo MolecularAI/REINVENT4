@@ -8,6 +8,9 @@ __all__ = [
     "mascof_strategy",
     "mauli_strategy",
     "sdap_strategy",
+    "dap_reinforce_strategy",
+    "mascof_reinforce_strategy",
+    "mauli_reinforce_strategy",
 ]
 import logging
 from typing import Callable, List, Tuple, Optional, TYPE_CHECKING
@@ -101,6 +104,65 @@ def sdap_strategy(
     loss = -reward_score.mean() * agent_lls.mean()  # scalar
 
     return loss.view(-1), augmented_lls
+
+
+def reinforce_loss(reward: torch.Tensor, agent_lls: torch.Tensor):
+    """Compute the REINFORCE loss function.
+
+    :param reward: reward for each generated SMILES
+    :param agent_lls: agent (actor) log-likelihood
+
+    :returns: the loss that can be used to calculate gradients"""
+    loss = -torch.mean(reward + reward.detach() * agent_lls)
+    return loss
+
+
+def dap_reinforce_strategy(
+    agent_lls: torch.Tensor, scores: torch.Tensor, prior_lls: torch.Tensor, sigma: float
+):
+    """Compute the DAP REINFORCE loss function.
+
+    :param agent_lls: agent (actor) log-likelihood
+    :param scores: scores for each generated SMILES
+    :param prior_lls: prior (critic) log-likelihood
+    :param sigma: scores multiplier
+
+    :returns: the loss that can be used to calculate gradients, and the reward for each generated SMILES
+    """
+    reward = prior_lls + sigma * scores - agent_lls
+    loss = reinforce_loss(reward, agent_lls)
+    return loss, reward
+
+
+def mascof_reinforce_strategy(
+    agent_lls: torch.Tensor, scores: torch.Tensor, *args, **kwargs
+):
+    """Compute the MASCOF REINFORCE loss function.
+
+    :param agent_lls: agent (actor) log-likelihood
+    :param scores: scores for each generated SMILES
+
+    :returns: the loss that can be used to calculate gradients, and the reward for each generated SMILES
+    """
+    loss = reinforce_loss(scores, agent_lls)
+    return loss, scores
+
+
+def mauli_reinforce_strategy(
+    agent_lls: torch.Tensor, scores: torch.Tensor, prior_lls: torch.Tensor, sigma: float
+):
+    """Compute the MAULI REINFORCE loss function.
+
+    :param agent_lls: agent (actor) log-likelihood
+    :param scores: scores for each generated SMILES
+    :param prior_lls: prior (critic) log-likelihood
+    :param sigma: scores multiplier
+
+    :returns: the loss that can be used to calculate gradients, and the reward for each generated SMILES
+    """
+    reward = prior_lls + sigma * scores
+    loss = reinforce_loss(reward, agent_lls)
+    return loss, reward
 
 
 class RLReward:
