@@ -87,7 +87,7 @@ scores = [val[0] if "Invalid SMILES" not in val else np.nan for val in preds]
 # Format the JSON string for REINVENT4 and write it to stdout
 data = {
         "version": 1,
-        "data": {
+        "payload": {
             "predictions": scores
        }
 }

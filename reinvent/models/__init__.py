@@ -10,3 +10,5 @@ from .model_factory.reinvent_adapter import *
 from .model_factory.libinvent_adapter import *
 from .model_factory.linkinvent_adapter import *
 from .model_factory.mol2mol_adapter import *
+
+from .meta_data import *

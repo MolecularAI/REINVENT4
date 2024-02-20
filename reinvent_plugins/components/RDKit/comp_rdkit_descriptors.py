@@ -6,6 +6,7 @@ from typing import List
 import logging
 
 from rdkit import Chem
+from rdkit.Chem import Descriptors
 from rdkit.ML.Descriptors.MoleculeDescriptors import MolecularDescriptorCalculator
 import numpy as np
 
@@ -14,6 +15,8 @@ from reinvent_plugins.mol_cache import molcache
 from ..add_tag import add_tag
 
 logger = logging.getLogger("reinvent")
+
+KNOWN_DESCRIPTORS = {d.lower(): d for d, _ in Descriptors._descList}
 
 
 @add_tag("__parameters")
@@ -25,8 +28,20 @@ class Parameters:
 @add_tag("__component")
 class RDKitDescriptors:
     def __init__(self, params: Parameters):
-        # collect descriptor from all endpoints: only one descriptor per endpoint
-        self.calc = MolecularDescriptorCalculator(params.descriptor).CalcDescriptors
+        # collect descriptor from all endpoints: only one descriptor per endpoint!
+        descriptors = []
+
+        for descriptor in params.descriptor:
+            desc = descriptor.lower()
+
+            if desc not in KNOWN_DESCRIPTORS:
+                raise RuntimeError(f"{__name__}: unknown descriptor {desc}")
+
+            descriptors.append(KNOWN_DESCRIPTORS[desc])
+
+        self.calc = MolecularDescriptorCalculator(descriptors).CalcDescriptors
+
+        logger.info(f"Known RDKit descriptors: {' '.join(KNOWN_DESCRIPTORS.keys())}")
 
     @molcache
     def __call__(self, mols: List[Chem.Mol]) -> ComponentResults:

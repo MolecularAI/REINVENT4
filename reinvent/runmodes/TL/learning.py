@@ -19,25 +19,15 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torch.nn.utils import clip_grad_norm_
-
-# Uncomment this line for newer versions of Pytorch.
-# There is a bug in version 1.12 / 1.13 that
-# causes an exception in SummaryWriter.add_histogram
-# from torch.utils.tensorboard import SummaryWriter
+from rdkit import Chem, DataStructs
 import tqdm
 from tqdm.contrib.logging import tqdm_logging_redirect
-from rdkit import Chem, DataStructs
 
-from reinvent.runmodes.reporter.remote import get_reporter
-from reinvent.runmodes.setup_sampler import setup_sampler
 from .reports.tensorboard import write_report, TBData
-from .reports.remote import send_report, RemoteData
-
-# Monkey-patched SummaryWriter
-# NOTE: for some reason this does not work on Windows, the original
-#       SummaryWriter is always used
-from reinvent.runmodes.utils.tensorboard import SummaryWriter
+from .reports.remote import get_reporter, send_report, RemoteData
+from reinvent.runmodes.setup_sampler import setup_sampler
 from reinvent.runmodes.dtos import ChemistryHelpers
+from reinvent.runmodes.utils.tensorboard import SummaryWriter  # monkey patch
 from reinvent.chemistry import Conversions
 from reinvent.chemistry.library_design import BondMaker, AttachmentPoints
 from reinvent.models.model_factory.sample_batch import SmilesState
@@ -271,11 +261,7 @@ class Learning(ABC):
     def _terminate(self):
         terminate = False
 
-        # FIXME: why are two steps made?
-        self._lr_scheduler.step()
-
         new_lr = self._lr_scheduler.optimizer.param_groups[0]["lr"]
-
         if new_lr < self._config.learning_rate_config.min:
             terminate = True
 

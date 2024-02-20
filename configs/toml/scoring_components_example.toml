@@ -1,0 +1,329 @@
+## this file shows and example of most scoring components available
+## with appropratie transforms
+version = 4
+run_type = "scoring"
+output_csv = "scoring_all_test.csv"
+json_out_config = "scoring_all_test_config.json"
+
+[parameters]
+smiles_file = "YOUR_SMILES_FILE.smi"
+
+[scoring]
+type = "geometric_mean"
+
+[[scoring.component]]
+[scoring.component.QED]
+[[scoring.component.QED.endpoint]]
+name = "QED"
+weight = 1
+
+[[scoring.component]]
+[scoring.component.SlogP]
+[[scoring.component.SlogP.endpoint]]
+name = "SlogP (RDKit)"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 3
+transform.low = 1
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.MolecularWeight]
+[[scoring.component.MolecularWeight.endpoint]]
+name = "Molecular weight"
+weight = 1
+transform.type = "double_sigmoid"
+transform.high = 500.0
+transform.low = 200.0
+transform.coef_div = 500.0
+transform.coef_si = 20.0
+transform.coef_se = 20.0
+
+[[scoring.component]]
+[scoring.component.TPSA]
+[[scoring.component.TPSA.endpoint]]
+name = "TPSA"
+weight = 1
+transform.type = "double_sigmoid"
+transform.high = 140.0
+transform.low = 0.0
+transform.coef_div = 140.0
+transform.coef_si = 20.0
+transform.coef_se = 20.0
+
+[[scoring.component]]
+[scoring.component.GraphLength]
+[[scoring.component.GraphLength.endpoint]]
+name = "Molecule length (number of bonds in longest path)"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 50
+transform.low = 20
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.NumAtomStereoCenters]
+[[scoring.component.NumAtomStereoCenters.endpoint]]
+name = "Number of stereo centers"
+weight = 1
+transform.type = "step"
+transform.high = 3
+transform.low = 0
+
+[[scoring.component]]
+[scoring.component.HBondAcceptors]
+[[scoring.component.HBondAcceptors.endpoint]]
+name = "Number of HB acceptors (Lipinski)"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 10
+transform.low = 8
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.HBondDonors]
+[[scoring.component.HBondDonors.endpoint]]
+name = "Number of HB donors (Lipinski)"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 4
+transform.low = 0
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.NumRotBond]
+[[scoring.component.NumRotBond.endpoint]]
+name = "Number of rotatable bonds"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 20
+transform.low = 0
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.Csp3]
+[[scoring.component.Csp3.endpoint]]
+name = "Number of sp3 carbon atoms"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 20
+transform.low = 0
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.numsp]
+[[scoring.component.numsp.endpoint]]
+name = "Number of sp atoms"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 20
+transform.low = 0
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.numsp2]
+[[scoring.component.numsp2.endpoint]]
+name = "Number of sp2 atoms"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 20
+transform.low = 0
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.numsp3]
+[[scoring.component.numsp3.endpoint]]
+name = "Number of sp3 atoms"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 20
+transform.low = 0
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.NumHeavyAtoms]
+[[scoring.component.NumHeavyAtoms.endpoint]]
+name = "Number of Heavy atoms"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 80
+transform.low = 20
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.NumHeteroAtoms]
+[[scoring.component.NumHeteroAtoms.endpoint]]
+name = "Number of hetero (non-carbon heavy) atoms"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 50
+transform.low = 8
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.NumRings]
+[[scoring.component.NumRings.endpoint]]
+name = "Number of rings"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 10
+transform.low = 0
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.NumAromaticRings]
+[[scoring.component.NumAromaticRings.endpoint]]
+name = "Number of aromatic rings"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 3
+transform.low = 0
+transform.k =  0.5
+
+[[scoring.component]]
+[scoring.component.NumAliphaticRings]
+[[scoring.component.NumAliphaticRings.endpoint]]
+name = "Number of aliphatic rings"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 3
+transform.low = 0
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.pmi]
+[[scoring.component.pmi.endpoint]]
+name = "PMI 3D-likeness npr1"
+weight = 1
+params.property = "npr1"
+[[scoring.component.pmi.endpoint]]
+name = "PMI 3D-likeness npr2"
+weight = 1
+params.property = "npr2"
+
+[[scoring.component]]
+[scoring.component.MolVolume]
+[[scoring.component.MolVolume.endpoint]]
+name = "Moleculer Volume (RDKit)"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 600
+transform.low = 300
+transform.k = 0.5
+
+# Similiarity and cheminformatics components:
+[[scoring.component]]
+[scoring.component.GroupCount]
+# Note, this a filter component and is applied before all others.
+# Any matches are scored zero regardless of other components
+[[scoring.component.GroupCount.endpoint]]
+name = "Group (substructure) count"
+weight = 1
+params.smarts = "[F,Cl]"
+transform.type = "reverse_sigmoid"
+transform.high = 3
+transform.low = 1
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.MatchingSubstructure]
+# Note, this a penalty component and is applied multiplicatively after all others.
+[[scoring.component.MatchingSubstructure.endpoint]]
+name = "Matching SMARTs substructure"
+weight = 1
+params.smarts = "CO"
+params.use_chirality = false
+
+[[scoring.component]]
+[scoring.component.custom_alerts]
+[[scoring.component.custom_alerts.endpoint]]
+name = "custom alerts"
+weight = 1
+params.smarts = [
+    "[*;r8]",
+    "[*;r9]",
+    "[*;r10]",
+    "[*;r11]",
+    "[*;r12]",
+    "[*;r13]",
+    "[*;r14]",
+    "[*;r15]",
+    "[*;r16]",
+    "[*;r17]",
+    "[#8][#8]",
+    "[#6;+]",
+    "[#16][#16]"
+]
+
+[[scoring.component]]
+[scoring.component.TanimotoDistance]
+[[scoring.component.TanimotoDistance.endpoint]]
+name = "Tanimoto similarity to asprin based on ECFP"
+weight = 1
+params.smiles = ["CC(=O)OC1=CC=CC=C1C(=O)O"] # asprin
+params.radius = 3
+params.use_counts = true
+params.use_features = true
+
+[[scoring.component]]
+[scoring.component.MMP]
+[[scoring.component.MMP.endpoint]]
+name = "Matched Molecular Pair Similarity"
+weight = 1
+params.reference_smiles = ["CC(=O)OC1=CC=CC=C1C(=O)O"] # asprin
+transform.type = "value_mapping"
+[scoring.component.MMP.endpoint.transform.mapping]
+MMP = 0.5
+"No MMP" = 0
+
+# Physics/structure/ligand based components:
+[[scoring.component]]
+[scoring.component.rocssimilarity]
+[[scoring.component.rocssimilarity.endpoint]]
+name = "ROCS similarity"
+weight = 1
+params.color_weight = 0.5
+params.shape_weight = 0.5
+params.similarity_measure = "Tanimoto"
+params.max_stereocenters = 4
+params.ewindow = 10
+params.maxconfs = 200
+params.rocs_input = "YOUR_ROCS_QUERY" # can be .sdf or .sq
+transform.type = "sigmoid"
+transform.high = 0.6
+transform.low = 0.15
+transform.k = 0.5
+
+[[scoring.component]]
+[scoring.component.DockStream]
+[[scoring.component.DockStream.endpoint]]
+name = "Docking with Dockstream"
+weight = 1
+params.configuration_path = "PATH_TO_DOCKSTEAM_CONF.json"
+params.docker_script_path = "PATH_TO_DOCKSTREAM/docker.py"
+params.docker_python_path =   "PATH_TO_DOCKSTREAM_ENV/bin/python"
+transform.type = "reverse_sigmoid"
+transform.high = -6
+transform.low = -13.5
+transform.k = 0.2
+
+[[scoring.component]]
+[scoring.component.Maize]
+[[scoring.component.Maize.endpoint]]
+name = "docking with MAIZE"
+weight = 1
+params.executable = "PATH_TO_MAIZE_ENV/bin/maize"
+params.workflow = "PATH_TO_MAIZE_WORKFLOW"
+params.config = "PATH_TO_MAIZE_CONFIG"
+params.log = "maize_worfklow_docking.log"
+transform.type = "reverse_sigmoid"
+transform.high = -6
+transform.low = -13.5
+transform.k = 0.2
+
+# Scoring components about drug-likeness, synthesizability & reactions:
+[[scoring.component]]
+[scoring.component.SAScore]
+[[scoring.component.SAScore.endpoint]]
+name = "SA score"
+weight = 1

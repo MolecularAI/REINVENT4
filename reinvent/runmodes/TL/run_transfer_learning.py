@@ -121,7 +121,7 @@ def run_transfer_learning(
             **common_opts,
             optimizer=adam,
             learning_rate_scheduler=learning_rate_scheduler,
-            learning_rate_config=TL.StepLRConfiguration(),
+            learning_rate_config=TL.StepLRConfiguration(min=1e-10),
             pairs=parameters["pairs"],
             max_sequence_length=parameters.get("max_sequence_length", None),
             ranking_loss_penalty=parameters.get("ranking_loss_penalty", False),

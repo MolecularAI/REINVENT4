@@ -1,15 +1,18 @@
-"""
-Implementation of the RNN model
+"""Classical Reinvent de novo model
+
+See:
+https://doi.org/10.1186/s13321-017-0235-x (original publication)
+https://doi.org/10.1021/acs.jcim.0c00915 (REINVENT 2.0)
 """
 
-
-import numpy as np
 from typing import List, Tuple, Dict, Any, TypeVar, Sequence, Union, Iterator
 
+import numpy as np
 import torch
 import torch.nn as tnn
 import torch.nn.functional as tnnf
 
+from reinvent.models import meta_data
 from reinvent.models.reinvent.models import vocabulary as mv
 from reinvent.models.reinvent.utils import collate_fn
 from reinvent.models.model_mode_enum import ModelModeEnum
@@ -149,6 +152,7 @@ class Model:
         self,
         vocabulary: mv.Vocabulary,
         tokenizer: mv.SMILESTokenizer,
+        meta_data: meta_data.ModelMetaData,
         network_params: dict = None,
         max_sequence_length: int = 256,
         mode: str = "training",
@@ -165,6 +169,7 @@ class Model:
 
         self.vocabulary = vocabulary
         self.tokenizer = tokenizer
+        self.meta_data = meta_data
         self.max_sequence_length = max_sequence_length
 
         if not isinstance(network_params, dict):
@@ -216,12 +221,11 @@ class Model:
         if model_type and model_type != cls._model_type:
             raise RuntimeError(f"Wrong type: {model_type} but expected {cls._model_type}")
 
-        network_params = save_dict.get("network_params", {})
-
         model = cls(
             vocabulary=save_dict["vocabulary"],
             tokenizer=save_dict.get("tokenizer", mv.SMILESTokenizer()),
-            network_params=network_params,
+            meta_data=save_dict.get("metadata"),
+            network_params=save_dict.get("network_params"),
             max_sequence_length=save_dict["max_sequence_length"],
             mode=mode,
             device=device,
@@ -237,6 +241,7 @@ class Model:
         save_dict = dict(
             model_type=self._model_type,
             version=self._version,
+            metadata=self.meta_data,
             vocabulary=self.vocabulary,
             tokenizer=self.tokenizer,
             max_sequence_length=self.max_sequence_length,
@@ -254,7 +259,7 @@ class Model:
         """
 
         save_dict = self.get_save_dict()
-
+        meta_data.update_model_data(save_dict)
         torch.save(save_dict, file_path)
 
     save_to_file = save  # alias for backwards compatibility
