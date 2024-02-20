@@ -91,7 +91,7 @@ class Scorer:
                 )
 
                 for scores in transform_result.transformed_scores:
-                    mask = np.logical_and(scores, invalid_mask)
+                    valid_mask = np.logical_and(scores, valid_mask)
                 # NOTE: filters are NOT also used as components as in REINVENT3
 
                 filters_to_report.append(transform_result)

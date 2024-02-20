@@ -1,11 +1,40 @@
 """
-Patch for tensorboard add_histogram
+Patch for Tensorboard add_histogram
 """
 
 
-from tensorboard.compat.proto.summary_pb2 import HistogramProto
-from torch.utils.tensorboard import SummaryWriter
 import numpy as np
+import torch
+from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard._convert_np import make_np
+from tensorboard.compat.proto.summary_pb2 import Summary, HistogramProto
+
+
+def add_histogram(
+    self,
+    tag,
+    values,
+    global_step=None,
+    bins="tensorflow",
+    walltime=None,
+    max_bins=None,
+):
+    torch._C._log_api_usage_once("tensorboard.logging.add_histogram")
+    if self._check_caffe2_blob(values):
+        from caffe2.python import workspace
+
+        values = workspace.FetchBlob(values)
+    if isinstance(bins, str) and bins == "tensorflow":
+        bins = self.default_bins
+    self._get_file_writer().add_summary(
+        histogram(tag, values, bins, max_bins=max_bins), global_step, walltime
+    )
+
+
+def histogram(name, values, bins, max_bins=None):
+    values = make_np(values)
+    hist = make_histogram(values.astype(float), bins, max_bins)
+    return Summary(value=[Summary.Value(tag=name, histo=hist)])
 
 
 def make_histogram(values, bins, max_bins=None):
@@ -33,7 +62,7 @@ def make_histogram(values, bins, max_bins=None):
 
     # Find the first and the last bin defining the support of the histogram:
 
-    cum_counts = np.cumsum(counts > 0)
+    cum_counts = np.cumsum(counts > 0)  # this is the location of the bug
     start, end = np.searchsorted(cum_counts, [0, cum_counts[-1] - 1], side="right")
     start = int(start)
     end = int(end) + 1
@@ -61,4 +90,8 @@ def make_histogram(values, bins, max_bins=None):
     )
 
 
-SummaryWriter.make_histogram = make_histogram
+__version = torch.__version__.split('.')
+__major = int(__version[0])
+
+if __major == 1:
+    SummaryWriter.add_histogram = add_histogram

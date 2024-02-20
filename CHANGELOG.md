@@ -10,6 +10,78 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 - CAZP scoring component
 
 
+## [4.1.8] 2024-02-20
+
+### Fixed
+
+- Tensorboard histogram bug fixed again
+
+
+## [4.1.7] 2024-02-20
+
+### Fixed
+
+- TL is now running for the expected `num_epochs`
+
+
+## [4.1.6] 2024-02-19
+
+### Fixed
+
+- Get model\_type from save\_dict prior model correctly
+
+
+## [4.1.5] 2024-02-13
+
+### Fixed
+
+- Staged learning does not allocate GPU memory if device is set to CPU
+
+
+## [4.1.4] 2024-02-06
+
+### Added
+
+- Prior model files have been tagged with meta data
+- Model files read in are checked for integrity
+
+
+## [4.1.3] 2024-02-06
+
+### Fixed
+
+- Tab reader unit tests now uses mocks for open
+- Wite correctly CSV scoring file when from one columns SMILES file
+
+
+## [4.1.2] 2024-02-04
+
+### Fixed
+
+- Scoring filter components work as filters again
+
+
+## [4.1.1] 2024-02-02
+
+### Added
+
+- CSV and SMILES file reader for the scoring run mode, will retain all columns form the input and write to output CSV
+
+
+## [4.1.0] 2024-01-26
+
+### Added
+
+- Tobias Ploetz' (Merck) REINFORCE implementations of the DAP, MAULI and MASCOF RL reward strategies
+
+
+## [4.0.36] 2024-01-22
+
+### Added
+
+- Check if RDKit descriptor names are valid
+
+
 ## [4.0.35] 2024-01-19
 
 ### Fixed

@@ -362,10 +362,10 @@ def run_staged_learning(
                 tb_logdir=logdir,
             )
 
-            if torch.cuda.is_available():
+            if device.type == "cuda" and torch.cuda.is_available():
                 free_memory, total_memory = torch.cuda.mem_get_info()
                 free_memory //= 1024**2
-                used_memory = total_memory // 1024**2  - free_memory
+                used_memory = total_memory // 1024**2 - free_memory
                 logger.info(f"Current GPU memory usage: {used_memory} MiB used, {free_memory} MiB free")
 
             handler.out_filename = package.out_state_filename

@@ -134,9 +134,7 @@ def dap_reinforce_strategy(
     return loss, reward
 
 
-def mascof_reinforce_strategy(
-    agent_lls: torch.Tensor, scores: torch.Tensor, *args, **kwargs
-):
+def mascof_reinforce_strategy(agent_lls: torch.Tensor, scores: torch.Tensor, *args, **kwargs):
     """Compute the MASCOF REINFORCE loss function.
 
     :param agent_lls: agent (actor) log-likelihood

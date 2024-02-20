@@ -52,6 +52,7 @@ dependencies = [
   "Pillow >=9.4,<10.0",
   "pydantic >=1.10,<2",
   "pytest >=7.2,<8",
+  "pytest-mock >=3.7,<4",
   "python-dotenv >=1.0,<2",
   "PyYAML >=6.0",
   "rdkit >=2021.0",
@@ -69,6 +70,7 @@ dependencies = [
 #  "torchaudio==0.12.1+cu113",
   "tqdm >=4.64,<5",
   "typing_extensions >=4.0,<5",
+  "xxhash >=3,<4",
 ]
 
 
