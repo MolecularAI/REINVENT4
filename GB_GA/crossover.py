@@ -12,6 +12,7 @@ import numpy as np
 def cut(mol):
     if not mol.HasSubstructMatch(Chem.MolFromSmarts("[*]-;!@[*]")):
         return None
+
     bis = random.choice(
         mol.GetSubstructMatches(Chem.MolFromSmarts("[*]-;!@[*]"))
     )  # single bond not in ring
@@ -32,6 +33,7 @@ def cut_ring(mol):
         if random.random() < 0.5:
             if not mol.HasSubstructMatch(Chem.MolFromSmarts("[R]@[R]@[R]@[R]")):
                 return None
+
             bis = random.choice(mol.GetSubstructMatches(Chem.MolFromSmarts("[R]@[R]@[R]@[R]")))
             bis = (
                 (bis[0], bis[1]),
@@ -40,6 +42,7 @@ def cut_ring(mol):
         else:
             if not mol.HasSubstructMatch(Chem.MolFromSmarts("[R]@[R;!D2]@[R]")):
                 return None
+
             bis = random.choice(mol.GetSubstructMatches(Chem.MolFromSmarts("[R]@[R;!D2]@[R]")))
             bis = (
                 (bis[0], bis[1]),
@@ -80,9 +83,12 @@ def mol_OK(mol):
     try:
         Chem.SanitizeMol(mol)
         test_mol = Chem.MolFromSmiles(Chem.MolToSmiles(mol))
+
         if test_mol == None:
             return None
+
         target_size = size_stdev * np.random.randn() + average_size  # parameters set in GA_mol
+
         if mol.GetNumAtoms() > 5 and mol.GetNumAtoms() < target_size:
             return True
         else:
@@ -93,6 +99,7 @@ def mol_OK(mol):
 
 def crossover_ring(parent_A, parent_B):
     ring_smarts = Chem.MolFromSmarts("[R]")
+
     if not parent_A.HasSubstructMatch(ring_smarts) and not parent_B.HasSubstructMatch(ring_smarts):
         return None
 
@@ -107,9 +114,11 @@ def crossover_ring(parent_A, parent_B):
             return None
 
         new_mol_trial = []
+
         for rs in rxn_smarts1:
             rxn1 = AllChem.ReactionFromSmarts(rs)
             new_mol_trial = []
+
             for fa in fragments_A:
                 for fb in fragments_B:
                     new_mol_trial.append(rxn1.RunReactants((fa, fb))[0])
@@ -118,6 +127,7 @@ def crossover_ring(parent_A, parent_B):
 
         for rs in rxn_smarts2:
             rxn2 = AllChem.ReactionFromSmarts(rs)
+
             for m in new_mol_trial:
                 m = m[0]
                 if mol_OK(m):
@@ -127,6 +137,7 @@ def crossover_ring(parent_A, parent_B):
 
         for m in new_mols:
             m = m[0]
+
             if mol_OK(m) and ring_OK(m):
                 new_mols2.append(m)
 
@@ -176,7 +187,6 @@ def crossover(parent_A, parent_B):
 
     for i in range(10):
         if random.random() <= 0.5:
-            # print 'non-ring crossover'
             new_mol = crossover_non_ring(parent_A, parent_B)
 
             if new_mol != None:
@@ -185,10 +195,11 @@ def crossover(parent_A, parent_B):
             if new_mol != None and new_smiles not in parent_smiles:
                 return new_mol
         else:
-            # print 'ring crossover'
             new_mol = crossover_ring(parent_A, parent_B)
+
             if new_mol != None:
                 new_smiles = Chem.MolToSmiles(new_mol)
+
             if new_mol != None and new_smiles not in parent_smiles:
                 return new_mol
 
@@ -196,8 +207,8 @@ def crossover(parent_A, parent_B):
 
 
 if __name__ == "__main__":
-    smiles1 = "CC(C)(C)c1ccc2occ(CC(=O)Nc3ccccc3F)c2c1"
-    smiles2 = "C[C@@H]1CC(Nc2cncc(-c3nncn3C)c2)C[C@@H](C)C1"
+    # smiles1 = "CC(C)(C)c1ccc2occ(CC(=O)Nc3ccccc3F)c2c1"
+    # smiles2 = "C[C@@H]1CC(Nc2cncc(-c3nncn3C)c2)C[C@@H](C)C1"
 
     smiles1 = "Cc1ccc(S(=O)(=O)N2C(N)=C(C#N)C(c3ccc(Cl)cc3)C2C(=O)c2ccccc2)cc1"
     smiles2 = "CC(C#N)CNC(=O)c1cccc(Oc2cccc(C(F)(F)F)c2)c1"

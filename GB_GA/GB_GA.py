@@ -15,18 +15,7 @@ import mutate as mu
 CALCULATOR = MolecularDescriptorCalculator(["qed"]).CalcDescriptors
 
 
-def read_file(file_name):
-    mol_list = []
-
-    with open(file_name, "r") as file:
-        for smiles in file:
-            mol_list.append(Chem.MolFromSmiles(smiles))
-
-    return mol_list
-
-
-def make_initial_population(population_size, file_name):
-    mol_list = read_file(file_name)
+def make_initial_population(population_size, mol_list):
     population = []
 
     for i in range(population_size):
@@ -101,7 +90,7 @@ def calculate_scores(population):
 def GA(args):
     (
         population_size,
-        file_name,
+        mol_list,
         generations,
         mating_pool_size,
         mutation_rate,
@@ -114,7 +103,7 @@ def GA(args):
     np.random.seed(seed)
     random.seed(seed)
 
-    population = make_initial_population(population_size, file_name)
+    population = make_initial_population(population_size, mol_list)
     scores = calculate_scores(population)
 
     # reorder so best score comes first

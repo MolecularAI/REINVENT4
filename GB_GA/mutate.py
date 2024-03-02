@@ -138,16 +138,15 @@ def mutate(mol, mutation_rate):
         rxn_smarts_list[6] = append_atom()
         rxn_smarts = np.random.choice(rxn_smarts_list, p=p)
 
-        # print('mutation',rxn_smarts)
-
         rxn = AllChem.ReactionFromSmarts(rxn_smarts)
 
         new_mol_trial = rxn.RunReactants((mol,))
 
         new_mols = []
+
         for m in new_mol_trial:
             m = m[0]
-            # print Chem.MolToSmiles(mol),mol_OK(mol)
+
             if co.mol_OK(m) and co.ring_OK(m):
                 new_mols.append(m)
 

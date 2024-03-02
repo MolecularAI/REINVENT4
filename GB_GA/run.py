@@ -10,6 +10,16 @@ import crossover as co
 rdBase.DisableLog("rdApp.error")
 
 
+def read_file(file_name):
+    mol_list = []
+
+    with open(file_name, "r") as file:
+        for smiles in file:
+            mol_list.append(Chem.MolFromSmiles(smiles))
+
+    return mol_list
+
+
 n_tries = 10  # determines number of output SMILES
 population_size = 20
 mating_pool_size = 20
@@ -38,13 +48,14 @@ print("* ")
 print("run,score,smiles,generations,prune")
 
 count = 0
+mol_list = read_file(file_name)
 
 for prune_population in [True, False]:
     index = slice(0, n_tries) if prune_population else slice(n_tries, 2 * n_tries)
     temp_args = [
         [
             population_size,
-            file_name,
+            mol_list,
             generations,
             mating_pool_size,
             mutation_rate,
