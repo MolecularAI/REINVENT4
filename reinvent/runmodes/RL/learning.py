@@ -24,6 +24,7 @@ from .reports.csv_summmary import CSVSummary, write_summary
 from reinvent.runmodes.RL.data_classes import ModelState
 from reinvent.models.model_factory.sample_batch import SmilesState
 from reinvent.runmodes.reporter.remote import get_reporter, NoopReporter
+from reinvent.GB_GA import run_ga
 
 
 if TYPE_CHECKING:
@@ -56,6 +57,7 @@ class Learning(ABC):
         chemistry: ChemistryHelpers = None,
         responder_config: dict = None,
         tb_logdir: str = None,
+        ga_config: dict = None,
     ):
         """Setup of the common framework"""
 
@@ -107,6 +109,8 @@ class Learning(ABC):
 
         self.__write_csv_header = True
 
+        self.ga_config = ga_config
+
     def optimize(self, converged: terminator_callable) -> bool:
         """Run the multistep optimization loop
 
@@ -123,6 +127,16 @@ class Learning(ABC):
 
         for step in range(self.max_steps):
             self.sampled = self.sampling_model.sample(self.seed_smilies)
+            self.invalid_mask = np.where(self.sampled.states == SmilesState.INVALID, False, True)
+            self.duplicate_mask = np.where(
+                self.sampled.states == SmilesState.DUPLICATE, False, True
+            )
+
+            if self.ga_config:
+                mask_valid = self.invalid_mask & self.duplicate_mask
+                smilies_ga = np.array(self.sampled.smilies)[mask_valid]
+                self.sample_ga(smilies_ga)
+
             self.invalid_mask = np.where(self.sampled.states == SmilesState.INVALID, False, True)
             self.duplicate_mask = np.where(
                 self.sampled.states == SmilesState.DUPLICATE, False, True
@@ -213,6 +227,24 @@ class Learning(ABC):
 
         :params score: the score from self._score()
         """
+
+    def sample_ga(self, smilies: List[str]):
+        """Sample from GB_GFA
+
+        :param smilies: seed SMILES for the GA algorithm
+        """
+
+        smilies_ga = run_ga(smilies, self.ga_config)
+
+        self.sampled.items2 += smilies_ga
+        self.sampled.smilies += smilies_ga
+
+        agent_ga_nlls = self._state.agent.likelihood_smiles(smilies_ga)
+        logger.info(f"Average GA NLL: {agent_ga_nlls.mean()}")
+        self.sampled.nlls = torch.concatenate((self.sampled.nlls, agent_ga_nlls), dim=0)
+
+        states = np.full(len(smilies_ga), SmilesState.VALID)
+        self.sampled.states = np.concatenate((self.sampled.states, states), axis=0)
 
     def _update_common(self, results: ScoreResults):
         """Common update for LibInvent and LinkInvent

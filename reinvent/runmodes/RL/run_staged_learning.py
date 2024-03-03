@@ -280,6 +280,11 @@ def run_staged_learning(
     except KeyError:  # optional for Reinvent
         smilies = None
 
+    ga_config = config.get("gb_ga", None)
+
+    if ga_config:
+        logger.info("Sampling with graph-based genetic algorithm enabled")
+
     # The chemistry helpers are mostly static functions with little state (only
     # AttachmentPoints needs constants from TransformationTokens.
     # AttachmentPoints depends on Conversions and BondMaker on both
@@ -360,13 +365,16 @@ def run_staged_learning(
                 chemistry=chemistry,
                 responder_config=responder_config,
                 tb_logdir=logdir,
+                ga_config=ga_config,
             )
 
             if device.type == "cuda" and torch.cuda.is_available():
                 free_memory, total_memory = torch.cuda.mem_get_info()
                 free_memory //= 1024**2
                 used_memory = total_memory // 1024**2 - free_memory
-                logger.info(f"Current GPU memory usage: {used_memory} MiB used, {free_memory} MiB free")
+                logger.info(
+                    f"Current GPU memory usage: {used_memory} MiB used, {free_memory} MiB free"
+                )
 
             handler.out_filename = package.out_state_filename
             handler.register_callback(optimize.get_state_dict)

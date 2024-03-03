@@ -23,14 +23,14 @@ def run_ga(smilies: List[str], config: dict) -> List[str]:
 
     mols = [Chem.MolFromSmiles(smiles) for smiles in smilies]
 
-    n_tries = config.get("n_tries", 10)
+    n_tries = config.get("batch_size", 10)
     population_size = config.get("population_size", 20)
     mating_pool_size = config.get("mating_pool_size", 20)
     generations = config.get("generations", 10)
     mutation_rate = config.get("mutation_rate", 0.05)
-    prune_population = True  # enforces unique SMILES
     n_cpus = config.get("n_cpus", 1)
 
+    prune_population = True  # enforces unique SMILES
     max_score = 0.7  # QED
 
     seeds = np.random.randint(100_000, size=2 * n_tries)
