@@ -59,7 +59,7 @@ def reproduce(mating_pool, population_size, mutation_rate):
 
 def sanitize(population, scores, population_size, prune_population):
     if prune_population:
-        smiles_list = []
+        smiles_list = set()
         population_tuples = []
 
         for score, mol in zip(scores, population):
@@ -67,7 +67,7 @@ def sanitize(population, scores, population_size, prune_population):
             smiles = Chem.MolToSmiles(Chem.MolFromSmiles(smiles))
 
             if smiles not in smiles_list:
-                smiles_list.append(smiles)
+                smiles_list.add(smiles)
                 population_tuples.append((score, mol))
     else:
         population_tuples = list(zip(scores, population))
@@ -124,7 +124,3 @@ def GA(args):
             break
 
     return scores, population, generation + 1
-
-
-if __name__ == "__main__":
-    pass
