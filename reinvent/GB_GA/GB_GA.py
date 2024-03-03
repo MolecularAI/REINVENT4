@@ -9,8 +9,8 @@ from rdkit import Chem
 from rdkit.ML.Descriptors.MoleculeDescriptors import MolecularDescriptorCalculator
 import numpy as np
 
-import crossover as co
-import mutate as mu
+from . import crossover as co
+from . import mutate as mu
 
 CALCULATOR = MolecularDescriptorCalculator(["qed"]).CalcDescriptors
 

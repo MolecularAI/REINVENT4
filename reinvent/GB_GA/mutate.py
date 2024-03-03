@@ -8,7 +8,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 import numpy as np
 
-import crossover as co
+from . import crossover as co
 
 
 def delete_atom():
