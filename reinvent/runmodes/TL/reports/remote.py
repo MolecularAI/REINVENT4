@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
+import logging
 
 from reinvent.runmodes.reporter.remote import get_reporter
 
 reporter = get_reporter()
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -27,6 +29,7 @@ def send_report(data: RemoteData, reporter) -> None:
         return
 
     smiles_counts = {}
+
     for smi in data.sampled_smiles:
         if smi not in smiles_counts:
             smiles_counts[smi] = 0
@@ -44,4 +47,6 @@ def send_report(data: RemoteData, reporter) -> None:
             for smi in smiles_counts
         ],
     }
+
+    logger.debug(f"Remote reporter record:\n{record}")
     reporter.send(record)

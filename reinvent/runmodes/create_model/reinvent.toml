@@ -1,0 +1,26 @@
+# TOML input configuration to create a new empty model
+#
+# Empty model means that a SMILES file is scanned for all possible tokens
+# to determine the vocabulary and to set the model's hyper-parameters. A
+# separate TL step is needed to actually train the prior on the same
+# dataset.
+
+[io]
+
+smiles_file = "test.smi"
+model_file = "test.model"
+
+
+[network]  # hyper-parameters
+
+num_layers = 3
+layer_size = 512
+dropout = 0.0
+layer_normalization = false
+standardize = true  # should be true to ensure data consistency
+
+
+[metadata]  # meta data for the model, information about the data source
+
+data_source = "ChEMBL 33"
+comment = "This is a test"

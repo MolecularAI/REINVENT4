@@ -8,8 +8,8 @@ import torch.utils.data as tud
 
 from .sampler import Sampler, validate_smiles, remove_duplicate_sequences
 from . import params
-from reinvent.models.mol2mol.dataset.dataset import Dataset
-from reinvent.models.mol2mol.models.vocabulary import SMILESTokenizer
+from reinvent.models.transformer.core.dataset.dataset import Dataset
+from reinvent.models.transformer.core.vocabulary import SMILESTokenizer
 from reinvent.models.model_factory.sample_batch import SampleBatch
 from reinvent.chemistry.similarity import Similarity
 
@@ -43,7 +43,7 @@ class Mol2MolSampler(Sampler):
             self.model.set_beam_size(self.batch_size)
         else:
             raise ValueError(
-                f"Sample strategy `{self.sample_strategy}` is not implemented in reinventcli"
+                f"Sample strategy `{self.sample_strategy}` is not implemented"
             )
 
         tokenizer = SMILESTokenizer()

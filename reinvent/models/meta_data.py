@@ -1,5 +1,7 @@
 """Meta data definition for model files"""
 
+from __future__ import annotations
+
 __all__ = ["ModelMetaData", "update_model_data", "check_valid_hash"]
 from dataclasses import dataclass, field, asdict
 import time
@@ -7,6 +9,7 @@ import copy
 import pickle
 import xxhash
 import platform
+from uuid import UUID
 from typing import List, Tuple
 
 HASH_FORMAT = f"xxhash.xxh3_128_hex {xxhash.VERSION}"
@@ -22,9 +25,9 @@ class ModelMetaData:
     hash_id, hash_id_format need to be excluded or use default for computation
     """
 
-    hash_id: str  # hash of the entire state dictionary minus the hash fields
+    hash_id: str | None # hash of the entire state dictionary minus the hash fields
     hash_id_format: str
-    model_id: str  # uuid.uuid4() or https://pypi.org/project/uuid6/
+    model_id: UUID | str  # uuid.uuid4() or https://pypi.org/project/uuid6/
     origina_data_source: str  # e.g. "ChEMBL 33" or "PubChem 2023-11-23"
     creation_date: float  # epoch e.g. time.time()
     date_format: str = "UNIX epoch"
@@ -48,6 +51,10 @@ def update_model_data(save_dict: dict) -> dict:
 
     metadata = save_dict["metadata"]
 
+    # check if metadata does not exist, do nothing
+    if metadata is None:
+        return save_dict
+
     # do not hash the hash and its format itself
     metadata.hash_id = None
     metadata.hash_id_format = None
@@ -56,14 +63,14 @@ def update_model_data(save_dict: dict) -> dict:
     metadata.updates.append((time.time(),))
 
     if "decorator" in save_dict:  # Libinvent
-        ptr = save_dict["decorator"]["state"]
+        ref = save_dict["decorator"]["state"]
     elif "network_state" in save_dict:  # Linkinvnet, Mol2Mol
-        ptr = save_dict["network_state"]
+        ref = save_dict["network_state"]
     else:  # Reinvent
-        ptr = save_dict["network"]
+        ref = save_dict["network"]
 
-    for k in ptr:
-        ptr[k] = ptr[k].cpu().numpy()
+    for k in ref:
+        ref[k] = ref[k].cpu().numpy()
 
     data = pickle.dumps(save_dict)
 

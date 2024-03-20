@@ -116,7 +116,7 @@ def compute_transform(
 
     for scores, transform in zip(component_results.scores, transforms):
         transformed = transform(scores) if transform else scores
-        transformed_scores.append(transformed * invalid_mask)
+        transformed_scores.append(transformed * invalid_mask * valid_mask)
 
     transform_types = [transform.params.type if transform else None for transform in transforms]
 

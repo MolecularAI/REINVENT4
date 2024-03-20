@@ -13,7 +13,8 @@ from reinvent.scoring.transforms import ValueMapping
 
 @pytest.mark.parametrize(
     "low, high, coef_div, coef_si, coef_se",
-    [(-5.0, 5.0, 100.0, 150.0, 150.0)]
+    [(-5.0, 5.0, 100.0, 150.0, 150.0),
+     (4.0, 9.0, 35.0, 150.0, 150.0)]
 )
 def test_double_sigmoid(low, high, coef_div, coef_si, coef_se):
     from reinvent.scoring.transforms.double_sigmoid import Parameters

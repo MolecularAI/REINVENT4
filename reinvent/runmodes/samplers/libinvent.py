@@ -39,6 +39,7 @@ class LibinventSampler(Sampler):
         if len(clean_scaffolds) == 1:
             clean_scaffolds *= 2
 
+        # FIXME: check why we need to amplify the dataset
         clean_scaffolds = clean_scaffolds * self.batch_size
         dataset = Dataset(
             clean_scaffolds,

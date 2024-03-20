@@ -1,7 +1,7 @@
 """Reinvent adapter"""
 
 __all__ = ["ReinventAdapter"]
-from typing import List, Tuple
+from typing import List
 
 import torch
 
@@ -23,7 +23,7 @@ class ReinventAdapter(ModelAdapter):
         :returns: token sequences, list of SMILES, NLLs
         """
         # torch.Tensor, List[str], torch.Tensor
-        sequences, smilies, nlls = self.model.sample_sequences_and_smiles(batch_size)
+        sequences, smilies, nlls = self.model.sample(batch_size)
 
         # NOTE: keep the sequences and nlls as Tensor as they are needed for
         #       later computations

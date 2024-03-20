@@ -4,12 +4,12 @@ FIXME: there is only a sign change for the two sigmoid functions
 """
 
 __all__ = ["Sigmoid", "ReverseSigmoid"]
-import math
 from dataclasses import dataclass
 
 import numpy as np
 
 from .transform import Transform
+from .sigmoid_functions import hard_sigmoid, stable_sigmoid
 
 
 @dataclass
@@ -18,17 +18,6 @@ class Parameters:
     low: float
     high: float
     k: float
-
-
-def sigmoid(x: float, low: float, high: float, k: float) -> float:
-    return math.pow(10, (10 * k * (x - (low + high) * 0.5) / (low - high)))
-
-
-def reverse_sigmoid(x: float, low: float, high: float, k: float) -> float:
-    try:
-        return 1 / (1 + 10 ** (k * (x - (high + low) * 0.5) * 10 / (high - low)))
-    except:
-        return 0
 
 
 class Sigmoid(Transform, param_cls=Parameters):
@@ -40,9 +29,18 @@ class Sigmoid(Transform, param_cls=Parameters):
         self.k = params.k
 
     def __call__(self, values) -> np.ndarray:
-        transformed = [1 / (1 + sigmoid(x, self.low, self.high, self.k)) for x in values]
+        values = np.array(values, dtype=np.float32)
 
-        return np.array(transformed, dtype=float)
+        x = values - (self.high + self.low) / 2
+
+        if (self.high - self.low) == 0:
+            k = 10.0 * self.k
+            transformed = hard_sigmoid(x, k)
+        else:
+            k = 10.0 * self.k / (self.high - self.low)
+            transformed = stable_sigmoid(x, k)
+
+        return transformed
 
 
 class ReverseSigmoid(Transform, param_cls=Parameters):
@@ -54,6 +52,15 @@ class ReverseSigmoid(Transform, param_cls=Parameters):
         self.k = params.k
 
     def __call__(self, values) -> np.ndarray:
-        transformed = [reverse_sigmoid(x, self.low, self.high, self.k) for x in values]
+        values = np.array(values, dtype=np.float32)
 
-        return np.array(transformed, dtype=float)
+        x = values - (self.high + self.low) / 2
+
+        if (self.high - self.low) == 0:
+            k = 10.0 * self.k
+            transformed = hard_sigmoid(x, k)
+        else:
+            k = 10.0 * self.k / (self.high - self.low)
+            transformed = stable_sigmoid(x, k)
+
+        return 1.0 - transformed

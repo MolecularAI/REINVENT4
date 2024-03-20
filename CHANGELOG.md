@@ -10,6 +10,122 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 - CAZP scoring component
 
 
+## [4.2.5] 2024-03-20
+
+### Added
+
+- Log network parameters
+
+
+## [4.2.4] 2024-03-20
+
+### Changed
+
+- Reworked TL code: clean-up, image layout, graph for Reinvent
+
+### Added
+
+- Added options and better statistics for TL: valid SMILES, duplicates
+- Disableable standardization
+
+### Removed
+
+- KL divergence in TB output
+
+### Fixed
+
+- Batch size calculation
+
+
+## [4.2.3] 2024-03-14
+
+### Fixed
+
+- Vocabulary for mol2mol and reinvent is saved as dictionary
+
+
+## [4.2.2] 2024-03-13
+
+### Fixed
+
+- Sigmoid functions in scoring have now a stable implementation
+
+
+## [4.2.1] 2024-03-12
+
+### Removed
+
+- Long chain (SMARTS for 5 aliphatic carbons) check
+
+
+## [4.2.0] 2024-03-08
+
+### Added
+
+- Unified transformer code to faciliate new model designs
+
+
+## [4.1.16] 2024-03-07
+
+### Fixed
+
+- filters now apply to transformed scores 
+
+
+## [4.1.15] 2024-03-07
+
+### Fixed
+
+- Minor change inception filter: cleaner way of handling internal SMILES store
+
+
+## [4.1.14] 2024-03-06
+
+### Added
+
+- Updated script for creating an empty classical Reinvent model
+
+### Fixed
+
+- Memory bug in TL related to similarity calculation: made this optional
+
+
+## [4.1.13] 2024-03-05
+
+### Added
+
+- Allowed runs with only filter/penalty components 
+
+
+## [4.1.12] 2024-03-05
+
+### Added
+
+- Better logging for Reinvent standardizer
+
+
+## [4.1.11] 2024-02-27
+
+### Fixed
+
+- Inception filters out SMILES containing tokens that are not compatible with the prior
+
+
+## [4.1.10] 2024-02-26
+
+### Fixed
+
+- Numerically stable double sigmoid implementation
+- Number of CPUs for TL (Mol2Mol) is now 1
+
+
+## [4.1.9] 2024-02-22
+
+### Fixed
+
+- Save models with no metadata
+
+
 ## [4.1.8] 2024-02-20
 
 ### Fixed

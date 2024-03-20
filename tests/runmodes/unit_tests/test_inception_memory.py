@@ -46,7 +46,7 @@ def test_inception_required_argument():
 
 def test_inception_add(inception_memory):
     assert len(inception_memory.storage) == len(SMILIES)
-    assert inception_memory._smilies == list(SMILIES)
+    assert inception_memory._smilies == set(SMILIES)
 
     smilies, _, _ = zip(*inception_memory.storage)
 

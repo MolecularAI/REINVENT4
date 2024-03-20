@@ -164,9 +164,6 @@ class Learning(ABC):
                 logger.info(f"Terminating early in {step = }")
                 break
 
-        if self.inception:
-            logger.debug(f"Inception SMILES: {self.inception.memory._smilies}")
-
         if self.tb_reporter:
             self.tb_reporter.flush()
             self.tb_reporter.close()

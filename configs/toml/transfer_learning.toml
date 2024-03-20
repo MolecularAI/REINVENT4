@@ -16,7 +16,8 @@ num_epochs = 3  # number of steps to run
 save_every_n_epochs = 3  # save checkpoint model file very N steps
 batch_size = 50
 num_refs = 100  # number of reference molecules randomly chosen for similarity
-sample_batch_size = 100  # number of sampled molecules chosen for similarity
+                # set this to zero for large datasets (>200 molecules)!
+sample_batch_size = 100  # number of sampled molecules to compute sample loss
 # Uncomment one of the comment blocks below.  Each generator needs a model
 # file and possibly a SMILES file with seed structures.
 
@@ -44,12 +45,12 @@ pairs.max_cardinality = 199
 ### the molecule to be optimizable
 ## LibInvent
 #input_model_file = "priors/libinvent.prior"
-#smiles_file = "TL_libinvent_100.smi"  # read first 2 columns: warheads, linker
-#validation_smiles_file = "TL_libinvent_100.smi"  # read first 2 columns: warheads, linker
+#smiles_file = "TL_libinvent_100.smi"  # read first 2 columns: scaffold, R-groups
+#validation_smiles_file = "TL_libinvent_100.smi"  # read first 2 columns: scaffold, R-groups
 #output_model_file = "TL_libinvent.model"
 #
 ## LinkInvent
 #input_model_file = "priors/linkinvent.prior"
-#smiles_file = "TL_linkinvent_100.smi"  # read first 2 columns: scaffold, R-groups
+#smiles_file = "TL_linkinvent_100.smi"  # read first 2 columns: warheads, linker
 #output_model_file = "TL_linkinvent.model"
-#validation_smiles_file = "TL_linkinvent_100.smi"  # read first 2 columns: scaffold, R-groups
+#validation_smiles_file = "TL_linkinvent_100.smi"  # read first 2 columns: warheads, linker

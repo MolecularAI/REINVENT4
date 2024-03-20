@@ -36,9 +36,9 @@ class SampleBatch:
     return two SMILES lists.
     """
 
-    items1: List[str]  # SMILES, None for Reinvent
+    items1: List[str] | None # SMILES, None for Reinvent
     items2: List[str]  # SMILES
-    nlls: Tensor[float]  # negative log likelihoods from the model
+    nlls: Tensor  # negative log likelihoods from the model
     smilies: List[str] = None  # processed SMILES
     states: np.ndarray[SmilesState] = None  # states for items2
 

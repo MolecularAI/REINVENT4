@@ -38,7 +38,7 @@ class InceptionMemory:
     maxsize: int
     storage: List[Tuple] = field(default_factory=list, init=False)
     deduplicate: bool = True  # for R3 backward compatibility: False
-    _smilies: list = field(default_factory=list, repr=False, init=False)
+    _smilies: list = field(default_factory=set, repr=False, init=False)  # internal SMILES memory
 
     def add(self, smilies: List[str], scores: np.ndarray, lls: np.ndarray):
         """Add lists to memory in sorter order"""
@@ -53,18 +53,19 @@ class InceptionMemory:
                     _smilies.append(smiles)
                     _scores.append(score)
                     _lls.append(ll)
+
+            self._smilies.update(_smilies)
         else:
             _smilies = smilies
             _scores = scores
             _lls = lls
 
-        self._smilies.extend(_smilies)
         self._to_internal_order(_smilies, _scores, _lls)
 
     def sample(self, num_samples):
         """Return a number of random samples"""
 
-        if not self._smilies:
+        if not self.storage:
             return None
 
         sample_size = min(num_samples, len(self.storage))
@@ -86,7 +87,7 @@ class InceptionMemory:
 
         logger.debug(f"Inception top score: {self.storage[0]}")
 
-        self.storage = seq[: self.maxsize]
+        self.storage = seq[:self.maxsize]
 
     def _from_internal_order(self, seq):
         """Return original order"""
@@ -120,13 +121,43 @@ class Inception:
         :param scoring_function:
         :param prior:
         """
-
         self.sample_size = sample_size
         self.smilies = smilies
         self.scoring_function = scoring_function
         self.prior = prior
 
+        valid_smiles_idx = self._validate_smiles_to_prior_vocabulary(smilies)
+
+        if len(valid_smiles_idx) < len(smilies):
+            invalid_smilies = []
+
+            for i, smi in enumerate(smilies):
+                if i not in valid_smiles_idx:
+                    invalid_smilies.append(smi)
+
+            raise RuntimeError(
+                f"Found incompatible smilies with the prior: {', '.join(invalid_smilies)}"
+            )
+
         self.memory = InceptionMemory(maxsize=memory_size, deduplicate=deduplicate)
+
+    def _validate_smiles_to_prior_vocabulary(self, smilies: List[str]) -> list:
+        """Return the list of SMILES indices compatibles with the prior vocabulary
+
+        : param smiles: list of SMILES
+        """
+        valid_idx = []
+        for i, smi in enumerate(smilies):
+            if smi is None:
+                continue
+            all_tokens_in_vocabulary = True
+            for token in self.prior.tokenizer.tokenize(smi):
+                all_tokens_in_vocabulary = all_tokens_in_vocabulary and (
+                    token in self.prior.vocabulary.tokens()
+                )
+            if all_tokens_in_vocabulary:
+                valid_idx.append(i)
+        return valid_idx
 
     def _load_smilies_to_memory(self):
         if len(self.smilies):
@@ -155,10 +186,23 @@ class Inception:
         self.scoring_function = scoring_functiom
         self._load_smilies_to_memory()
 
-    def add(self, smiles: List[str], score: torch.Tensor, lls: torch.Tensor) -> None:
+    def add(self, smiles: List[str], scores: torch.Tensor, lls: torch.Tensor) -> None:
         """Add new data to the memory"""
+        scores = scores.detach().cpu().numpy()
+        lls = lls.detach().cpu().numpy()
 
-        self.memory.add(smiles, score.detach().cpu().numpy(), lls.detach().cpu().numpy())
+        valid_smiles_idx = self._validate_smiles_to_prior_vocabulary(smiles)
+        if len(valid_smiles_idx) < len(smiles):
+            logger.warning(
+                f"Found {len(smiles)-len(valid_smiles_idx):d} of {len(smiles):d} smilies incompatible with the prior for the inception filter"
+            )
+
+        if len(valid_smiles_idx) > 0:
+            smiles = [smiles[i] for i in valid_smiles_idx]
+            scores = scores[valid_smiles_idx]
+            lls = lls[valid_smiles_idx]
+
+            self.memory.add(smiles, scores, lls)
 
     # FIXME: return type
     def sample(self):

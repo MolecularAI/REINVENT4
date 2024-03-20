@@ -5,7 +5,7 @@ import unittest
 
 import torch
 
-from reinvent.runmodes.create_model.reinvent import create_model
+from reinvent.runmodes.create_model.create_reinvent import create_model
 
 
 @pytest.mark.integration
@@ -34,6 +34,7 @@ class TestCreateModel(unittest.TestCase):
             standardize=True,
             input_smiles_path=self.json_config["SMILES_SET_PATH"],
             output_model_path=self.output_file,
+            metadata={"data_source": "pytest", "comment": "pytest"},
         )
 
         model = torch.load(self.output_file)
@@ -44,6 +45,7 @@ class TestCreateModel(unittest.TestCase):
             [
                 "model_type",
                 "version",
+                "metadata",
                 "vocabulary",
                 "tokenizer",
                 "max_sequence_length",

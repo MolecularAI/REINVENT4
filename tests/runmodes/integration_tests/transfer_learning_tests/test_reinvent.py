@@ -47,6 +47,7 @@ def test_transfer_learning(setup, tmp_path, pytestconfig):
     assert keys == [
         "model_type",
         "version",
+        "metadata",
         "vocabulary",
         "tokenizer",
         "max_sequence_length",

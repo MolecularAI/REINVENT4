@@ -119,7 +119,10 @@ class Scorer:
             for tscores, weight in zip(component.transformed_scores, component.weight):
                 scores_and_weights.append((tscores, weight))
 
-        total_scores = self.aggregate(scores_and_weights)
+        if len(scores_and_weights) > 0:  # penalty only run
+            total_scores = self.aggregate(scores_and_weights)
+        else:
+            total_scores = valid_mask.astype(float)  # apply filters if needed
 
         penalties = np.full(len(smilies), 1.0, dtype=float)
 

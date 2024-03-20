@@ -10,14 +10,10 @@ The SMILES strings is expected to be a complete molecule.
 from __future__ import annotations
 
 __all__ = ["Reinvent"]
-from typing import List, TYPE_CHECKING
 
 from .learning import Learning
 from reinvent.models.reinvent.models.dataset import Dataset
 from reinvent.models.reinvent.models.vocabulary import SMILESTokenizer
-
-if TYPE_CHECKING:
-    from reinvent.models import ReinventAdapter
 
 
 class Reinvent(Learning):

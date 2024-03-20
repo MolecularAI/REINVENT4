@@ -23,7 +23,7 @@ def setup(tmp_path, json_config, pytestconfig):
             "save_every_n_epochs": 1,
             "num_epochs": 2,
             "batch_size": 64,
-            "sample_batch_size": 100,
+            "sample_batch_size": 10,
             "num_refs": 10,
             "pairs": {
                 "type": "tanimoto",

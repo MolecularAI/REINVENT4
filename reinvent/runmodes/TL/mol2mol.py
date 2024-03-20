@@ -12,11 +12,10 @@ import numpy as np
 import tqdm
 
 from .learning import Learning
-from reinvent.models.mol2mol.dataset import get_pair_generator
-import reinvent.models.mol2mol.dataset.paired_dataset as mol2mol_dataset
+import reinvent.models.transformer.core.dataset.paired_dataset as mol2mol_dataset
 
 from ..reporter import remote
-
+from ...models.transformer.mol2mol.dataset import get_pair_generator
 
 logger = logging.getLogger(__name__)
 remote_reporter = remote.get_reporter()

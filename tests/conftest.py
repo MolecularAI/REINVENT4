@@ -5,8 +5,14 @@ IMPORTANT: NEVER import directly from conftest.py
 """
 
 import os
+import sys
 import json
 import pytest
+
+from reinvent import models
+
+# kludge to fix tests by-passing compatibility mode in the code
+sys.modules["reinvent.models.mol2mol.models.vocabulary"] = models.transformer.core.vocabulary
 
 
 def pytest_addoption(parser):

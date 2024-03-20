@@ -3,15 +3,15 @@
 Reads in a SMILES file and performs transfer learning.
 """
 
-import logging
 import os
+import logging
 
 import torch
 import torch.optim as topt
 
 from reinvent.runmodes import TL, create_adapter
 from reinvent.config_parse import read_smiles_csv_file
-from reinvent.runmodes.reporter.remote import setup_reporter
+from reinvent.runmodes.reporter.remote import setup_reporter, get_reporter
 from reinvent.chemistry import Conversions
 from reinvent.chemistry.standardization.rdkit_standardizer import (
     RDKitStandardizer,
@@ -33,35 +33,37 @@ def run_transfer_learning(
     logger.info("Starting Transfer Learning")
 
     parameters = config["parameters"]
-    logger_parameters = parameters.get("logging", None)
 
     model_filename = parameters["input_model_file"]
     adapter, _, model_type = create_adapter(model_filename, "training", device)
 
     logger.info(f"Using generator {model_type}")
 
-    smiles_filename = parameters["smiles_file"]
-    logger.info(f"Reading input SMILES from {smiles_filename}")
+    smiles_filename = os.path.abspath(parameters["smiles_file"])
+    do_standardize = parameters.get("standardize_smiles", True)
+    do_randomize = parameters.get("randomize_smiles", True)
 
-    actions = None
+    actions = []
+    cols = 0
+    conversions = Conversions()
 
     # FIXME: move to preprocessing
-    if model_type == "Reinvent" or model_type == "Mol2Mol":
-        cols = 0
-        conversions = Conversions()
-
-        if model_type == "Reinvent":
+    if model_type == "Reinvent":
+        if do_standardize:
             standardizer = RDKitStandardizer(None, isomeric=False)
-            actions = [standardizer.apply_filter, conversions.randomize_smiles]
-            logger.debug("Applying standardization and randomization of SMILES")
-        elif model_type == "Mol2Mol":
-            actions = [conversions.convert_to_standardized_smiles]
-            logger.debug("Applying standardization of SMILES")
+            actions.append(standardizer.apply_filter)
+
+        if do_randomize:
+            actions.append(conversions.randomize_smiles)
+    elif model_type == "Mol2Mol":
+        if do_standardize:
+            actions.append(conversions.convert_to_standardized_smiles)
     else:
         cols = slice(0, 2, None)
 
     # NOTE: we expect here that all data will fit into memory
     smilies = read_smiles_csv_file(smiles_filename, cols, actions=actions, remove_duplicates=True)
+    logger.info(f"Read {len(smilies)} input SMILES from {smiles_filename}")
 
     if not smilies:
         msg = f"Unable to read valid SMILES from {smiles_filename}"
@@ -72,25 +74,28 @@ def run_transfer_learning(
     validation_smilies = None
 
     if validation_smiles_filename:
-        logger.info(f"Reading validation SMILES from {validation_smiles_filename}")
+        validation_smiles_filename = os.path.abspath(validation_smiles_filename)
         validation_smilies = read_smiles_csv_file(
             validation_smiles_filename,
             cols,
             actions=actions,
             remove_duplicates=True,
         )
+        logger.info(
+            f"Read {len(validation_smilies)} validation SMILES from {validation_smiles_filename}"
+        )
 
     common_opts = dict(
         input_model_file=model_filename,
-        output_model_file=parameters["output_model_file"],
+        output_model_file=parameters.get("output_model_file", "TL.model"),
         smilies=smilies,
         validation_smilies=validation_smilies,
         batch_size=parameters["batch_size"],
-        sample_batch_size=parameters["sample_batch_size"],
         num_epochs=parameters["num_epochs"],
-        num_refs=parameters["num_refs"],
         save_every_n_epochs=parameters["save_every_n_epochs"],
-        n_cpus=config.get("number_of_cpus", os.cpu_count()),
+        sample_batch_size=parameters.get("sample_batch_size", 1),
+        num_refs=parameters.get("num_refs", 0),
+        n_cpus=config.get("number_of_cpus", 1),
     )
 
     if model_type == "Mol2Mol":
@@ -133,7 +138,7 @@ def run_transfer_learning(
             adam, step_size=lr_config.step, gamma=lr_config.gamma
         )
 
-        mode_config = TL.Configuration(
+        mode_config = TL.GeneralConfiguration(
             **common_opts,
             optimizer=adam,
             learning_rate_scheduler=learning_rate_scheduler,
@@ -141,10 +146,14 @@ def run_transfer_learning(
         )
 
     runner_class = getattr(TL, f"{model_type}")
-    runner = runner_class(adapter, tb_logdir, mode_config, logger_parameters)
+    optimize = runner_class(adapter, tb_logdir, mode_config)
 
     if "logging" in config:
         url = config["logging"].get("endpoint", None)
         setup_reporter(url)
+        reporter = get_reporter()
 
-    runner.optimize()
+        if hasattr(reporter, "url"):
+            logger.info(f"Remote reporting to {reporter.url}")
+
+    optimize()

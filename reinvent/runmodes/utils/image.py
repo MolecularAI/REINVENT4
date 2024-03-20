@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-__all__ = ["make_grid_image", "get_matching_substructure"]
-from typing import TYPE_CHECKING
+__all__ = ["make_grid_image"]
+from typing import Tuple
 import logging
 
 import torch
@@ -11,20 +11,11 @@ from torchvision import transforms
 from rdkit import Chem
 from rdkit.Chem.Draw import MolsToGridImage
 
-from reinvent.chemistry.logging import (
-    padding_with_invalid_smiles,
-    check_for_invalid_mols_and_create_legend,
-    find_matching_pattern_in_smiles,
-)
-
-if TYPE_CHECKING:
-    from reinvent_scoring.scoring.score_summary import FinalSummary
-
 logger = logging.getLogger(__name__)
 convert_img_to_tensor = transforms.ToTensor()
 
 
-def make_grid_image(smilies, data, label: str, sample_size: int, nrows: int) -> torch.Tensor:
+def make_grid_image(smilies, data, label: str, sample_size: int, nrows: int) -> Tuple(torch.Tensor, int) | None:
     """Create image grid from the SMILES
 
     :param smilies: score summary
@@ -56,21 +47,8 @@ def make_grid_image(smilies, data, label: str, sample_size: int, nrows: int) -> 
     png_image = MolsToGridImage(
         mols[:sample_size],
         molsPerRow=nrows,
-        subImgSize=(350, 350),
+        subImgSize=(250, 250),
         legends=legends,
     )
 
-    return convert_img_to_tensor(png_image)
-
-
-def get_matching_substructure(score_summary: FinalSummary):
-    smarts_pattern = ""
-
-    for summary_component in score_summary.scaffold_log:
-        if summary_component.parameters.component_type == "matching_substructure":
-            smarts = summary_component.parameters.specific_parameters.get("smilies", [])
-
-            if len(smarts) > 0:
-                smarts_pattern = smarts[0]
-
-    return smarts_pattern
+    return convert_img_to_tensor(png_image), len(mols)

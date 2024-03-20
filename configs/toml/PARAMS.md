@@ -59,8 +59,8 @@ Run transfer learning on a set of input SMILES.
 | num\_epochs            | number of epochs to run                                       |
 | save\_every\_n\_epochs | save checkpoint file every N epochs                           |
 | batch\_size            | batch size, note: affects SGD                                 |
-| num\_refs              | number of references for similarity                           |
-| sample\_batch\_size    | number of samples for similarity                              |
+| sample\_batch\_size    | batch size to calculate the sample loss and other statistics  |
+| num\_refs              | number of references for similarity if > 0, DO NOT use with large dataset (> 200 molecules) |
 | input\_model\_file     | filename of input prior model                                 |
 | smiles\_file           | SMILES file for Lib/Linkinvent and Molformer                  |
 | output_model\_file     | filename of the final model                                   |

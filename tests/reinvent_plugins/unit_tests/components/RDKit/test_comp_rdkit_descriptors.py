@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 
 from reinvent_plugins.components.RDKit.comp_rdkit_descriptors import Parameters, RDKitDescriptors
@@ -29,3 +30,8 @@ def test_comp_rdkit_descriptors():
         results = component(input_smiles)
 
         assert np.allclose(results.scores[0], result)
+
+
+@pytest.mark.xfail
+def test_comp_rdkit_descriptors_unknown_descriptor():
+    params = Parameters(['unknown'])

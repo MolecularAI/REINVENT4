@@ -15,7 +15,8 @@ import torch
 import torch.utils.data as tud
 
 if TYPE_CHECKING:
-    from reinvent.models.mol2mol.dto.mol2mol_batch_dto import Mol2MolBatchDTO
+    from reinvent.models.transformer.core.dto.batch_dto import BatchDTO
+
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ class LinkInventBatchDTO:
 
 @dataclass
 class BatchLikelihoodDTO:
-    batch: Union[Mol2MolBatchDTO, LinkInventBatchDTO]
+    batch: Union[BatchDTO, LinkInventBatchDTO]
     likelihood: torch.Tensor
 
 

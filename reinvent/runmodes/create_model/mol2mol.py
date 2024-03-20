@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import csv
 
-from reinvent.models.mol2mol.model import EncoderDecoder, Mol2MolModel
-from reinvent.models.mol2mol.models.vocabulary import Vocabulary, SMILESTokenizer
+from reinvent.models import Mol2MolModel
+from reinvent.models.transformer.transformer import EncoderDecoder
+from reinvent.models.transformer.core.vocabulary import Vocabulary, SMILESTokenizer
 
 
 def create_model(

@@ -10,7 +10,6 @@ import torch
 import numpy as np
 
 from .learning import Learning
-from reinvent.models.model_factory.mol2mol_adapter import SampledSequencesDTO
 from reinvent.models.model_factory.sample_batch import SmilesState
 
 if TYPE_CHECKING:

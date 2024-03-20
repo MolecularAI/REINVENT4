@@ -16,13 +16,9 @@ this means that the scaffolds are in column 1 and the decorators in column 2.
 from __future__ import annotations
 
 __all__ = ["Libinvent"]
-from typing import List, TYPE_CHECKING
 
 from .learning import Learning
 from reinvent.models.libinvent.models.dataset import DecoratorDataset
-
-if TYPE_CHECKING:
-    from reinvent.models import LibinventAdapter
 
 
 class Libinvent(Learning):

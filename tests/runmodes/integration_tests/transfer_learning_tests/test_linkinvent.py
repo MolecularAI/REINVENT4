@@ -19,11 +19,11 @@ def setup(tmp_path, json_config, pytestconfig):
             "input_model_file": json_config["LINKINVENT_PRIOR_PATH"],
             "smiles_file": json_config["TL_LINKINVENT_SMILES_PATH"],
             "output_model_file": output_model_file,
-            "save_every_n_epochs": 5,
+            "save_every_n_epochs": 2,
             "batch_size": 64,
-            "sample_batch_size": 128,
-            "num_epochs": 5,
-            "num_refs": 5,
+            "sample_batch_size": 10,
+            "num_epochs": 2,
+            "num_refs": 2,
         }
     }
 

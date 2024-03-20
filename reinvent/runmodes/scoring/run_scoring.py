@@ -139,18 +139,10 @@ def setup_actions(standardize: bool = True) -> ACTION_CALLABLES:
     actions = []
 
     # List of known standardization flags
-    #   DEFAULT = "default"  # all the below
-    #   NEUTRALIZE_CHARGES = "neutralise_charges"
-    #   GET_LARGEST_FRAGMENT = "get_largest_fragment"
-    #   REMOVE_HYDROGENS = "remove_hydrogens"
-    #   REMOVE_SALTS = "remove_salts"
-    #   GENERAL_CLEANUP = "general_cleanup"
-    #   TOKEN_FILTERS = "token_filters"
-    #   VOCABULARY_FILTER = "vocabulary_filter"
-    #   VALID_SIZE = "valid_size"
-    #   HEAVY_ATOM_FILTER = "heavy_atom_filter"
-    #   ALLOWED_ATOM_TYPE = "allowed_atom_type"
-    #   ALIPHATIC_CHAIN_FILTER = "aliphatic_chain_filter"
+    # DEFAULT = "default"  # all of the below
+    # NEUTRALIZE_CHARGES, GET_LARGEST_FRAGMENT, REMOVE_HYDROGENS, REMOVE_SALTS,
+    # GENERAL_CLEANUP, UNWANTED_PATTERNS, VOCABULARY_FILTER, VALID_SIZE,
+    # HEAVY_ATOM_FILTER, ALLOWED_ELEMENTS
     filter_types = FilterTypesEnum()
     standardizer_config = [  # this will need fine-tuning depending on downstream component
         FilterConfiguration(filter_types.GET_LARGEST_FRAGMENT),

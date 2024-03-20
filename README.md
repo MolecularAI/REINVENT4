@@ -13,8 +13,9 @@ property profile defined as a multi-component score.  Transfer Learning (TL)
 can be used to create or pre-train a model that generates molecules closer
 to a set of input molecules. 
 
-A preprint with more details is available on ChemRxiv:
-[REINVENT4: Modern AI-Driven Generative Molecule Design](https://chemrxiv.org/engage/chemrxiv/article-details/65463cafc573f893f1cae33a).
+A paper describing the software has been published as Open Access in the
+Journal of Cheminformatics:
+[Reinvent 4: Modern AI–driven generative molecule design](https://link.springer.com/article/10.1186/s13321-024-00812-5?utm_source=rct_congratemailt&utm_medium=email&utm_campaign=oa_20240221&utm_content=10.1186/s13321-024-00812-5).
 See AUTHORS.md for references to previous papers.
 
 

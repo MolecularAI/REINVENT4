@@ -13,8 +13,6 @@ def setup(tmp_path, json_config, pytestconfig):
     device = pytestconfig.getoption("device")
     set_torch_device(device)
 
-    os.chdir(tmp_path)
-
     config = {
         "parameters": {
             "use_checkpoint": False,
@@ -100,7 +98,6 @@ def setup(tmp_path, json_config, pytestconfig):
             },
         ],
     }
-
     return config
 
 
@@ -109,6 +106,7 @@ def test_staged_learning(setup, tmp_path, pytestconfig):
     config = setup
     device = pytestconfig.getoption("device")
 
+    device = torch.device(device)
     run_staged_learning(config, device, tb_logdir=None, responder_config=None)
 
     checkpoint_file = Path("test1.chkpt")
@@ -121,6 +119,7 @@ def test_staged_learning(setup, tmp_path, pytestconfig):
     assert keys == [
         "model_type",
         "version",
+        "metadata",
         "vocabulary",
         "tokenizer",
         "max_sequence_length",

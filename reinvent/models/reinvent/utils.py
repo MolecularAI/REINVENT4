@@ -3,10 +3,12 @@
 A set of common auxiliary functionality.
 """
 
+from typing import List
+
 import torch
 
 
-def collate_fn(encoded_seqs: torch.Tensor) -> torch.Tensor:
+def collate_fn(encoded_seqs: List[torch.Tensor]) -> torch.Tensor:
     """Converts a list of encoded sequences into a padded tensor
 
     :param encoded_seqs: encodes sequences to be padded with zeroes

@@ -9,7 +9,6 @@ import torch
 
 from reinvent import models
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -22,8 +21,6 @@ def create_adapter(dict_filename: str, mode: str, device: torch.device) -> Tuple
     :returns: the adapter class, the model type
     """
 
-    # FIXME: check if map_location is needed for CPU as in Reinvent
-    #save_dict = torch.load(dict_filename, map_location=device)
     save_dict = torch.load(dict_filename, map_location="cpu")
 
     if "metadata" in save_dict:
@@ -68,4 +65,22 @@ def create_adapter(dict_filename: str, mode: str, device: torch.device) -> Tuple
     model = model_class.create_from_dict(save_dict, mode, device)
     adapter = adapter_class(model)
 
+    compatibility(model)
+
+    network_params = model.network.parameters()
+    num_params = sum([tensor.numel() for tensor in network_params])
+    logger.info(f"Number of network parameters: {num_params:,}")
+
     return adapter, save_dict, model_type
+
+def compatibility(model):
+    """Compatibility mode for old Mol2Mol priors"""
+
+    from reinvent.models.mol2mol.models.vocabulary import Vocabulary
+
+    if isinstance(model.vocabulary, Vocabulary):
+        from reinvent.models.transformer.core import vocabulary as tvoc
+
+        tokens = model.vocabulary._tokens
+        model.vocabulary = tvoc.Vocabulary()
+        model.vocabulary._tokens = tokens
