@@ -35,7 +35,7 @@ def setup_TBData(sampled: SampleBatch, time: int, **kwargs):
     counter = collections.Counter(sampled.smilies)
     top_sampled = counter.most_common(ROWS * COLS)
     top_sampled_smiles, top_sampled_freq = zip(*top_sampled)
-    image_tensor = make_grid_image(top_sampled_smiles, top_sampled_freq, "Times sampled", ROWS * COLS, ROWS)
+    image_tensor, _ = make_grid_image(top_sampled_smiles, top_sampled_freq, "Times sampled", ROWS * COLS, ROWS)
 
     return TBData(fraction_valid_smiles,
                   fraction_unique_molecules,

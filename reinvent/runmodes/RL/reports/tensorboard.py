@@ -98,7 +98,7 @@ def write_report(reporter, data: TBData) -> None:
 
     sample_size = ROWS * COLUMNS
 
-    image_tensor = make_grid_image(data.smilies, results.total_scores, "score", sample_size, ROWS)
+    image_tensor, _ = make_grid_image(data.smilies, results.total_scores, "score", sample_size, ROWS)
 
     if image_tensor is not None:
         reporter.add_image(
