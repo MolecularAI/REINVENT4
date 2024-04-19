@@ -49,7 +49,7 @@ def param(request, json_config):
             "num_smiles": 10,
             "smiles_multiplier": 1,
             "smiles_file": json_config["LINKINVENT_SMILES_WARHEADS"],
-            "sample_strategy": None,
+            "sample_strategy": "multinomial",
             "num_cols": 4
         },
         "mol2mol-multi": {

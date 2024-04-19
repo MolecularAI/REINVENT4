@@ -33,7 +33,7 @@ def data():
 def test_enough_smiles(data):
     smilies, mols = data
 
-    validated_smilies, states = validate_smiles(mols)
+    validated_smilies, states = validate_smiles(mols, smilies)
 
     assert len(validated_smilies) == len(smilies)
     assert len(states) == len(smilies)
@@ -43,7 +43,7 @@ def test_number_of_valids(data):
     """Test for number of valid SMILES only"""
     smilies, mols = data
 
-    validated_smilies, states = validate_smiles(mols)
+    validated_smilies, states = validate_smiles(mols, smilies)
 
     valid = np.where(states == SmilesState.VALID, True, False)
     assert sum(valid) == 4
@@ -53,7 +53,7 @@ def test_number_of_all_valids(data):
     """Test for number of valid and duplicate SMILES"""
     smilies, mols = data
 
-    validated_smilies, states = validate_smiles(mols)
+    validated_smilies, states = validate_smiles(mols, smilies)
 
     all_valid = np.where(
         (states == SmilesState.VALID) | (states == SmilesState.DUPLICATE), True, False
@@ -65,7 +65,7 @@ def test_number_of_invalids(data):
     """Test for number of invalid SMILES"""
     smilies, mols = data
 
-    validated_smilies, states = validate_smiles(mols)
+    validated_smilies, states = validate_smiles(mols, smilies)
 
     invalid = np.where(states == SmilesState.INVALID, True, False)
     assert sum(invalid) == 4

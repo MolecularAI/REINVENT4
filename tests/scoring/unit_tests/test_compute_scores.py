@@ -35,12 +35,12 @@ VALIDATED_SMILIES = [
     'CC(C)Cc1ccc(C(C)C(=O)O)cc1',
     'COC(=O)C1C(OC(=O)c2ccccc2)CC2CCC1N2C',
     'CCC',
-    'INVALID5',
+    'CCCCX',
     'Cc1c(N(C)CS(=O)(=O)O)c(=O)n(-c2ccccc2)n1C',
     'Cn1c(=O)c2c(ncn2C)n(C)c1=O',
     'COC(=O)C1C(OC(=O)c2ccccc2)CC2CCC1N2C',
-    'INVALID9',
-    'INVALID10',
+    'c1ccccc1c',
+    'c1cccc1N',
     'Clc1ccc2c(c1)C(N1CCNCC1)=Nc1ccccc1O2',
     'CNC(C)C1CCC(N)C(OC2C(N)CC(N)C(OC3OCC(C)(O)C(NC)C3O)C2O)O1',
     'CC(C)Cc1ccc(C(C)C(=O)O)cc1',
@@ -97,7 +97,7 @@ def test_validate_smiles():
         for smiles in SMILIES
     ]
 
-    validated_smilies, states = validate_smiles(mols)
+    validated_smilies, states = validate_smiles(mols, SMILIES)
 
     assert validated_smilies == VALIDATED_SMILIES
     assert (states == STATES).all()
@@ -109,7 +109,7 @@ def test_compute_scores():
         for smiles in SMILIES
     ]
 
-    validated_smilies, states = validate_smiles(mols)
+    validated_smilies, states = validate_smiles(mols, SMILIES)
 
     cache = {}
     invalid_mask = np.where(states == SmilesState.INVALID, False, True)

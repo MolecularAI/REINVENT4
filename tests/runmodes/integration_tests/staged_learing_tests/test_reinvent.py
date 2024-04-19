@@ -20,7 +20,7 @@ def setup(tmp_path, json_config, pytestconfig):
             "agent_file": json_config["PRIOR_PATH"],
             "max_steps": 10,
             "batch_size": 50,
-            "uniquify_smiles": True,
+            "unique_sequences": True,
             "randomize_smiles": True,
         },
         "learning_strategy": {"type": "dap", "sigma": 120, "rate": 0.0001},

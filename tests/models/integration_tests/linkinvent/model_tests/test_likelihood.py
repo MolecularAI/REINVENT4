@@ -18,7 +18,7 @@ class TestLinkInventLikelihoodSMILES(unittest.TestCase):
         self.sampled_sequence_list = [dto1, dto2]
 
         save_dict = torch.load(
-            self.json_config["LINKINVENT_PRIOR_PATH"], map_location=self.device
+            self.json_config["LINKINVENT_CHEMBL_PRIOR_PATH"], map_location=self.device
         )
         model = LinkInventModel.create_from_dict(
             save_dict, "inference", torch.device(self.device)

@@ -13,7 +13,7 @@ from reinvent_plugins.components.comp_reaction_filter import ReactionFilter
         ("nonselective", [0.0, 0.0]),
     ],
 )
-def test_comp_custom_alerts(reaction_type, expected_results):
+def test_comp_reaction_filter(reaction_type, expected_results):
     reaction_smarts = (
         "[C:2]([#7;!D4:1])(=[O:3])[#6:4]>>[#7:1][*].[C,$(C=O):2](=[O:3])([*])[#6:4]"
     )

@@ -44,6 +44,9 @@ CELECOXIB_SCAFFOLD = "Cc1ccc(cc1)c2cc(nn2c3ccc(cc3)S(=O)(=O)N)[*:0]"
 SCAFFOLD_TO_DECORATE = "[*]c1ccc(cc1)c2cc(nn2c3ccc(cc3)S(=O)(=O)N)[*]"
 
 WARHEAD_PAIR = "*C1CCCCC1|*C1CCCC(ON)C1"
+WARHEAD_TRIPLE = "*N(C)C|*Cc1cncc(C#N)c1|*C[C@@H](O)CC(=O)O"
+WARHEAD_QUADRUPLE = "*C[C@@H](O)CC(=O)O|*N(C)C|*c1ccccc1|*Cc1cncc(C#N)c1"
+LINKER_TRIPLE = "[*]Cc1ccc(-c2cccc(COc3cc(O[*])c(CN[*])cc3Cl)c2C)c(C)c1-c1ccccc1"
 
 IBUPROFEN_TOKENIZED = [
     "^",
