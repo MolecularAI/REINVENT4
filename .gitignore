@@ -1,8 +1,11 @@
 __pycache__
-.vscode
-.idea/
-.env
 *.pyc
+package.json
+.vscode
+tags
+.idea
+/configs/config.json
+.env
 
 # Coverage.py output
 .coverage
@@ -13,4 +16,12 @@ mprofile_*.dat
 
 /reinvent.egg-info/*
 /reinvent.egg-info/dependency_links.txt
+/reinvent/models/lib_invent/
+/reinvent/models/link_invent/
+/reinvent/models/reinvent_core/
+/reinvent_models/
 /build/
+
+# Notebooks
+.ipynb_checkpoints/
+*.ipynb
