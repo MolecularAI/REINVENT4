@@ -1,3 +1,20 @@
+New in REINVENT 4.3
+===================
+
+For details see CHANGELOG.md.
+
+* Upgrade to **PyTorch 2.2**: rerun `pip install -r requirements-linux-64.lock`
+* 2 new **notebooks** demoing Reinvent with reinforcement learning and also transfer learning, includes TensorBoard visualisation and basic analysis
+* New Linkinvent model code based on unified transformer
+* New PubChem Mol2Mol prior
+* Unknown token support for PubChem based transformer models
+* New "device" config parameter to allow for explicit device e.g. "cuda:0"
+* Optional SMILES randomization in every TL epoch for Reinvent
+* Dataclass parameter validation for most scoring components
+* Invalid SMILES are now written to the reinforcement learning CSV
+* Code improvements and fixes
+
+
 New in REINVENT 4.2
 ===================
 

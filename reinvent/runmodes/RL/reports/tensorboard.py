@@ -15,8 +15,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-ROWS = 3
-COLUMNS = 10
+ROWS = 5
+COLUMNS = 6
 
 
 @dataclass

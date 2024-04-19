@@ -11,10 +11,10 @@ __all__ = ["ExternalProcess"]
 import os
 import shlex
 import json
-from dataclasses import dataclass
 from typing import List
 
 import numpy as np
+from pydantic.dataclasses import dataclass
 
 from .component_results import ComponentResults
 from .run_program import run_command

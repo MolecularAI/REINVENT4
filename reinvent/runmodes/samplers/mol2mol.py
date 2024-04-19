@@ -26,7 +26,9 @@ class Mol2MolSampler(Sampler):
         :returns: list of SampledSequencesDTO
         """
         # Standardize smiles in the same way as training data
-        smilies = [self.chemistry.conversions.convert_to_standardized_smiles(smile) for smile in smilies]
+        smilies = [
+            self.chemistry.conversions.convert_to_standardized_smiles(smile) for smile in smilies
+        ]
 
         smilies = (
             [self._get_randomized_smiles(smiles) for smiles in smilies]
@@ -34,17 +36,10 @@ class Mol2MolSampler(Sampler):
             else smilies
         )
 
-        self.model.set_temperature(self.temperature)
         # FIXME: should probably be done by caller
         #        replace hard-coded strings
         if self.sample_strategy == "multinomial":
             smilies = smilies * self.batch_size
-        elif self.sample_strategy == "beamsearch":
-            self.model.set_beam_size(self.batch_size)
-        else:
-            raise ValueError(
-                f"Sample strategy `{self.sample_strategy}` is not implemented"
-            )
 
         tokenizer = SMILESTokenizer()
         dataset = Dataset(smilies, self.model.get_vocabulary(), tokenizer)
@@ -75,13 +70,17 @@ class Mol2MolSampler(Sampler):
             for smiles in sampled.output
         ]
 
-        sampled.smilies, sampled.states = validate_smiles(mols, isomeric=self.isomeric)
+        sampled.smilies, sampled.states = validate_smiles(
+            mols, sampled.output, isomeric=self.isomeric
+        )
 
         return sampled
 
     def _get_randomized_smiles(self, smiles: str):
         input_mol = self.chemistry.conversions.smile_to_mol(smiles)
-        randomized_smile = self.chemistry.conversions.mol_to_random_smiles(input_mol)
+        randomized_smile = self.chemistry.conversions.mol_to_random_smiles(
+            input_mol, isomericSmiles=self.isomeric
+        )
 
         return randomized_smile
 
@@ -91,20 +90,24 @@ class Mol2MolSampler(Sampler):
         returns the largest if multiple reference smiles provided
         """
         specific_parameters = {"radius": 2, "use_features": False}
-        ref_fingerprints = self.chemistry.conversions.smiles_to_fingerprints(reference_smiles,
-                                                                         radius=specific_parameters['radius'],
-                                                                         use_features=specific_parameters[
-                                                                             'use_features'])
+        ref_fingerprints = self.chemistry.conversions.smiles_to_fingerprints(
+            reference_smiles,
+            radius=specific_parameters["radius"],
+            use_features=specific_parameters["use_features"],
+        )
         valid_mols, valid_idxs = self.chemistry.conversions.smiles_to_mols_and_indices(smiles)
-        query_fps = self.chemistry.conversions.mols_to_fingerprints(valid_mols, radius=specific_parameters['radius'],
-                                                            use_features=specific_parameters[
-                                                                'use_features'])
+        query_fps = self.chemistry.conversions.mols_to_fingerprints(
+            valid_mols,
+            radius=specific_parameters["radius"],
+            use_features=specific_parameters["use_features"],
+        )
         similarity = Similarity()
         scores = similarity.calculate_tanimoto(query_fps, ref_fingerprints)
         return scores
 
-    def check_nll(self, input_smiles: List[str], target_smiles: List[str]) -> Tuple[
-        List[str], List[str], List[float], List[float]]:
+    def check_nll(
+        self, input_smiles: List[str], target_smiles: List[str]
+    ) -> Tuple[List[str], List[str], List[float], List[float]]:
         """
         Compute the NLL of generating each target smiles given each input reference smiles
         :param input_smiles: list of input SMILES
@@ -118,8 +121,9 @@ class Mol2MolSampler(Sampler):
                 current_smi = smi
 
                 try:
-                    cano_smi = self.chemistry.conversions.convert_to_rdkit_smiles(smi,
-                                                                                  sanitize=True, isomericSmiles=True)
+                    cano_smi = self.chemistry.conversions.convert_to_rdkit_smiles(
+                        smi, sanitize=True, isomericSmiles=True
+                    )
                     current_smi = cano_smi
                 except Exception:
                     print(f"WARNING. SMILES {smi} is invalid")
@@ -129,7 +133,9 @@ class Mol2MolSampler(Sampler):
                     tokenized_smi = tokenizer.tokenize(current_smi)
                     self.model.vocabulary.encode(tokenized_smi)
                 except KeyError as e:
-                    print(f"WARNING. SMILES {current_smi} contains an invalid token {e}. It will be ignored")
+                    print(
+                        f"WARNING. SMILES {current_smi} contains an invalid token {e}. It will be ignored"
+                    )
                 else:
                     dto_list.append(SampledSequencesDTO(compound, current_smi, 0))
 
@@ -152,7 +158,7 @@ class Mol2MolSampler(Sampler):
         # Compute Tanimoto
         valid_mols, valid_idxs = self.chemistry.conversions.smiles_to_mols_and_indices(target)
         valid_scores = self.calculate_tanimoto(input, target)
-        tanimoto = [None]*len(target)
+        tanimoto = [None] * len(target)
         for i, j in enumerate(valid_idxs):
             tanimoto[j] = valid_scores[i]
 

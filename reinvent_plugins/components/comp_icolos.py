@@ -9,10 +9,10 @@ import shlex
 import json
 import tempfile
 import time
-from dataclasses import dataclass
 from typing import List, IO
 
 import numpy as np
+from pydantic.dataclasses import dataclass
 
 from .component_results import ComponentResults
 from .run_program import run_command

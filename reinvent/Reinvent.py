@@ -250,8 +250,18 @@ def main():
 
     logger.info(f"Number of PyTorch CUDA devices {torch.cuda.device_count()}")
 
-    use_cuda = input_config.get("use_cuda", True)
-    actual_device = set_torch_device(args.device, use_cuda)
+    if "use_cuda" in input_config:
+        logger.warning("'use_cuda' is deprecated, use 'device' instead")
+
+    device = input_config.get("device", None)
+
+    if not device:
+        use_cuda = input_config.get("use_cuda", True)
+
+        if use_cuda:
+            device = "cuda:0"
+
+    actual_device = set_torch_device(args.device, device)
 
     if actual_device.type == "cuda":
         current_device = torch.cuda.current_device()

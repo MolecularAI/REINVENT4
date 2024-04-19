@@ -8,11 +8,11 @@ from __future__ import annotations
 
 __all__ = ["MatchingSubstructure"]
 
-from dataclasses import dataclass
 from typing import List
 
 from rdkit import Chem
 import numpy as np
+from pydantic.dataclasses import dataclass
 
 from ..component_results import ComponentResults
 from reinvent_plugins.mol_cache import molcache
@@ -30,7 +30,7 @@ class Parameters:
     endpoint.
     """
 
-    smarts: List[List[str]]
+    smarts: List[str]
     use_chirality: List[bool]
 
 

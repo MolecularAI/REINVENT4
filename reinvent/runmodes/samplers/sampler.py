@@ -14,7 +14,7 @@ FIXME: The alternative would be to remove this class and use a simple strategy
 
 from __future__ import annotations
 
-__all__ = ["Sampler", "remove_duplicate_sequences", "validate_smiles", "INVALID_STR"]
+__all__ = ["Sampler", "remove_duplicate_sequences", "validate_smiles"]
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from typing import List, Tuple, TYPE_CHECKING
@@ -34,8 +34,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-INVALID_STR = "INVALID"
-
 
 @dataclass
 class Sampler(ABC):
@@ -45,13 +43,12 @@ class Sampler(ABC):
     # number of smiles to be generated for each input,
     # different from batch size used in dataloader which affect cuda memory
     batch_size: int
-    sample_strategy: str = "multinomial"  # Mol2Mol
-    isomeric: bool = False  # Mol2Mol
+    sample_strategy: str = "multinomial"  # Transformer-based models
+    isomeric: bool = False  # Transformer-based models
     randomize_smiles: bool = True
     unique_sequences: bool = False  # backwards compatibility for R3
     chemistry: ChemistryHelpers = None
     tokens: TransformationTokens = None  # LinkInvent only
-    temperature: float = 1.0
 
     @abstractmethod
     def sample(self, smilies: List[str]) -> SampleBatch:
@@ -74,18 +71,18 @@ def remove_duplicate_sequences(
 
     orig_len = len(sampled.output)
 
-    if is_reinvent:
-        seq_string = np.array(sampled.output)
-    elif is_mol2mol:
+    if is_reinvent or is_mol2mol:
         seq_string = np.array(sampled.output)
     else:
         seq_string = np.array([f"{a}{b}" for a, b in zip(sampled.input, sampled.output)])
 
     # order shouldn't matter here
     smilies, uniq_idx = np.unique(seq_string, return_index=True)
+
     if sampled.items1:
         sampled.items1 = np.array(sampled.items1)
         sampled.items1 = list(sampled.items1[uniq_idx])
+
     sampled.output = list(smilies)
     sampled.nlls = sampled.nlls[uniq_idx]
     sampled.items2 = list(np.array(sampled.items2)[uniq_idx])
@@ -97,12 +94,16 @@ def remove_duplicate_sequences(
     return sampled
 
 
-def validate_smiles(mols: List[Chem.Mol], isomeric: bool = False) -> Tuple[List, np.ndarray]:
+def validate_smiles(
+    mols: List[Chem.Mol], smilies, isomeric: bool = False
+) -> Tuple[List, np.ndarray]:
     """Basic validation of sampled or joined SMILES
 
     The molecules are converted to canonical SMILES.  Each SMILES state is
     determined to be invalid, valid or duplicate.
 
+    :mols: molecules
+    :smilies: SMILES of molecules including invalid ones
     :returns: validated SMILES and their states
     """
 
@@ -110,14 +111,12 @@ def validate_smiles(mols: List[Chem.Mol], isomeric: bool = False) -> Tuple[List,
     smilies_states = []  # valid, invalid, duplicate
     seen_before = set()
 
-    for i, mol in enumerate(mols):
+    for mol, sampled_smiles in zip(mols, smilies):
         if mol:
             failed = Chem.SanitizeMol(mol, catchErrors=True)
 
             if not failed:
-                canonical_smiles = Chem.MolToSmiles(
-                    mol, canonical=True, isomericSmiles=isomeric
-                )
+                canonical_smiles = Chem.MolToSmiles(mol, canonical=True, isomericSmiles=isomeric)
 
                 if canonical_smiles in seen_before:
                     smilies_states.append(SmilesState.DUPLICATE)
@@ -127,10 +126,10 @@ def validate_smiles(mols: List[Chem.Mol], isomeric: bool = False) -> Tuple[List,
                 validated_smilies.append(canonical_smiles)
                 seen_before.add(canonical_smiles)
             else:
-                validated_smilies.append(f"{INVALID_STR}{i}")
+                validated_smilies.append(sampled_smiles)
                 smilies_states.append(SmilesState.INVALID)
         else:
-            validated_smilies.append(f"{INVALID_STR}{i}")
+            validated_smilies.append(sampled_smiles)
             smilies_states.append(SmilesState.INVALID)
 
     smilies_states = np.array(smilies_states)

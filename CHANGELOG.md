@@ -6,8 +6,118 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 ## [Unreleased]
 
 ### Changed
-- Fragment generators using transformers
 - CAZP scoring component
+
+
+## [4.3.5] 2024-04-18
+
+### Changed
+
+- Code clean-up in create\_adapter()
+
+### Fixed
+
+- Import mol2mol vocabulary rather than copying the file
+
+
+## [4.3.4] 2024-04-16
+
+### Added
+
+- Write invalid SMILES unchanged to RL CSV
+
+
+## [4.3.3] 2024-04-16
+
+### Added
+
+- Notebook: demo on how to analyse RL CSV
+
+
+## [4.3.2] 2024-04-15
+
+### Added
+
+- Dataclass validation for scoring component parameters
+
+### Fixed
+
+- Datatype in MatchingSubstructure's Parameters: only single SMARTS is allowed
+
+
+## [4.3.1] 2024-04-15
+
+### Added
+
+- Notebook to demo simple RL run, TensorBoard visualisation and TensorBoard data extraction.
+
+
+## [4.3.0] 2024-04-15
+
+### Added
+
+- Linkinvent based on unified Transformer model supported by RL and sampling.  Both beam search and multinomial sampling are implemented.
+
+
+## [4.2.13] 2024-04-12
+
+### Fixed
+
+- downgraded Chemprop to 1.5.2 and sklearn to 1.2.2 to retain backward compatibility
+
+
+## [4.2.12] 2024-04-10
+
+### Changed
+
+- New default torch device setup from PyTorch 2.x
+
+### Added
+
+- Config parameter "device" to explicitly set torch device e.g. "cuda:0"
+
+
+## [4.2.11] 2024-04-08
+
+### Fixed
+
+- Fixed unknown token handling for Mol2mol TL
+
+
+## [4.2.10] 2024-04-05
+
+### Fixed
+
+- Fixed dataloader for TL to use incomplete batch 
+
+
+## [4.2.9] 2024-04-04
+
+### Fixed
+
+- Skip hash check in metadata if no metadata in model file
+
+
+## [4.2.8] 2024-04-03
+
+### Added
+
+- Mol2Mol supports unknown tokens for all the priors
+
+
+
+## [4.2.7] 2024-03-27
+
+### Added
+
+- Optional randomization in all TL epochs for Reinvent
+
+
+## [4.2.6] 2024-03-21
+
+### Fixed
+
+- Return from make\_grid\_image()
 
 
 ## [4.2.5] 2024-03-20

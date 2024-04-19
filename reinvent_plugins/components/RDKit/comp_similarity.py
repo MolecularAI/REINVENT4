@@ -4,10 +4,10 @@ from __future__ import annotations
 
 __all__ = ["TanimotoDistance"]
 
-from dataclasses import dataclass
 from typing import List
 
 import numpy as np
+from pydantic.dataclasses import dataclass
 
 from reinvent.chemistry.conversions import Conversions
 from reinvent.chemistry.similarity import Similarity

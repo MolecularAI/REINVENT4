@@ -3,11 +3,12 @@
 The quality depends on the quality of the conformer.
 """
 
-from dataclasses import dataclass, field
 from typing import List, Optional
 
 import numpy as np
 from rdkit.Chem import AllChem as Chem
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 from ..component_results import ComponentResults
 from ..add_tag import add_tag
@@ -17,8 +18,8 @@ from reinvent_plugins.mol_cache import molcache
 @add_tag("__parameters")
 @dataclass
 class Parameters:
-    grid_spacing: Optional[List[float]] = field(default_factory=lambda: [0.2])
-    box_margin: Optional[List[float]] = field(default_factory=lambda: [2.0])
+    grid_spacing: Optional[List[float]] = Field(default_factory=lambda: [0.2])
+    box_margin: Optional[List[float]] = Field(default_factory=lambda: [2.0])
 
 
 @add_tag("__component")

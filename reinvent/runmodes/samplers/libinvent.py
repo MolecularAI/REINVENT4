@@ -72,7 +72,7 @@ class LibinventSampler(Sampler):
 
         mols = join_fragments(sampled, reverse=False, keep_labels=True)
 
-        sampled.smilies, sampled.states = validate_smiles(mols)
+        sampled.smilies, sampled.states = validate_smiles(mols, sampled.output)
 
         return sampled
 

@@ -8,12 +8,13 @@ from __future__ import annotations
 
 __all__ = ["TPSA"]
 
-from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 import numpy as np
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 from ..component_results import ComponentResults
 from reinvent_plugins.mol_cache import molcache
@@ -25,7 +26,7 @@ from ..add_tag import add_tag
 class Parameters:
     """Parameters for the scoring component"""
 
-    includeSandP: Optional[List[bool]] = field(default_factory=lambda: [False])
+    includeSandP: Optional[List[bool]] = Field(default_factory=lambda: [False])
 
 
 @add_tag("__component")

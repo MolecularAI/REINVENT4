@@ -81,7 +81,7 @@ class Conversions:
         if molecule:
             return MolToSmiles(molecule, isomericSmiles=isomericSmiles, canonical=canonical)
 
-    def mol_to_random_smiles(self, molecule: Mol) -> str:
+    def mol_to_random_smiles(self, molecule: Mol, isomericSmiles=False) -> str:
         """
         Converts a Mol object into a random SMILES string.
         :return: A SMILES string.
@@ -90,7 +90,7 @@ class Conversions:
             new_atom_order = list(range(molecule.GetNumAtoms()))
             random.shuffle(new_atom_order)
             random_mol = RenumberAtoms(molecule, newOrder=new_atom_order)
-            return MolToSmiles(random_mol, canonical=False, isomericSmiles=False)
+            return MolToSmiles(random_mol, canonical=False, isomericSmiles=isomericSmiles)
 
     def convert_to_rdkit_smiles(
         self, smiles: str, allowTautomers=True, sanitize=False, isomericSmiles=False

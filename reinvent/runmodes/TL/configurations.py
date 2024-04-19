@@ -36,6 +36,8 @@ class Configuration:
     num_refs: int = 0  # number of reference molecules for similarity
     starting_epoch: int = 1
     shuffle_each_epoch: bool = True
+    randomize_all_smiles: bool = False
+    internal_diversity: bool = False
 
 
 @dataclass(frozen=True)

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 __all__ = ["Qptuna"]
 import pickle
-from dataclasses import dataclass
 from typing import List
 import logging
 import json
 
 import numpy as np
+from pydantic.dataclasses import dataclass
 
 from .component_results import ComponentResults
 from .add_tag import add_tag

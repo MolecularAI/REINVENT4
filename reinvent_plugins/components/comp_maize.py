@@ -137,10 +137,11 @@ import shlex
 import json
 import tempfile
 import time
-from dataclasses import dataclass, field
 from typing import List, Any
 
 import numpy as np
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 from .component_results import ComponentResults
 from .run_program import run_command
@@ -169,11 +170,11 @@ class Parameters:
 
     executable: List[str]
     workflow: List[str]
-    debug: List[bool] = field(default_factory=lambda: [False])
-    keep: List[bool] = field(default_factory=lambda: [False])
-    log: List[str | None] = field(default_factory=lambda: [None])
-    config: List[str | None] = field(default_factory=lambda: [None])
-    parameters: List[dict[str, Any]] = field(default_factory=lambda: [{}])
+    debug: List[bool] = Field(default_factory=lambda: [False])
+    keep: List[bool] = Field(default_factory=lambda: [False])
+    log: List[str | None] = Field(default_factory=lambda: [None])
+    config: List[str | None] = Field(default_factory=lambda: [None])
+    parameters: List[dict[str, Any]] = Field(default_factory=lambda: [{}])
 
 
 CMD = "{exe} {config} --inp {inp} --out {out} --parameters {params}"

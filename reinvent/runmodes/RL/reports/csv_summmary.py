@@ -20,6 +20,7 @@ class CSVSummary:
     agent_nll: float
     augmented_nll: float
     scaffolds: list
+    smiles_state: list
 
 
 def write_summary(data: CSVSummary, write_header=False) -> tuple:
@@ -30,7 +31,7 @@ def write_summary(data: CSVSummary, write_header=False) -> tuple:
     :returns: headers and columns
     """
 
-    header = ["Agent", "Prior", "Target", "Score", "SMILES"]
+    header = ["Agent", "Prior", "Target", "Score", "SMILES", "SMILES_state"]
     results = data.score_results
 
     columns = [
@@ -39,6 +40,7 @@ def write_summary(data: CSVSummary, write_header=False) -> tuple:
         [f"{score:.4f}" for score in data.augmented_nll],
         [f"{score:.7f}" for score in results.total_scores],
         results.smilies,
+        [str(state.value) for state in data.smiles_state]
     ]
 
     if data.scaffolds:

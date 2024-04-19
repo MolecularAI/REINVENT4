@@ -57,7 +57,7 @@ Installation
     ```
 4. Optional: if you want to use **AMD GPUs** on Linux you would need to install the [ROCm PyTorch version](https://pytorch.org/get-started/locally/) manually _after_ installation of the dependencies in point 3, e.g.
    ```shell
-   pip install torch==1.13.1+rocm5.2 torchvision==0.14.1+rocm5.2 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/rocm5.2
+   pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/rocm5.7
    ```
 5. Install the tool. The dependencies were already installed in the previous step, so there is no need to install them again (flag `--no-deps).  If you want to install in editable mode (changes to the code are automatically picked up) add -e before the dot.
     ```shell
@@ -90,22 +90,23 @@ appropriate run mode depending on the research problem you are trying to address
 There is additional information in `config/toml` in several `*.md` files with
 instructions on how to configure the TOML file.
 
-<!--- For concrete examples, you can check out the Jupyter notebook examples in the ReinventCommunity repo.
-Running each example will result in a template file.There are templates for many running modes. 
-Each running mode can be executed by `python input.py some\_running\_mode.json` after activating the environment.
-    
-Templates can be manually edited before using. The only thing that needs modification for a standard run are the file 
-and folder paths. Most running modes produce logs that can be monitored by tensorboard. --->
-
 
 Tutorials / `Jupyter` notebooks
 -------------------------------
 
-NOTE: these will be updated at a later time!
+Basic instructions can be found in the comments in the config examples in `config/toml`.
 
-<!--- There is another repository containing useful `jupyter` notebooks related to `REINVENT` 
-called [ReinventCommunity](https://github.com/MolecularAI/ReinventCommunity). Note, that it uses a
-different `conda` environment to execute, so you have to set up a separate environment. --->
+Notebooks will be provided in the `notebook/` directory.  Please note that we provide the notebooks in jupytext "light script" format.  To work with the light scripts you will need to install jupytext.  A few other packages will come in handy too.
+
+```shell
+pip install jupytext mols2grid seaborn
+```
+
+The Python files in `notebook/` can then be converted to a notebook e.g.
+
+```shell
+jupytext --to ipynb -o Reinvent_demo.ipynb Reinvent_demo.py
+```
 
 
 Updating dependencies
@@ -113,7 +114,7 @@ Updating dependencies
 
 Update the lock files with [pip-tools](https://pypi.org/project/pip-tools/) (please, do not edit the files manually):
 ```shell
-pip-compile --extra-index-url=https://download.pytorch.org/whl/cu113 --extra-index-url=https://pypi.anaconda.org/OpenEye/simple --resolver=backtracking pyproject.toml
+pip-compile --extra-index-url=https://download.pytorch.org/whl/cu121 --extra-index-url=https://pypi.anaconda.org/OpenEye/simple --resolver=backtracking pyproject.toml
 ```
 To update a single package, use `pip-compile --upgrade-package somepackage`
 (see the documentation for pip-tools).

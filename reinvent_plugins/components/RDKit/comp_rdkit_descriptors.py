@@ -1,7 +1,6 @@
 """Compute a desired list of RDKit descriptors up to a total of 210"""
 
 __all__ = ["RDKitDescriptors"]
-from dataclasses import dataclass
 from typing import List
 import logging
 
@@ -9,6 +8,7 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 from rdkit.ML.Descriptors.MoleculeDescriptors import MolecularDescriptorCalculator
 import numpy as np
+from pydantic.dataclasses import dataclass
 
 from ..component_results import ComponentResults
 from reinvent_plugins.mol_cache import molcache

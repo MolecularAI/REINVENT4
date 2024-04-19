@@ -1,6 +1,6 @@
 """The LinkInvent sampling module"""
 
-__all__ = ["LinkinventSampler"]
+__all__ = ["LinkinventSampler", "LinkinventTransformerSampler"]
 from typing import List
 
 import torch.utils.data as tud
@@ -10,6 +10,7 @@ from . import params
 from reinvent.models.linkinvent.dataset.dataset import Dataset
 from reinvent.models.model_factory.sample_batch import SampleBatch
 from reinvent.runmodes.utils.helpers import join_fragments
+from ...models.transformer.core.dataset.dataset import Dataset as TransformerDataset
 
 
 class LinkinventSampler(Sampler):
@@ -22,14 +23,26 @@ class LinkinventSampler(Sampler):
         :returns: list of SampledSequencesDTO
         """
 
+        if self.model.model._version == 2:  # Transformer-based
+            smilies = self._standardize_input(smilies)
+
         warheads_list = self._get_randomized_smiles(smilies) if self.randomize_smiles else smilies
         clean_warheads = [
             self.chemistry.attachment_points.remove_attachment_point_numbers(warheads)
             for warheads in warheads_list
         ]
 
-        clean_warheads = clean_warheads * self.batch_size
-        dataset = Dataset(clean_warheads, self.model.get_vocabulary().input)
+        if self.model.model._version == 1:  # RNN-based
+            clean_warheads = clean_warheads * self.batch_size
+
+            dataset = Dataset(clean_warheads, self.model.get_vocabulary().input)
+        elif self.model.model._version == 2:  # Transformer-based
+            if self.sample_strategy == "multinomial":
+                clean_warheads = clean_warheads * self.batch_size
+
+            dataset = TransformerDataset(
+                clean_warheads, self.model.get_vocabulary(), self.model.tokenizer
+            )
 
         dataloader = tud.DataLoader(
             dataset,
@@ -41,8 +54,12 @@ class LinkinventSampler(Sampler):
         sequences = []
 
         for batch in dataloader:
-            inputs, input_seq_lengths = batch
-            sampled = self.model.sample(inputs, input_seq_lengths)
+            inputs, input_info = batch
+
+            if self.model.model._version == 1:
+                sampled = self.model.sample(inputs, input_info)
+            elif self.model.model._version == 2:
+                sampled = self.model.sample(inputs, input_info, self.sample_strategy)
 
             for batch_row in sampled:
                 sequences.append(batch_row)
@@ -54,12 +71,26 @@ class LinkinventSampler(Sampler):
 
         mols = join_fragments(sampled, reverse=True)
 
-        sampled.smilies, sampled.states = validate_smiles(mols)
+        sampled.smilies, sampled.states = validate_smiles(
+            mols, sampled.output, isomeric=self.isomeric
+        )
 
         return sampled
 
+    def _standardize_input(self, warheads_list: List[str]):
+        cano_warheads_list = []
+        for warheads in warheads_list:
+            cano_warheads = "|".join(
+                [
+                    self.chemistry.conversions.convert_to_standardized_smiles(warhead)
+                    for warhead in warheads.split("|")
+                ]
+            )
+            cano_warheads_list.append(cano_warheads)
+        return cano_warheads_list
+
     def _get_randomized_smiles(self, warhead_pair_list: List[str]):
-        """Y"""
+        """Randomize the warhead SMILES"""
 
         randomized_warhead_pair_list = []
 
@@ -69,7 +100,8 @@ class LinkinventSampler(Sampler):
                 self.chemistry.conversions.smile_to_mol(warhead) for warhead in warhead_list
             ]
             warhead_randomized_list = [
-                self.chemistry.conversions.mol_to_random_smiles(mol) for mol in warhead_mol_list
+                self.chemistry.conversions.mol_to_random_smiles(mol, isomericSmiles=self.isomeric)
+                for mol in warhead_mol_list
             ]
             # Note do not use self.self._bond_maker.randomize_scaffold, as it would add unwanted brackets to the
             # attachment points (which are not part of the warhead vocabulary)
@@ -79,3 +111,6 @@ class LinkinventSampler(Sampler):
             randomized_warhead_pair_list.append(warhead_pair_randomized)
 
         return randomized_warhead_pair_list
+
+
+LinkinventTransformerSampler = LinkinventSampler

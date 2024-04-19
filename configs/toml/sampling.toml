@@ -3,7 +3,7 @@
 
 
 run_type = "sampling"
-use_cuda = true  # run on the GPU if true, on the CPU if false
+device = "cuda:0"  # set torch device e.g. "cpu"
 json_out_config = "_sampling.json"  # write this TOML to JSON
 
 

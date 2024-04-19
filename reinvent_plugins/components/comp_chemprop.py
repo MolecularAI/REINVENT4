@@ -23,12 +23,13 @@ transform.k = 0.4
 from __future__ import annotations
 
 __all__ = ["ChemProp"]
-from dataclasses import dataclass, field
 from typing import List
 import logging
 
 import chemprop
 import numpy as np
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 from .component_results import ComponentResults
 from .add_tag import add_tag
@@ -50,7 +51,7 @@ class Parameters:
     """
 
     checkpoint_dir: List[str]
-    rdkit_2d_normalized: List[bool] = field(default_factory=lambda: [False])
+    rdkit_2d_normalized: List[bool] = Field(default_factory=lambda: [False])
 
 
 @add_tag("__component")

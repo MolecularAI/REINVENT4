@@ -24,6 +24,7 @@ class Reinvent(Learning):
             smiles_list=self.smilies,
             vocabulary=self.model.vocabulary,
             tokenizer=SMILESTokenizer(),
+            randomize=self.randomize_all_smiles,
         )
 
         self.validation_dataset = None
@@ -33,6 +34,7 @@ class Reinvent(Learning):
                 smiles_list=self.validation_smilies,
                 vocabulary=self.model.vocabulary,
                 tokenizer=SMILESTokenizer(),
+                randomize=self.randomize_all_smiles,  # if true much shallower minimum
             )
 
         self.collate_fn = Dataset.collate_fn

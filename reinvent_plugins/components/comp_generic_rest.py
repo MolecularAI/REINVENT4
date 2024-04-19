@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 __all__ = ["REST"]
-from dataclasses import dataclass
 from typing import List
 
 import requests
 import numpy as np
+from pydantic.dataclasses import dataclass
 
 from .component_results import ComponentResults
 from .add_tag import add_tag

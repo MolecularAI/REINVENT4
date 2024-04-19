@@ -7,13 +7,13 @@ __all__ = ["MMP"]
 import logging
 import shlex
 from io import StringIO
-from dataclasses import dataclass, field
 from typing import List
 
 import numpy as np
 import pandas as pd
-
 from rdkit import Chem
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 from .component_results import ComponentResults
 from .run_program import run_command
@@ -34,9 +34,9 @@ class Parameters:
     """
 
     reference_smiles: List[List[str]]
-    num_of_cuts: List[int] = field(default_factory=lambda: [1])
-    max_variable_heavies: List[int] = field(default_factory=lambda: [40])
-    max_variable_ratio: List[float] = field(default_factory=lambda: [0.33])
+    num_of_cuts: List[int] = Field(default_factory=lambda: [1])
+    max_variable_heavies: List[int] = Field(default_factory=lambda: [40])
+    max_variable_ratio: List[float] = Field(default_factory=lambda: [0.33])
 
 
 FRAG_CMD = "mmpdb --quiet fragment --num-cuts {ncuts}"

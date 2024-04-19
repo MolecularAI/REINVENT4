@@ -36,8 +36,11 @@ HEADERS = {
     "Reinvent": ("SMILES", "NLL"),
     "Libinvent": ("SMILES", "Scaffold", "R-groups", "NLL"),
     "Linkinvent": ("SMILES", "Warheads", "Linker", "NLL"),
+    "LinkinventTransformer": ("SMILES", "Warheads", "Linker", "NLL"),
     "Mol2Mol": ("SMILES", "Input_SMILES", "Tanimoto", "NLL"),
 }
+
+FRAGMENT_GENERATORS = ["Libinvent", "Linkinvent", "LinkinventTransformer"]
 
 
 def run_sampling(config: dict, device, *args, **kwargs):
@@ -132,7 +135,7 @@ def run_sampling(config: dict, device, *args, **kwargs):
     csv_logger.info(HEADERS[model_type])
     if model_type == "Reinvent":
         records = zip(sampled.smilies, sampled.nlls.cpu().tolist())
-    elif model_type in ["Libinvent", "Linkinvent"]:
+    elif model_type in FRAGMENT_GENERATORS:
         records = zip(sampled.smilies, sampled.items1, sampled.items2, sampled.nlls.cpu().tolist())
     elif model_type == "Mol2Mol":
         records = zip(sampled.smilies, sampled.items1, scores, sampled.nlls.cpu().tolist())

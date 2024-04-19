@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["LinkinventAdapter"]
+__all__ = ["LinkinventAdapter", "LinkinventTransformerAdapter"]
 from typing import List, TYPE_CHECKING
 
 from .sample_batch import SampleBatch
@@ -12,6 +12,7 @@ from reinvent.models.model_factory.model_adapter import (
     SampledSequencesDTO,
     BatchLikelihoodDTO,
 )
+from reinvent.models.model_factory.transformer_adapter import TransformerAdapter
 
 if TYPE_CHECKING:
     pass
@@ -32,3 +33,7 @@ class LinkinventAdapter(ModelAdapter):
         # warhead SMILES, linker SMILES, NLLs
         sampled = self.model.sample(warheads_seqs, warheads_seq_lengths)
         return SampleBatch(*sampled)
+
+
+class LinkinventTransformerAdapter(TransformerAdapter):
+    pass

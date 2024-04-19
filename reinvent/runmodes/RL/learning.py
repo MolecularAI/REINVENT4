@@ -238,6 +238,31 @@ class Learning(ABC):
             np.argwhere(self.sampled.states == SmilesState.VALID).flatten(),
         )
 
+    def _update_common_transformer(self, results: ScoreResults):
+        """Common update for Transformer-based models, Mol2Mol, LibInvent and LinkInvent
+
+        :param results: scoring results object
+        :return: total loss
+        """
+        likelihood_dto = self._state.agent.likelihood_smiles(self.sampled)
+        batch = likelihood_dto.batch
+
+        prior_nlls = self.prior.likelihood(
+            batch.input, batch.input_mask, batch.output, batch.output_mask
+        )
+
+        agent_nlls = likelihood_dto.likelihood
+
+        return self.reward_nlls(
+            agent_nlls,
+            prior_nlls,
+            results.total_scores,
+            self.inception,
+            results.smilies,
+            self._state.agent,
+            np.argwhere(self.sampled.states == SmilesState.VALID).flatten(),
+        )
+
     # FIXME: still needed: molecule ID
     def report(
         self,
@@ -327,7 +352,9 @@ class Learning(ABC):
 
             send_report(report, self.reporter)
 
-        csv_summary = CSVSummary(step_no, score_results, NLL_prior, NLL_agent, NLL_augm, scaffolds)
+        csv_summary = CSVSummary(
+            step_no, score_results, NLL_prior, NLL_agent, NLL_augm, scaffolds, self.sampled.states
+        )
 
         header, columns = write_summary(csv_summary, write_header=self.__write_csv_header)
 

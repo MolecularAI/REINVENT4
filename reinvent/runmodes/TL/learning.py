@@ -11,7 +11,7 @@ from __future__ import annotations
 
 __all__ = ["Learning"]
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 import logging
 import random
 
@@ -31,6 +31,7 @@ from reinvent.runmodes.utils.tensorboard import SummaryWriter  # monkey patch
 from reinvent.chemistry import Conversions
 from reinvent.chemistry.library_design import BondMaker, AttachmentPoints
 from reinvent.models.model_factory.sample_batch import SmilesState
+from reinvent.runmodes.utils import mutual_similarities, internal_diversity
 
 if TYPE_CHECKING:
     from reinvent.models import ModelAdapter
@@ -64,6 +65,7 @@ class Learning(ABC):
         self.validation_dataset = None
         self.collate_fn = None
         self.dataset = None
+        self.randomize_all_smiles = self._config.randomize_all_smiles
 
         # FIXME: ugly hard-coded model names
         if model_type == "Reinvent" or model_type == "Mol2Mol":
@@ -73,11 +75,10 @@ class Learning(ABC):
         self._optimizer = configuration.optimizer
         self._lr_scheduler = configuration.learning_rate_scheduler
 
-        self.ref_fps = None
+        self.reference_fingerprints = None
 
         self.smilies = self._config.smilies
         self.validation_smilies = self._config.validation_smilies
-        self.duplicate_smiles = set()
 
         chemistry = ChemistryHelpers(
             Conversions(),  # Lib/LinkInvent, Mol2Mol
@@ -91,11 +92,15 @@ class Learning(ABC):
             sample_batch_size = self._config.sample_batch_size
 
         sampling_parameters = {"batch_size": sample_batch_size}
-        sampler, _ = setup_sampler(model_type, sampling_parameters, self.model, chemistry)
+        sampler, _ = setup_sampler(
+            model_type, sampling_parameters, self.model, chemistry
+        )
         sampler.unique_sequences = False
 
         self.sampler = sampler
-        self.sampling_smilies = random.choices(self.smilies, k=self._config.sample_batch_size)
+        self.sampling_smilies = random.choices(
+            self.smilies, k=self._config.sample_batch_size
+        )
 
         if not isinstance(self.sampling_smilies[0], str):
             self.sampling_smilies = [s[0] for s in self.sampling_smilies]
@@ -107,6 +112,7 @@ class Learning(ABC):
 
         self.batch_size = configuration.batch_size
         self.save_freq = max(self._config.save_every_n_epochs, 1)
+        self.internal_diversity = self._config.internal_diversity
 
         self.reporter = get_reporter()
         self.tb_reporter = None
@@ -116,7 +122,9 @@ class Learning(ABC):
 
             if model_type == "Reinvent":
                 iv = torch.full((self.batch_size,), 0, dtype=torch.long)
-                self.tb_reporter.add_graph(self.model.model.network, input_to_model=iv.unsqueeze(1))
+                self.tb_reporter.add_graph(
+                    self.model.model.network, input_to_model=iv.unsqueeze(1)
+                )
 
             if do_similarity:
                 self._compute_similarity()
@@ -143,7 +151,7 @@ class Learning(ABC):
             generator=torch.Generator(device=self.device),
             shuffle=self._config.shuffle_each_epoch,
             collate_fn=self.collate_fn,
-            drop_last=True,
+            drop_last=False,
         )
 
         self.validation_dataloader = None
@@ -238,7 +246,9 @@ class Learning(ABC):
             loss.backward()
 
             if self.clip_gradient_norm > 0:
-                clip_grad_norm_(self.model.network.parameters(), self.clip_gradient_norm)
+                clip_grad_norm_(
+                    self.model.network.parameters(), self.clip_gradient_norm
+                )
 
             self._optimizer.step()
 
@@ -270,8 +280,10 @@ class Learning(ABC):
     def _prepare_similarity(self):
         nmols = min(len(self.smilies), self._config.num_refs)
         ref_smilies = random.sample(self.smilies, nmols)
-        mols = filter(lambda m: m, [Chem.MolFromSmiles(smiles) for smiles in ref_smilies])
-        self.ref_fps = [Chem.RDKFingerprint(mol) for mol in mols]
+        mols = filter(
+            lambda m: m, [Chem.MolFromSmiles(smiles) for smiles in ref_smilies]
+        )
+        self.reference_fingerprints = [Chem.RDKFingerprint(mol) for mol in mols]
 
     def _compute_similarity(self):
         mols = filter(
@@ -319,27 +331,46 @@ class Learning(ABC):
         samples = self.sampler.sample(self.sampling_smilies)
         sampled_smilies = []
         sampled_nlls = []
+        mols = []
+        duplicate_smiles = set()
 
-        for smiles, nll, state in zip(samples.smilies, samples.nlls.cpu(), samples.states):
+        for smiles, nll, state in zip(
+            samples.smilies, samples.nlls.cpu(), samples.states
+        ):
             if state == SmilesState.DUPLICATE:
-                self.duplicate_smiles.add(smiles)
+                duplicate_smiles.add(smiles)
 
             if state == SmilesState.DUPLICATE or state == SmilesState.VALID:
                 sampled_smilies.append(smiles)
                 sampled_nlls.append(nll)
+
+            mol = Chem.MolFromSmiles(smiles)
+
+            if mol:
+                mols.append(mol)
+
+        intdiv = 0.0
+        sampled_fps = [Chem.RDKFingerprint(mol) for mol in mols]
+
+        if self.internal_diversity:
+            similarities = mutual_similarities(sampled_fps)
+            intdiv = internal_diversity(similarities, p=2)
 
         if self.tb_reporter:
             tb_data = TBData(
                 epoch=epoch_no,
                 mean_nll=mean_nll,
                 mean_nll_validation=mean_nll_valid,
-                ref_fps=self.ref_fps,
+                fingerprints=sampled_fps,
+                reference_fingerprints=self.reference_fingerprints,
                 sampled_smilies=sampled_smilies,
                 sampled_nlls=np.array(sampled_nlls),
                 fraction_valid=len(sampled_smilies) / len(samples.smilies),
+                number_duplicates=len(duplicate_smiles),
+                internal_diversity=intdiv,
             )
 
-            write_report(self.tb_reporter, tb_data, self.duplicate_smiles)
+            write_report(self.tb_reporter, tb_data)
 
         remote_data = RemoteData(
             epoch=epoch_no,

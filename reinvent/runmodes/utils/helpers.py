@@ -36,30 +36,29 @@ def disable_gradients(model: ModelAdapter) -> None:
         param.requires_grad = False
 
 
-def set_torch_device(device: str = None, use_cuda: bool = True) -> torch.device:
+def set_torch_device(args_device: str = None, device: str = None) -> torch.device:
     """Set the Torch device
 
-    :param device: device name from the command line
-    :param use_cuda: whether use_cuda was set in the user config
+    :param args_device: device name from the command line
+    :param device: device name from the config
     """
 
-    logger.debug(f"{device=} {use_cuda=}")
+    logger.debug(f"{device=} {args_device=}")
 
-    if device:  # command line overwrites config file
+    # NOTE: ChemProp > 1.5 would need "spawn" but hits performance 4-5 times
+    #       Windows requires "spawn"
+    #torch.multiprocessing.set_start_method('fork')
+
+    if args_device:  # command line overwrites config file
         # NOTE: this will throw a RuntimeError if the device is not available
+        torch.set_default_device(args_device)
+        actual_device = torch.device(args_device)
+    elif device:
+        torch.set_default_device(device)
         actual_device = torch.device(device)
-    elif use_cuda and torch.cuda.is_available():
-        actual_device = torch.device("cuda")
     else:  # we assume there are no other devices...
+        torch.set_default_device("cpu")
         actual_device = torch.device("cpu")
-
-    # FIXME: as of PyTorch 2.1 this should be replaced with
-    #        torch.set_default_dtype() and torch.set_default_device()
-    #        The dtype can be set to torch.float32 for both CPU and GPU
-    if actual_device.type == "cuda":
-        torch.set_default_tensor_type(torch.cuda.FloatTensor)
-    else:  # assume CPU...
-        torch.set_default_tensor_type(torch.FloatTensor)
 
     logger.debug(f"{actual_device=}")
 

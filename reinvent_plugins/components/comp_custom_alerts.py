@@ -1,11 +1,11 @@
 """Compute scores with RDKit's QED"""
 
 __all__ = ["CustomAlerts"]
-from dataclasses import dataclass
 from typing import List
 
 import numpy as np
 from rdkit import Chem
+from pydantic.dataclasses import dataclass
 
 from .component_results import ComponentResults
 from reinvent_plugins.mol_cache import molcache

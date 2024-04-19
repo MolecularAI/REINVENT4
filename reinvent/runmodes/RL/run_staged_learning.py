@@ -251,7 +251,7 @@ def run_staged_learning(
 
     rdkit_smiles_flags = dict(allowTautomers=True)
 
-    if model_type == "Mol2Mol":  # this is a special case
+    if model_type in ["Mol2Mol", "LinkinventTransformer"]:  # Transformer-based models
         agent_mode = "inference"
         rdkit_smiles_flags.update(sanitize=True, isomericSmiles=True)
         rdkit_smiles_flags2 = dict(isomericSmiles=True)

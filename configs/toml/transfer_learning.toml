@@ -5,7 +5,7 @@
 
 
 run_type = "transfer_learning"
-use_cuda = true  # run on the GPU if true, on the CPU if false
+device = "cuda:0"  # set torch device e.g. "cpu"
 tb_logdir = "tb_TL"  # name of the TensorBoard logging directory
 json_out_config = "json_transfer_learning.json"  # write this TOML to JSON
 

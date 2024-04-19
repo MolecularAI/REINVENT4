@@ -48,21 +48,4 @@ class Mol2MolLearning(Learning):
         return results
 
     def update(self, results: ScoreResults):
-        likelihood_dto = self._state.agent.likelihood_smiles(self.sampled)
-        batch = likelihood_dto.batch
-
-        prior_nlls = self.prior.likelihood(
-            batch.input, batch.input_mask, batch.output, batch.output_mask
-        )
-
-        agent_nlls = likelihood_dto.likelihood
-
-        return self.reward_nlls(
-            agent_nlls,
-            prior_nlls,
-            results.total_scores,
-            self.inception,
-            results.smilies,
-            self._state.agent,
-            np.argwhere(self.sampled.states == SmilesState.VALID).flatten(),
-        )
+        return self._update_common_transformer(results)

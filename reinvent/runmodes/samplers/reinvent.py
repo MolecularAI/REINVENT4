@@ -23,8 +23,9 @@ class ReinventSampler(Sampler):
         :param dummy: Reinvent does not need SMILES input
         :returns: a dataclass
         """
-        smiles_sampled, likelihood_sampled = \
-            self.model.model.sample_smiles(self.batch_size, params.DATALOADER_BATCHSIZE)
+        smiles_sampled, likelihood_sampled = self.model.model.sample_smiles(
+            self.batch_size, params.DATALOADER_BATCHSIZE
+        )
         sampled = SampleBatch(None, smiles_sampled, Tensor(likelihood_sampled))
 
         if self.unique_sequences:
@@ -35,5 +36,5 @@ class ReinventSampler(Sampler):
             for smiles in sampled.output
         ]
 
-        sampled.smilies, sampled.states = validate_smiles(mols)
+        sampled.smilies, sampled.states = validate_smiles(mols, sampled.output)
         return sampled

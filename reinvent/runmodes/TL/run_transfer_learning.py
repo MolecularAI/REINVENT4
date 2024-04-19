@@ -41,7 +41,11 @@ def run_transfer_learning(
 
     smiles_filename = os.path.abspath(parameters["smiles_file"])
     do_standardize = parameters.get("standardize_smiles", True)
-    do_randomize = parameters.get("randomize_smiles", True)
+
+    randomize_all_smiles = parameters.get("randomize_all_smiles", False)
+    do_randomize = parameters.get("randomize_smiles", True) and not randomize_all_smiles
+
+    internal_diversity = parameters.get("internal_diversity", False)
 
     actions = []
     cols = 0
@@ -62,7 +66,9 @@ def run_transfer_learning(
         cols = slice(0, 2, None)
 
     # NOTE: we expect here that all data will fit into memory
-    smilies = read_smiles_csv_file(smiles_filename, cols, actions=actions, remove_duplicates=True)
+    smilies = read_smiles_csv_file(
+        smiles_filename, cols, actions=actions, remove_duplicates=True
+    )
     logger.info(f"Read {len(smilies)} input SMILES from {smiles_filename}")
 
     if not smilies:
@@ -96,6 +102,8 @@ def run_transfer_learning(
         sample_batch_size=parameters.get("sample_batch_size", 1),
         num_refs=parameters.get("num_refs", 0),
         n_cpus=config.get("number_of_cpus", 1),
+        randomize_all_smiles=randomize_all_smiles,
+        internal_diversity=internal_diversity,
     )
 
     if model_type == "Mol2Mol":

@@ -12,10 +12,10 @@ import os
 import logging
 import copy
 
-from dataclasses import dataclass, field
 from typing import List, Optional
 
 import numpy as np
+from pydantic.dataclasses import dataclass
 
 from .component_results import ComponentResults
 from .run_program import run_command

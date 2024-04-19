@@ -10,7 +10,7 @@ class Vocabulary:
     """Stores the tokens and their conversion to vocabulary indexes."""
 
     def __init__(
-        self, tokens=None, starting_id=0, pad_token=0, bos_token=1, eos_token=2, unk_token=3
+        self, tokens=None, starting_id=0, pad_token=0, bos_token=1, eos_token=2, unk_token=None
     ):
         self._tokens = {}
         self._current_id = starting_id
@@ -98,7 +98,7 @@ class Vocabulary:
             "pad_token": getattr(self, "pad_token", 0),
             "bos_token": getattr(self, "bos_token", 1),
             "eos_token": getattr(self, "eos_token", 2),
-            "unk_token": getattr(self, "unk_token", 3),
+            "unk_token": getattr(self, "unk_token", None),
         }
 
     @classmethod

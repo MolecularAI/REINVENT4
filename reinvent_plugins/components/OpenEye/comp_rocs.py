@@ -15,14 +15,15 @@ params.rocs_input = ""
 
 
 from __future__ import annotations
-import logging
-import copy
 
 __all__ = ["ROCSSimilarity"]
-from dataclasses import dataclass, field
+import copy
 from typing import List, Optional
+import logging
 
 import numpy as np
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 from .rocs.rocs_similarity import ROCSOverlay
 from ..component_results import ComponentResults
@@ -47,9 +48,9 @@ class Parameters:
     shape_weight: List[float]
     max_stereocenters: List[int]
     ewindow: List[int]
-    maxconfs: [List[int]]
+    maxconfs: List[int]
     similarity_measure: List[str]
-    custom_cff: Optional[List[str]] = field(default_factory=lambda: [None])
+    custom_cff: Optional[List[str]] = Field(default_factory=lambda: [None])
 
 
 @add_tag("__component")

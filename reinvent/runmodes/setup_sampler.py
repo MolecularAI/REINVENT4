@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 warnings.filterwarnings("once", category=FutureWarning)
 
+TRANSFORMERS = ["Mol2Mol", "LinkinventTransformer"]
 
 def setup_sampler(model_type: str, config: dict, agent: ModelAdapter, chemistry: ChemistryHelpers):
     """Setup the sampling module.
@@ -36,9 +37,12 @@ def setup_sampler(model_type: str, config: dict, agent: ModelAdapter, chemistry:
     randomize_smiles = config.get("randomize_smiles", True)
     temperature = config.get("temperature", 1.0)
 
-    if model_type == "Mol2Mol" and randomize_smiles:
+    # Transformer-based models were trained on canonical SMILES
+    if model_type in TRANSFORMERS and randomize_smiles:
         randomize_smiles = False
-        logger.warning(f"randomize_smiles set to false for Mol2Mol")
+        logger.warning(f"randomize_smiles is set to be True by user. But the model was trained using canonical SMILES"
+                       f"where randomize_smiles might undermine the performance (this needs more investigation), "
+                       f"but randomize_smiles is reset to be False for now.")
 
     unique_sequences = config.get("unique_sequences", False)
 
@@ -49,31 +53,31 @@ def setup_sampler(model_type: str, config: dict, agent: ModelAdapter, chemistry:
             stacklevel=2,
         )
 
-    if model_type == "Mol2Mol":
-        try:
-            sample_strategy = config["sample_strategy"]  # for Mol2Mol
-        except KeyError:
-            sample_strategy = "multinomial"
+    if model_type in TRANSFORMERS:
+        sample_strategy = config.get("sample_strategy", "multinomial")
     else:
         sample_strategy = None
 
     tokens = TransformationTokens()  # LinkInvent only
     isomeric = False
 
-    if model_type == "Mol2Mol":  # this is a special case
+    if model_type in TRANSFORMERS:  # for Transformer-based models
         isomeric = True
+
+        agent.model.set_temperature(temperature)
+        if sample_strategy == "beamsearch":
+            agent.model.set_beam_size(batch_size)
 
     sampling_model = getattr(samplers, f"{model_type}Sampler")
     sampler = sampling_model(
         agent,
         batch_size=batch_size,
-        sample_strategy=sample_strategy,  # needed for Mol2Mol
-        isomeric=isomeric,  # needed for Mol2Mol
+        sample_strategy=sample_strategy,  # needed for Transformer-based models
+        isomeric=isomeric,  # needed for Transformer-based models
         randomize_smiles=randomize_smiles,
         unique_sequences=unique_sequences,
         chemistry=chemistry,
         tokens=tokens,
-        temperature=temperature
     )
 
     return sampler, batch_size

@@ -1,10 +1,10 @@
 """Compute the PMI score in RDKit"""
 
-from dataclasses import dataclass
 from typing import List
 
 import numpy as np
 from rdkit.Chem import AllChem as Chem
+from pydantic.dataclasses import dataclass
 
 from ..component_results import ComponentResults
 from ..add_tag import add_tag

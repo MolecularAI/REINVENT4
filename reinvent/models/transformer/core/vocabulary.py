@@ -8,7 +8,7 @@ import numpy as np
 class Vocabulary:
     """Stores the tokens and their conversion to one-hot vectors."""
 
-    def __init__(self, tokens=None, starting_id=0, pad_token=0, bos_token=1, eos_token=2, unk_token=3):
+    def __init__(self, tokens=None, starting_id=0, pad_token=0, bos_token=1, eos_token=2, unk_token=None):
         self._tokens = {}
         self._current_id = starting_id
 
@@ -84,17 +84,17 @@ class Vocabulary:
         :return : An numpy array with the tokens encoded.
         """
         ohe_vect = np.zeros(len(tokens), dtype=np.float32)
+        ohe_keep_mask = np.ones_like(tokens, dtype=bool)
         for i, token in enumerate(tokens):
             if token not in self._tokens:
-                raise KeyError(
-                    f"{token} is not part of the tokens "
-                    + "the model was trained on. "
-                    + f"The token {token} may have been generated "
-                    + "by the internal canonicalization, but "
-                    + "please check your input SMILES."
-                )
-            ohe_vect[i] = self._tokens[token]
-        return ohe_vect
+                if hasattr(self, "unk_token") and (self.unk_token is not None):
+                    unk_symbol = self[self.unk_token]
+                    ohe_vect[i] = self._tokens[unk_symbol]
+                else:
+                    ohe_keep_mask[i] = False
+            else:
+                ohe_vect[i] = self._tokens[token]
+        return ohe_vect[ohe_keep_mask]
 
     def decode(self, ohe_vect):
         """
@@ -126,7 +126,7 @@ class Vocabulary:
                 "pad_token": getattr(self, "pad_token", 0),
                 "bos_token": getattr(self, "bos_token", 1),
                 "eos_token": getattr(self, "eos_token", 2),
-                "unk_token": getattr(self, "unk_token", 3),
+                "unk_token": getattr(self, "unk_token", None),
                 }
 
     @classmethod

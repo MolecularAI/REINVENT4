@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["LinkinventLearning"]
+__all__ = ["LinkinventLearning", "LinkinventTransformerLearning"]
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -32,4 +32,10 @@ class LinkinventLearning(Learning):
         return results
 
     def update(self, results: ScoreResults):
-        return self._update_common(results)
+        if self.prior.model._version == 1: # RNN-based
+            return self._update_common(results)
+        elif self.prior.model._version == 2:  # Transformer-based
+            return self._update_common_transformer(results)
+
+
+LinkinventTransformerLearning = LinkinventLearning
