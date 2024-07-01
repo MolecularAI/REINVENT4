@@ -25,6 +25,9 @@ attachment_points = AttachmentPoints()
 bond_maker = BondMaker()
 logger = logging.getLogger(__name__)
 
+# Get torch major version
+TORCH_MAJOR = int(torch.__version__.split(".")[0])
+
 
 def disable_gradients(model: ModelAdapter) -> None:
     """Disable gradient tracking for all parameters in a model
@@ -51,13 +54,13 @@ def set_torch_device(args_device: str = None, device: str = None) -> torch.devic
 
     if args_device:  # command line overwrites config file
         # NOTE: this will throw a RuntimeError if the device is not available
-        torch.set_default_device(args_device)
+        torch.set_default_device(args_device) if TORCH_MAJOR > 2 else None
         actual_device = torch.device(args_device)
     elif device:
-        torch.set_default_device(device)
-        actual_device = torch.device(device)
+        torch.set_default_device(device) if TORCH_MAJOR > 2 else None
+        actual_device = torch.device(device) 
     else:  # we assume there are no other devices...
-        torch.set_default_device("cpu")
+        torch.set_default_device("cpu") if TORCH_MAJOR > 2 else None
         actual_device = torch.device("cpu")
 
     logger.debug(f"{actual_device=}")
