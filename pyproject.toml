@@ -64,8 +64,8 @@ dependencies = [
   "tenacity >=8.2,<9",
   "tensorboard",
   "tomli >=2.0,<3",
-  "torch==2.2.1+cu121", # Requires --extra-index-url https://download.pytorch.org/whl/cu121
-  "torchvision==0.17.1+cu121",  # Needed to log molecular images to Tensorboard.
+  "torch==2.3.1+cu121", # Requires --extra-index-url https://download.pytorch.org/whl/cu121
+  "torchvision==0.18.1+cu121",  # Needed to log molecular images to Tensorboard.
   "tqdm >=4.64,<5",
   "typing_extensions >=4.0,<5",
   "xxhash >=3,<4",

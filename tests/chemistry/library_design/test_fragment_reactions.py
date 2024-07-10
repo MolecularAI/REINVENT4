@@ -1,9 +1,14 @@
 import unittest
 
-from reinvent.chemistry import Conversions
+from reinvent.chemistry import conversions
 from reinvent.chemistry.library_design.fragment_reactions import FragmentReactions
 from tests.chemistry.library_design.fixtures import FRAGMENT_REACTION_SUZUKI, SCAFFOLD_SUZUKI
-from tests.chemistry.fixtures.test_data import CELECOXIB, ASPIRIN, CELECOXIB_FRAGMENT, METHYLPHEMYL_FRAGMENT
+from tests.chemistry.fixtures.test_data import (
+    CELECOXIB,
+    ASPIRIN,
+    CELECOXIB_FRAGMENT,
+    METHYLPHEMYL_FRAGMENT,
+)
 
 
 class TestFragmentReactions(unittest.TestCase):
@@ -15,10 +20,9 @@ class TestFragmentReactions(unittest.TestCase):
         self.suzuki_positive_smile = CELECOXIB
         self.suzuki_negative_smile = ASPIRIN
         self.suzuki_fragment = SCAFFOLD_SUZUKI
-        self.chemistry = Conversions()
 
     def test_slicing_molecule_to_fragments(self):
-        molecule = self.chemistry.smile_to_mol(self.suzuki_positive_smile)
+        molecule = conversions.smile_to_mol(self.suzuki_positive_smile)
         all_fragment_pairs = self.reactions.slice_molecule_to_fragments(
             molecule, self._suzuki_reaction_dto_list
         )
@@ -27,7 +31,7 @@ class TestFragmentReactions(unittest.TestCase):
             smiles_pair = []
 
             for fragment in pair:
-                smile = self.chemistry.mol_to_smiles(fragment)
+                smile = conversions.mol_to_smiles(fragment)
                 smiles_pair.append(smile)
             smile_fragments.append(tuple(smiles_pair))
 
@@ -35,7 +39,7 @@ class TestFragmentReactions(unittest.TestCase):
         self.assertEqual(CELECOXIB_FRAGMENT, smile_fragments[0][1])
 
     def test_slicing_wrong_molecule_to_fragments(self):
-        molecule = self.chemistry.smile_to_mol(self.suzuki_negative_smile)
+        molecule = conversions.smile_to_mol(self.suzuki_negative_smile)
         all_fragment_pairs = self.reactions.slice_molecule_to_fragments(
             molecule, self._suzuki_reaction_dto_list
         )
@@ -43,13 +47,13 @@ class TestFragmentReactions(unittest.TestCase):
         for pair in all_fragment_pairs:
             smiles_pair = []
             for fragment in pair:
-                smile = self.chemistry.mol_to_smiles(fragment)
+                smile = conversions.mol_to_smiles(fragment)
                 smiles_pair.append(smile)
             smile_fragments.append(tuple(smiles_pair))
         self.assertEqual(0, len(smile_fragments))
 
     def test_slicing_suzuki_fragment(self):
-        molecule = self.chemistry.smile_to_mol(self.suzuki_fragment)
+        molecule = conversions.smile_to_mol(self.suzuki_fragment)
         all_fragment_pairs = self.reactions.slice_molecule_to_fragments(
             molecule, self._suzuki_reaction_dto_list
         )
@@ -57,7 +61,7 @@ class TestFragmentReactions(unittest.TestCase):
         for pair in all_fragment_pairs:
             smiles_pair = []
             for fragment in pair:
-                smile = self.chemistry.mol_to_smiles(fragment)
+                smile = conversions.mol_to_smiles(fragment)
                 smiles_pair.append(smile)
             smile_fragments.append(tuple(smiles_pair))
         self.assertEqual(2, len(smile_fragments))

@@ -26,6 +26,7 @@ from reinvent_plugins.components.RDKit.comp_linkinvent import FragmentEffectiveL
 from reinvent_plugins.components.RDKit.comp_linkinvent import FragmentGraphLength
 from reinvent_plugins.components.RDKit.comp_linkinvent import FragmentLengthRatio
 
+
 def test_comp_linkinvent():
     input_fragments = ["[*]c1ccc2c(N)noc2c1[*]"]
 
@@ -36,16 +37,16 @@ def test_comp_linkinvent():
         FragmentDistanceMatrix: np.array(
             [
                 [
-                    [0., 1., 2., 3., 4., 5., 4., 3., 2., 1.],
-                    [1., 0., 1., 2., 3., 4., 4., 4., 3., 2.],
-                    [2., 1., 0., 1., 2., 3., 3., 3., 2., 3.],
-                    [3., 2., 1., 0., 1., 2., 2., 2., 1., 2.],
-                    [4., 3., 2., 1., 0., 1., 1., 2., 2., 3.],
-                    [5., 4., 3., 2., 1., 0., 2., 3., 3., 4.],
-                    [4., 4., 3., 2., 1., 2., 0., 1., 2., 3.],
-                    [3., 4., 3., 2., 2., 3., 1., 0., 1., 2.],
-                    [2., 3., 2., 1., 2., 3., 2., 1., 0., 1.],
-                    [1., 2., 3., 2., 3., 4., 3., 2., 1., 0.]
+                    [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 4.0, 3.0, 2.0, 1.0],
+                    [1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 4.0, 4.0, 3.0, 2.0],
+                    [2.0, 1.0, 0.0, 1.0, 2.0, 3.0, 3.0, 3.0, 2.0, 3.0],
+                    [3.0, 2.0, 1.0, 0.0, 1.0, 2.0, 2.0, 2.0, 1.0, 2.0],
+                    [4.0, 3.0, 2.0, 1.0, 0.0, 1.0, 1.0, 2.0, 2.0, 3.0],
+                    [5.0, 4.0, 3.0, 2.0, 1.0, 0.0, 2.0, 3.0, 3.0, 4.0],
+                    [4.0, 4.0, 3.0, 2.0, 1.0, 2.0, 0.0, 1.0, 2.0, 3.0],
+                    [3.0, 4.0, 3.0, 2.0, 2.0, 3.0, 1.0, 0.0, 1.0, 2.0],
+                    [2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 1.0, 0.0, 1.0],
+                    [1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 3.0, 2.0, 1.0, 0.0],
                 ]
             ]
         ),
@@ -72,6 +73,7 @@ def test_comp_linkinvent():
         results = component()(input_fragments)
         assert np.allclose(results.scores[0], expected_results[component])
 
+
 def test_linker_effective_length():
     # 4 attachment points
     input_fragments = ["[*]c1ccc(N(c2ccc3c(c2)C([*])([*])c2ccccc2-3)[*])cc1"]
@@ -84,6 +86,7 @@ def test_linker_effective_length():
     for component in expected_results:
         results = component()(input_fragments)
         assert np.allclose(results.scores[0], expected_results[component])
+
 
 def test_linker_effective_length_ratio():
     # linker with single atom

@@ -1,4 +1,4 @@
-from reinvent.chemistry.enums import FilterTypesEnum
+from reinvent.chemistry.standardization.filter_types_enum import FilterTypesEnum
 from tests.chemistry.fixtures.test_data import CELECOXIB, BENZENE
 from tests.chemistry.standardization.base_rdkit_standardizer import BaseRDKitStandardizer
 

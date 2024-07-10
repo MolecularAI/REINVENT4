@@ -2,8 +2,11 @@
 """
 
 import re
+import logging
 
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 class Vocabulary:
@@ -56,6 +59,11 @@ class Vocabulary:
         vocab_index = np.zeros(len(tokens), dtype=np.float32)
 
         for i, token in enumerate(tokens):
+            if token not in self._tokens:
+                msg = f"unknown token {token}: {tokens}"
+                logger.critical(msg)
+                raise RuntimeError(msg)
+
             vocab_index[i] = self._tokens[token]
 
         return vocab_index

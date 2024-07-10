@@ -35,5 +35,4 @@ class Transform(ABC):
         registry[registry_name] = cls, param_cls
 
     @abstractmethod
-    def __call__(self, predictions):
-        ...
+    def __call__(self, predictions): ...

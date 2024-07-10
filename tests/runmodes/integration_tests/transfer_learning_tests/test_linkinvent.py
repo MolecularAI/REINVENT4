@@ -5,6 +5,7 @@ import torch
 
 from reinvent.runmodes.TL.run_transfer_learning import run_transfer_learning
 from reinvent.runmodes.utils.helpers import set_torch_device
+from reinvent.models.meta_data import check_valid_hash
 
 
 @pytest.fixture
@@ -16,12 +17,12 @@ def setup(tmp_path, json_config, pytestconfig):
 
     config = {
         "parameters": {
-            "input_model_file": json_config["LINKINVENT_CHEMBL_PRIOR_PATH"],
+            "input_model_file": ".linkinvent",
             "smiles_file": json_config["TL_LINKINVENT_SMILES_PATH"],
-            "output_model_file": output_model_file,
+            "output_model_file": str(output_model_file),
             "save_every_n_epochs": 2,
             "batch_size": 64,
-            "sample_batch_size": 10,
+            "sample_batch_size": 100,
             "num_epochs": 2,
             "num_refs": 2,
         }
@@ -45,12 +46,14 @@ def test_transfer_learning(setup, tmp_path, pytestconfig):
     keys = list(model.keys())
 
     assert keys == [
-        "model_type",
-        "version",
-        "vocabulary",
         "max_sequence_length",
+        "metadata",
+        "model_type",
         "network_parameter",
         "network_state",
+        "version",
+        "vocabulary",
     ]
 
     assert model["model_type"] == "Linkinvent"
+    # assert check_valid_hash(model)  # does not work at the moment

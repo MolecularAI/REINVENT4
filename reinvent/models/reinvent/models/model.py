@@ -5,17 +5,18 @@ https://doi.org/10.1186/s13321-017-0235-x (original publication)
 https://doi.org/10.1021/acs.jcim.0c00915 (REINVENT 2.0)
 """
 
-from typing import List, Tuple, TypeVar, Iterator
+from __future__ import annotations
+from typing import Tuple, TypeVar, Iterator, TYPE_CHECKING
 
-import numpy as np
 import torch
 import torch.nn as tnn
 
-from reinvent.models import meta_data
 from reinvent.models.reinvent.models import rnn, vocabulary as mv
 from reinvent.models.reinvent.utils import collate_fn
 from reinvent.models.model_mode_enum import ModelModeEnum
 
+if TYPE_CHECKING:
+    from reinvent.models.meta_data import ModelMetaData
 
 M = TypeVar("M", bound="Model")
 
@@ -32,7 +33,7 @@ class Model:
         self,
         vocabulary: mv.Vocabulary,
         tokenizer: mv.SMILESTokenizer,
-        meta_data: meta_data.ModelMetaData,
+        meta_data: ModelMetaData,
         network_params: dict = None,
         max_sequence_length: int = 256,
         mode: str = "training",
@@ -54,14 +55,13 @@ class Model:
         self.tokenizer = tokenizer
         self.meta_data = meta_data
         self.max_sequence_length = max_sequence_length
+        self.device = device
 
         if not isinstance(network_params, dict):
             network_params = {}
 
         self._model_modes = ModelModeEnum()
-        self.network = rnn.RNN(len(self.vocabulary), **network_params)
-        self.network.to(device)
-        self.device = device
+        self.network = rnn.RNN(len(self.vocabulary), **network_params, device=self.device)
         self.set_mode(mode)
 
         self._nll_loss = tnn.NLLLoss(reduction="none")
@@ -87,8 +87,6 @@ class Model:
 
         if model_type and model_type != cls._model_type:
             raise RuntimeError(f"Wrong type: {model_type} but expected {cls._model_type}")
-
-        vocabulary = None
 
         if isinstance(save_dict["vocabulary"], dict):
             vocabulary = mv.Vocabulary.load_from_dictionary(save_dict["vocabulary"])
@@ -126,14 +124,12 @@ class Model:
         return save_dict
 
     def save(self, file_path: str) -> None:
-        """
-        Saves the model into a file.
+        """Saves the model into a file
 
         :param file_path: Path to the model file.
         """
 
         save_dict = self.get_save_dict()
-        meta_data.update_model_data(save_dict)
         torch.save(save_dict, file_path)
 
     save_to_file = save  # alias for backwards compatibility
@@ -142,17 +138,20 @@ class Model:
         tokens = [self.tokenizer.tokenize(smile) for smile in smiles]
         encoded = [self.vocabulary.encode(token) for token in tokens]
 
-        sequences = [torch.tensor(encode, dtype=torch.long) for encode in encoded]
+        sequences = [
+            torch.tensor(encode, dtype=torch.long, device=self.device) for encode in encoded
+        ]
         padded_sequences = collate_fn(sequences)
 
         return self.likelihood(padded_sequences)
 
     def likelihood(self, sequences: torch.Tensor) -> torch.Tensor:
-        """
-        Retrieves the likelihood of a given sequence. Used in training.
+        """Retrieves the likelihood of a given sequence
 
-        :param sequences: (batch_size, sequence_length) A batch of sequences
-        :return:  (batch_size) Log likelihood for each example.
+        Used in training.
+
+        :param sequences: a batch of sequences (batch_size, sequence_length)
+        :returns: log likelihood for each example (batch_size)
         """
 
         logits, _ = self.network(sequences[:, :-1])  # all steps done at once
@@ -161,31 +160,6 @@ class Model:
         return self._nll_loss(log_probs.transpose(1, 2), sequences[:, 1:]).sum(dim=1)
 
     # NOTE: needed for Reinvent TL
-    def sample_smiles(self, num: int = 128, batch_size: int = 128) -> Tuple[List[str], np.ndarray]:
-        """
-        Samples n SMILES from the model.  Is this batched because of memory concerns?
-
-        :param num: Number of SMILES to sample.
-        :param batch_size: Number of sequences to sample at the same time.
-        :return: A list with SMILES and a list of likelihoods.
-        """
-
-        batch_sizes = [batch_size for _ in range(num // batch_size)] + [num % batch_size]
-        smiles_sampled = []
-        likelihoods_sampled = []
-
-        for size in batch_sizes:
-            if not size:
-                break
-
-            _, smiles, likelihoods = self.sample(batch_size=size)
-
-            smiles_sampled.extend(smiles)
-            likelihoods_sampled.append(likelihoods.data.cpu().numpy())
-
-            del likelihoods
-
-        return smiles_sampled, np.concatenate(likelihoods_sampled)
 
     @torch.no_grad()
     def sample(self, batch_size: int = 128) -> Tuple[torch.Tensor, list, torch.Tensor]:
@@ -206,10 +180,19 @@ class Model:
         """
 
         # NOTE: the first token never gets added in the loop so initialize with the start token
-        sequences = [torch.full((batch_size, 1), self.vocabulary[mv.START_TOKEN], dtype=torch.long)]
-        input_vector = torch.full((batch_size,), self.vocabulary[mv.START_TOKEN], dtype=torch.long)
+        sequences = [
+            torch.full(
+                (batch_size, 1),
+                self.vocabulary[mv.START_TOKEN],
+                dtype=torch.long,
+                device=self.device,
+            )
+        ]
+        input_vector = torch.full(
+            (batch_size,), self.vocabulary[mv.START_TOKEN], dtype=torch.long, device=self.device
+        )
         hidden_state = None
-        nlls = torch.zeros(batch_size)
+        nlls = torch.zeros(batch_size, device=self.device)
 
         for _ in range(self.max_sequence_length - 1):
             logits, hidden_state = self.network(input_vector.unsqueeze(1), hidden_state)

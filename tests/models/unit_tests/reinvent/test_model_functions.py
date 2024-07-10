@@ -16,9 +16,9 @@ class TestModelFunctions(unittest.TestCase):
     def setUp(self):
         vocabulary = Vocabulary(tokens=SIMPLE_TOKENS)
         tokenizer = SMILESTokenizer()
-        metadata = meta_data.ModelMetaData(hash_id=None,
-                hash_id_format=0, model_id=0, origina_data_source="",
-                creation_date=0)
+        metadata = meta_data.ModelMetaData(
+            hash_id=None, hash_id_format=0, model_id=0, origina_data_source="", creation_date=0
+        )
         device = torch.device(self.device)
         self.model = Model(vocabulary, tokenizer, metadata, device=device)
 
@@ -34,14 +34,7 @@ class TestModelFunctions(unittest.TestCase):
         self.assertEqual(len(likelihoods), 1)
         self.assertEqual(type(likelihoods), torch.Tensor)
 
-    def test_sample_from_model_1(self):
-        sample, nll = self.model.sample_smiles(num=20, batch_size=20)
-        self.assertEqual(len(sample), 20)
-        self.assertEqual(type(sample), list)
-        self.assertEqual(len(nll), 20)
-        self.assertEqual(type(nll), numpy.ndarray)
-
-    def test_sample_from_model_2(self):
+    def test_sample_from_model(self):
         seq, sample, nll = self.model.sample(batch_size=20)
         self.assertEqual(seq.shape[0], 20)
         self.assertEqual(type(seq), torch.Tensor)

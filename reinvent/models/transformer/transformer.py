@@ -5,6 +5,7 @@ import torch
 from torch import nn as tnn
 from torch.autograd import Variable
 
+from reinvent.models import meta_data
 from reinvent.models.transformer.core.enums.sampling_mode_enum import SamplingModesEnum
 from reinvent.models.transformer.core.network.encode_decode.model import EncoderDecoder
 from reinvent.models.transformer.core.network.module.subsequent_mask import subsequent_mask
@@ -25,12 +26,14 @@ class TransformerModel(ABC):
         self,
         vocabulary: Vocabulary,
         network: EncoderDecoder,
+        meta_data: meta_data.ModelMetaData,
         max_sequence_length: int = 128,
         mode: str = ModelModeEnum().TRAINING,
         device=torch.device("cpu"),
     ):
         self.vocabulary = vocabulary
         self.tokenizer = SMILESTokenizer()
+        self.meta_data = meta_data
 
         self._model_modes = ModelModeEnum()
         self.network = network
@@ -92,10 +95,11 @@ class TransformerModel(ABC):
             vocabulary = Vocabulary.load_from_dictionary(save_dict["vocabulary"])
         else:
             vocabulary = save_dict["vocabulary"]
- 
+
         model = cls(
             vocabulary=vocabulary,
             network=network,
+            meta_data=save_dict.get("metadata"),
             max_sequence_length=save_dict["max_sequence_length"],
             mode=mode,
             device=device,
@@ -109,6 +113,7 @@ class TransformerModel(ABC):
         save_dict = dict(
             model_type=self._model_type,
             version=self._version,
+            metadata=self.meta_data,
             vocabulary=self.vocabulary.get_dictionary(),
             max_sequence_length=self.max_sequence_length,
             network_parameter=self.network.get_params(),
@@ -157,6 +162,10 @@ class TransformerModel(ABC):
         :param src_mask: (batch, seq, seq) Mask of the input sequences.
         :param decode_type: decode type
         """
+
+        if not self._sampling_modes_enum.is_supported_sampling_mode(decode_type):
+            raise ValueError(f"Sampling mode `{decode_type}` is not supported")
+
         if decode_type == self._sampling_modes_enum.BEAMSEARCH:
             beam_size = self.beam_size
             vocabulary = self.vocabulary

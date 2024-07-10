@@ -3,11 +3,8 @@
 import torch
 import torch.utils.data as tud
 
-from reinvent.chemistry import Conversions
+from reinvent.chemistry import conversions
 from reinvent.models.reinvent.utils import collate_fn
-
-
-conversions = Conversions()
 
 
 class Dataset(tud.Dataset):

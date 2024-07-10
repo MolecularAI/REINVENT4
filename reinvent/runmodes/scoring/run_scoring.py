@@ -15,10 +15,11 @@ from typing import List, Tuple, Callable
 import numpy as np
 
 from reinvent.scoring.scorer import Scorer
-from reinvent.chemistry.enums import FilterTypesEnum
+from reinvent.chemistry.standardization.filter_types_enum import FilterTypesEnum
 from reinvent.runmodes.scoring.file_io import TabFileReader, write_csv
 from reinvent.chemistry.standardization.filter_configuration import FilterConfiguration
 from reinvent.chemistry.standardization.rdkit_standardizer import RDKitStandardizer
+from .validation import ScoringConfig
 
 logger = logging.getLogger(__name__)
 
@@ -27,18 +28,19 @@ REINVENT_SMILES_COLUMN = "RDKit_SMILES (REINVENT)"
 SUFFIX_PATTERN = r"^(.*)\.\d+$"
 
 
-def run_scoring(config: dict, *args, **kwargs) -> None:
+def run_scoring(input_config: dict, write_config: str = None, *args, **kwargs) -> None:
     """Scoring run setup.
 
-    :param config: configuration
+    :param input_config: configuration
     """
 
-    output_csv_filename = os.path.abspath(config.get("output_csv", "_scoring.csv"))
+    config = ScoringConfig(**input_config)
+    parameters = config.parameters
 
-    params = config["parameters"]
-    smiles_filename = os.path.abspath(params["smiles_file"])
-    smiles_column = params.get("smiles_column", "SMILES")
-    standardize = params.get("standardize_smiles", True)
+    output_csv_filename = os.path.abspath(parameters.output_csv)
+    smiles_filename = os.path.abspath(parameters.smiles_file)
+    smiles_column = parameters.smiles_column
+    standardize = parameters.standardize_smiles
 
     if smiles_column == REINVENT_SMILES_COLUMN:
         raise RuntimeError(f"{__name__}: the column name {REINVENT_SMILES_COLUMN} is reserved")
@@ -53,8 +55,12 @@ def run_scoring(config: dict, *args, **kwargs) -> None:
 
     mask = np.array([True if smiles else False for smiles in reader.smilies])
 
-    scorer = Scorer(config["scoring"])
-    results = scorer(reader.smilies, mask, mask)
+    scoring_function = Scorer(config.scoring)
+
+    if callable(write_config):
+        write_config(config.model_dump())
+
+    results = scoring_function(reader.smilies, mask, mask)
 
     logger.info(f"Number of SMILES processed: {len(results.smilies)}")
 

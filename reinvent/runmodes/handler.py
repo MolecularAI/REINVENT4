@@ -13,6 +13,8 @@ from typing import Callable, Dict
 
 import torch
 
+from reinvent.models.meta_data import update_model_data
+
 
 if platform.system() != "Windows":
     # NOTE: SIGTERM (signal 15) seems to be triggered by terminating processes.  So
@@ -107,7 +109,8 @@ class Handler:
             data = self._callback()
 
         if data:
-            torch.save(data, self._out_filename)
+            save_dict = update_model_data(data, comment="RL")
+            torch.save(save_dict, self._out_filename)
 
     def _signal_handler(self, signum, frame) -> None:
         """Simple signal handler.

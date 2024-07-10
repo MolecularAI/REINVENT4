@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 __all__ = ["make_grid_image"]
-from typing import Tuple
+from typing import Tuple, List
 import logging
 
 import torch
@@ -15,12 +15,13 @@ logger = logging.getLogger(__name__)
 convert_img_to_tensor = transforms.ToTensor()
 
 
-def make_grid_image(smilies, data, label: str, sample_size: int, nrows: int) -> Tuple(torch.Tensor, int) | None:
+def make_grid_image(
+    smilies: List[str], labels: List[str], sample_size: int, nrows: int
+) -> torch.Tensor | None:
     """Create image grid from the SMILES
 
     :param smilies: score summary
-    :param data: array with numbers the same length as smilies
-    :param label: string label data
+    :param labels: labels for each SMILES
     :param sample_size: sample size
     :param nrows: number of rows
     :returns: an image in tensor format
@@ -29,7 +30,7 @@ def make_grid_image(smilies, data, label: str, sample_size: int, nrows: int) -> 
     mols = []
     legends = []
 
-    for smiles, datum in zip(smilies, data):
+    for smiles, label in zip(smilies, labels):
         if not smiles:
             continue
 
@@ -37,7 +38,7 @@ def make_grid_image(smilies, data, label: str, sample_size: int, nrows: int) -> 
 
         if mol:
             mols.append(mol)
-            legends.append(f"{label}={datum:.2f}")
+            legends.append(label)
 
     if not mols:
         logger.debug("No valid RDKit molecules found for MolsToGridImage(): ignoring")
@@ -51,4 +52,4 @@ def make_grid_image(smilies, data, label: str, sample_size: int, nrows: int) -> 
         legends=legends,
     )
 
-    return convert_img_to_tensor(png_image), len(mols)
+    return convert_img_to_tensor(png_image)

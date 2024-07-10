@@ -1,16 +1,17 @@
-"""Tanimoto and Jaccard similarity"""
+"""Tanimoto similarity and Jaccard distance"""
 
 from __future__ import annotations
 
-__all__ = ["TanimotoDistance"]
+__all__ = ["TanimotoSimilarity", "TanimotoDistance"]
 
+import warnings
 from typing import List
 
 import numpy as np
 from pydantic.dataclasses import dataclass
 
-from reinvent.chemistry.conversions import Conversions
-from reinvent.chemistry.similarity import Similarity
+from reinvent.chemistry import conversions
+from reinvent.chemistry.similarity import calculate_tanimoto_batch
 from ..component_results import ComponentResults
 from ..add_tag import add_tag
 
@@ -33,16 +34,22 @@ class Parameters:
 
 
 @add_tag("__component")
-class TanimotoDistance:
+class TanimotoSimilarity:
+    """Compute the Tanimoto similarity
+
+    Scoring component to compute the Tanimoto similarity between the provided
+    SMILES and the generated molecule.  Supports fingerprint radius, count
+    fingerprints and the use of pharmacophore-like features (see
+    https://doi.org/10.1002/(SICI)1097-0290(199824)61:1%3C47::AID-BIT9%3E3.0.CO;2-Z).
+    """
+
     def __init__(self, params: Parameters):
-        self.chem = Conversions()
-        self.similarity = Similarity()
         self.fp_params = []
 
         for smilies, radius, use_counts, use_features in zip(
             params.smiles, params.radius, params.use_counts, params.use_features
         ):
-            fingerprints = self.chem.smiles_to_fingerprints(
+            fingerprints = conversions.smiles_to_fingerprints(
                 smilies, radius=radius, use_counts=use_counts, use_features=use_features
             )
 
@@ -51,19 +58,34 @@ class TanimotoDistance:
 
             self.fp_params.append((fingerprints, radius, use_counts, use_features))
 
+        self.number_of_endpoints = len(params.smiles)
+
     def __call__(self, smilies: List[str]) -> np.array:
         scores = []
 
         for fingerprints, radius, use_counts, use_features in self.fp_params:
-            query_fingerprints = self.chem.smiles_to_fingerprints(
+            query_fingerprints = conversions.smiles_to_fingerprints(
                 smilies, radius=radius, use_counts=use_counts, use_features=use_features
             )
 
             scores.extend(
                 [
-                    self.similarity.calculate_tanimoto_batch(fingerprint, query_fingerprints)
+                    calculate_tanimoto_batch(fingerprint, query_fingerprints)
                     for fingerprint in fingerprints
                 ]
             )
 
         return ComponentResults(scores)
+
+
+# for backward compatibility
+@add_tag("__component")
+class TanimotoDistance(TanimotoSimilarity):
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "TanimotoDistance is deprecated and will be removed in a future release. "
+            "Please use TanimotoSimilarity instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)

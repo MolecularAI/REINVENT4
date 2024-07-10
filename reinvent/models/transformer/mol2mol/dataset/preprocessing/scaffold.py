@@ -5,7 +5,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-from reinvent.chemistry.conversions import Conversions
+from reinvent.chemistry import conversions
 from reinvent.chemistry.utils import compute_scaffold, compute_num_heavy_atoms
 from reinvent.models.utils.parallel import parallel
 
@@ -43,10 +43,9 @@ class ScaffoldPairGenerator(PairGenerator):
         """
         if len(smiles) == 0:
             raise ValueError("The smiles list is empty")
-        
+
         logger.info(f"Creating Scaffold pairs with {processes:d} processes...")
 
-        conversions = Conversions()
         fsmiles, fscaffolds, fhatoms, fscaffold_hatoms = [], [], [], []
 
         for smi in smiles:
@@ -95,7 +94,7 @@ class ScaffoldPairGenerator(PairGenerator):
         scaffold_db,
         hatom_db,
         scaffold_hatom_db,
-        smi_db
+        smi_db,
     ):
         table = []
         criterion_2 = scaffold_hatom_db >= hatom_db / 2.0

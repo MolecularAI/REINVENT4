@@ -17,7 +17,6 @@ from reinvent.chemistry.library_design.reaction_filters.base_reaction_filter imp
 class DefinedSelectiveFilter(BaseReactionFilter):
     def __init__(self, configuration: ReactionFilterConfiguration):
         self._chemistry = FragmentReactions()
-        self._score_cutoff = 0.5
         self._reactions_library = StandardDefinitions(configuration.reaction_definition_file)
         self._reactions = self._configure_reactions(configuration.reactions)
 
@@ -39,7 +38,7 @@ class DefinedSelectiveFilter(BaseReactionFilter):
     def score_molecule(self, molecule):
         new_bonds = self._find_new_bonds(molecule)
         count = self._count_applicable_reactions_on_molecule(molecule, new_bonds)
-        score = self._score_cutoff + (1 - self._score_cutoff) * (count / len(new_bonds))
+        score = 1.0 if len(new_bonds) == count else 0.0
         return score
 
     def _find_new_bonds(self, molecule) -> dict:

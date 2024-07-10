@@ -6,7 +6,362 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 ## [Unreleased]
 
 ### Changed
+
 - CAZP scoring component
+
+
+## [4.4.22] 2024-07-10
+
+### Fixed
+
+- Scalar return value from make\_grid\_image()
+
+
+## [4.4.21] 2024-07-10
+
+### Changed
+
+- Removed labels from Libinvent generated molecules before passing to scoring components: maize, icolos, dockstream and ROCS
+- Write out clean SMILES without labels to CSV and tensorboard in staged learning and sampling run modes
+- Simplified update code for Libinvent RL
+
+
+## [4.4.20] 2024-07-10
+
+### Fixed
+
+- Added missing layer\_normalization when getting Reinvent RNN model parameters
+
+
+## [4.4.19] 2024-07-08
+
+### Fixed
+
+- Log likelihood calculation is handled more efficiently
+
+
+## [4.4.18] 2024-07-05
+
+### Fixed
+
+- Added missing tag to legacy TanimotoDistance component
+
+
+## [4.4.17] 2024-07-05
+
+### Added
+
+- Custom RDKit normalization transforms hard-coded or from file
+
+
+## [4.4.16] 2024-07-01
+
+### Fixed
+
+- Safe-guard against invalid SMILES in SMILES file/CSV reading
+
+
+## [4.4.15] 2024-06-27
+
+### Added
+
+- Allow dot SMILES fragment separator for Lib/Linkinvent input
+
+
+## [4.4.14] 2024-06-27
+
+### Changed
+
+- Renamed pipeline options keep\_isotopes to keep\_isotope\_molecules
+
+### Added
+
+- New data pipeline options: uncharge, kekulize, randomize\_smiles
+
+
+## [4.4.13] 2024-06-27
+
+### Fixed
+
+- Parallel logging in data pipeline preprocessor (partial only)
+
+
+## [4.4.12] 2024-06-25
+
+### Added
+
+- Libinvent based on unified Transformer
+
+### Fixed
+
+- Error handling for unsupported tokens in RNN-based Libinvent
+
+
+## [4.4.11] 2024-06-17
+
+### Added
+
+- Parallel processing of regex and rdkit filters
+
+### Chamged
+
+- RDKit filter uses simpler functions not compound functions
+
+
+## [4.4.10] 2024-06-05
+
+### Changed
+
+- RL max\_score is optional and has a default of 1.0
+
+
+## [4.4.9] 2024-06-05
+
+### Added
+
+- Parallel implementation of chemistry filter in data pipeline
+
+
+## [4.4.8] 2024-06-05
+
+### Fixed
+
+- Added multinomial as default sampling strategy for Transformer. 
+
+
+## [4.4.7] 2024-06-04
+
+### Changed
+
+- Chemistry filter: customizable normalization, do not use RDKit logger
+
+
+## [4.4.6] 2024-06-04
+
+### Changed
+
+- Reworked remote responder
+
+
+## [4.4.5] 2024-06-03
+
+### Changed
+
+- Reporting for sampling runmode
+
+
+## [4.4.4] 2024-06-03
+
+### Fixed
+
+- Minor fix to DF validation
+
+
+## [4.4.3] 2024-06-03
+
+### Added
+
+- Chemistry filter for data pipeline
+
+
+## [4.4.2] 2024-05-30
+
+### Fixed
+
+- Check if agent is in RL state info to avoid unnecessary exception
+
+
+## [4.4.1] 2024-05-30
+
+### Changed
+
+- Toplevel validation of config file to detect extra sections
+
+
+## [4.4.0] 2024-05-30
+
+### Added
+
+- Initial support for data pipeline
+
+
+## [4.3.26] 2024-05-30
+
+### Added
+
+- Example scoring component script for RAScore
+- Reimplentation of Conversion class for backward compatibility
+
+
+## [4.3.25] 2024-05-29
+
+### Fixed
+
+- Various fixes in TLRL notebook
+
+
+## [4.3.24] 2024-05-27
+
+### Changed
+
+- Scoring runmode now also allows import of scoring components
+
+
+## [4.3.23] 2024-05-25
+
+### Changed
+
+- More consistent JSON config writing (includes imported scoring functions)
+- Better handling of value mapping
+
+
+## [4.3.22] 2024-05-24
+
+### Fixed
+
+- All scoring components need to compute the number of endpoints, added where sensible
+
+
+## [4.3.21] 2024-05-24
+
+### Fixed
+
+- Filter out invalid fragments for Lib/Linkinvent
+
+
+## [4.3.20] 2024-05-22
+
+### Changed
+
+- Lifted static methods to module level functions
+
+### Removed
+
+- More chemistry code
+
+
+## [4.3.19] 2024-05-21
+
+### Removed
+
+- Unused chemistry code and associated tests
+
+
+## [4.3.18] 2024-05-17
+
+### Added
+
+- Chained reporters for RL
+
+### Fixed
+
+- Compatibility support for model file metadata: dict vs dataclass
+
+
+## [4.3.17] 2024-05-15
+
+### Changed
+
+- Various cosmetic fixes to TB output
+
+### Fixed
+
+- TL responder: validation loss was reported as sampled loss
+- Add metadata when "metadata" files is empty
+
+
+## [4.3.16] 2024-05-14
+
+### Changed
+
+- Code clean-up in Reinvent model and RNN code
+- Global pydantic configuration
+
+### Fixed
+
+- Affected test cases after code rearrangement
+
+
+## [4.3.15] 2024-05-13
+
+### Added
+
+Various code improvements.
+- Metadata writing for all created RL and TL models
+- Chained reporters
+- Prior registry
+- Config validation
+
+
+## [4.3.14] 2024-05-06
+
+### Added
+
+- Write additional information to RL CSV
+  - For Mol2Mol, add _Input\_SMILEs_
+  - For Linkinvent, add _Warheads_ and _Linker_
+  - For Libinvnet, add _Input\_Scaffold_ and _R-groups_
+
+
+## [4.3.13] 2024-05-06
+
+### Added
+
+- Notebook: plot of reverse sigmoid transform
+
+
+## [4.3.12] 2024-05-06
+
+### Added
+
+- Stages can now defined their own diversity filters.  Global filter always overwrites stage settings.  Currently no mechanism to carry over DF from previous stage, use single stage runs.
+
+
+## [4.3.11] 2024-04-30
+
+### Changed
+
+- TanimotoSimilarity replaces TanimotoDistance
+
+### Deprecated
+
+- TanimotoDistance: computes actually a similarity and TanimotoSimilarity
+
+
+## [4.3.10] 2024-04-29
+
+### Changed
+
+- ChemProp scoring component now supports multitask models
+
+
+## [4.3.9] 2024-04-28
+
+### Added
+
+- Optional [scheduler] section for TL
+
+
+## [4.3.8] 2024-04-24
+
+### Fixed
+
+- LibInvent: fixed issue with multiple R-groups on one atom
+- ReactionFilter: selective filter will now function correctly as filter
+
+
+## [4.3.7] 2024-04-22
+
+### Added
+
+- Notebook: a more complete RL/TL demo
+
+
+## [4.3.6] 2024-04-22
+
+### Fixed
+
+- Fixed crash when all molecules in batch are filtered out
 
 
 ## [4.3.5] 2024-04-18

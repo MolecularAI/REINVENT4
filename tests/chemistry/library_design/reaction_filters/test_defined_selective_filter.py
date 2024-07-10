@@ -2,7 +2,7 @@ import unittest
 
 from rdkit import Chem
 
-from reinvent.chemistry.library_design import BondMaker, AttachmentPoints
+from reinvent.chemistry.library_design import bond_maker, attachment_points
 from reinvent.chemistry.library_design.reaction_filters import ReactionFiltersEnum
 from reinvent.chemistry.library_design.reaction_filters.reaction_filter import ReactionFilter
 from reinvent.chemistry.library_design.reaction_filters.reaction_filter_configruation import (
@@ -23,8 +23,6 @@ from tests.chemistry.fixtures.test_data import (
 
 class TestDefinedSelectiveFilterSingleReaction(unittest.TestCase):
     def setUp(self):
-        self._bond_maker = BondMaker()
-        self._attachment_points = AttachmentPoints()
         self._enum = ReactionFiltersEnum()
         reactions = [[REACTION_SUZUKI_NAME]]
         with default_reaction_definitions() as reaction_definitions_path:
@@ -35,35 +33,29 @@ class TestDefinedSelectiveFilterSingleReaction(unittest.TestCase):
             )
         self.reaction_filter = ReactionFilter(configuration)
 
-
-    @unittest.skip("non-functional in R4")
     def test_with_suzuki_reagents(self):
         scaffold = SCAFFOLD_SUZUKI
         decoration = DECORATION_SUZUKI
-        scaffold = self._attachment_points.add_attachment_point_numbers(
-            scaffold, canonicalize=False
+        scaffold = attachment_points.add_attachment_point_numbers(scaffold, canonicalize=False)
+        molecule: Chem.Mol = bond_maker.join_scaffolds_and_decorations(
+            scaffold, decoration, keep_labels_on_atoms=True
         )
-        molecule: Chem.Mol = self._bond_maker.join_scaffolds_and_decorations(scaffold, decoration)
         score = self.reaction_filter.evaluate(molecule)
         self.assertEqual(1.0, score)
 
-
-    @unittest.skip("non-functional in R4")
     def test_with_non_suzuki_reagents(self):
         scaffold = SCAFFOLD_NO_SUZUKI
         decoration = DECORATION_NO_SUZUKI
-        scaffold = self._attachment_points.add_attachment_point_numbers(
-            scaffold, canonicalize=False
+        scaffold = attachment_points.add_attachment_point_numbers(scaffold, canonicalize=False)
+        molecule: Chem.Mol = bond_maker.join_scaffolds_and_decorations(
+            scaffold, decoration, keep_labels_on_atoms=True
         )
-        molecule: Chem.Mol = self._bond_maker.join_scaffolds_and_decorations(scaffold, decoration)
         score = self.reaction_filter.evaluate(molecule)
-        self.assertEqual(0.5, score)
+        self.assertEqual(0.0, score)
 
 
 class TestDefinedSelectiveFilter(unittest.TestCase):
     def setUp(self):
-        self._bond_maker = BondMaker()
-        self._attachment_points = AttachmentPoints()
         self._enum = ReactionFiltersEnum()
         reactions = [[REACTION_SUZUKI_NAME], [REACTION_SUZUKI_NAME]]
         with default_reaction_definitions() as reaction_definitions_path:
@@ -75,24 +67,22 @@ class TestDefinedSelectiveFilter(unittest.TestCase):
 
         self.reaction_filter = ReactionFilter(configuration)
 
-    @unittest.skip("non-functional in R4")
     def test_two_attachment_points_with_suzuki_reagents(self):
         scaffold = SCAFFOLD_TO_DECORATE
         decoration = TWO_DECORATIONS_SUZUKI
-        scaffold = self._attachment_points.add_attachment_point_numbers(
-            scaffold, canonicalize=False
+        scaffold = attachment_points.add_attachment_point_numbers(scaffold, canonicalize=False)
+        molecule: Chem.Mol = bond_maker.join_scaffolds_and_decorations(
+            scaffold, decoration, keep_labels_on_atoms=True
         )
-        molecule: Chem.Mol = self._bond_maker.join_scaffolds_and_decorations(scaffold, decoration)
         score = self.reaction_filter.evaluate(molecule)
         self.assertEqual(1.0, score)
 
-    @unittest.skip("non-functional in R4")
     def test_two_attachment_points_one_with_suzuki_reagents(self):
         scaffold = SCAFFOLD_TO_DECORATE
         decoration = TWO_DECORATIONS_ONE_SUZUKI
-        scaffold = self._attachment_points.add_attachment_point_numbers(
-            scaffold, canonicalize=False
+        scaffold = attachment_points.add_attachment_point_numbers(scaffold, canonicalize=False)
+        molecule: Chem.Mol = bond_maker.join_scaffolds_and_decorations(
+            scaffold, decoration, keep_labels_on_atoms=True
         )
-        molecule: Chem.Mol = self._bond_maker.join_scaffolds_and_decorations(scaffold, decoration)
         score = self.reaction_filter.evaluate(molecule)
-        self.assertEqual(0.75, score)
+        self.assertEqual(0.0, score)

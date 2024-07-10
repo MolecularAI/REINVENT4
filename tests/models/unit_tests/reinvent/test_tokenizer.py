@@ -44,9 +44,7 @@ class TestSmilesTokenizer(unittest.TestCase):
         )
 
         self.assertListEqual(
-            self.tokenizer.tokenize(
-                "C%12CC(Br)C1CC%121[ClH]", with_begin_and_end=False
-            ),
+            self.tokenizer.tokenize("C%12CC(Br)C1CC%121[ClH]", with_begin_and_end=False),
             [
                 "C",
                 "%12",

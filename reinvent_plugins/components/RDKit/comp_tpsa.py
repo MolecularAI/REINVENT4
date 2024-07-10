@@ -33,6 +33,7 @@ class Parameters:
 class TPSA:
     def __init__(self, params: Parameters):
         self.includeSandP = params.includeSandP
+        self.number_of_endpoints = len(params.includeSandP)
 
     @molcache
     def __call__(self, mols: List[Chem.Mol]) -> np.ndarray:

@@ -28,6 +28,7 @@ def set_device(arg, device):
 
 def consistify(method):
     """Decorator to move a method's arguments to the device of the instance"""
+
     @wraps(method)
     def wrapper(*args, **kwargs):
         self = args[0]

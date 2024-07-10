@@ -27,7 +27,7 @@ class ComponentData:
     cache: Dict
 
 
-def get_components(components: dict[str, dict]) -> ComponentType:
+def get_components(components: list[dict[str, dict]]) -> ComponentType:
     """Get all the components from the configuration
 
     Stores the component function, transform and results objects.
@@ -43,7 +43,7 @@ def get_components(components: dict[str, dict]) -> ComponentType:
     component_registry = get_registry()
 
     for component in components:
-        component_type, component_value  = list(component.items())[0]
+        component_type, component_value = list(component.items())[0]
         endpoints: dict = component_value["endpoint"]
 
         component_type_lookup = component_type.lower().replace("-", "").replace("_", "")
@@ -92,10 +92,11 @@ def get_components(components: dict[str, dict]) -> ComponentType:
             component_params = ComponentParams(**collected_params)
 
         component = Component(component_params)
-        data = ComponentData(component_type = component_type_lookup,
-                             params = (names,component,transforms,weights),
-                             cache = defaultdict(dict))
-
+        data = ComponentData(
+            component_type=component_type_lookup,
+            params=(names, component, transforms, weights),
+            cache=defaultdict(dict),
+        )
 
         if Component.__component == "filter":
             logger.info(f"Creating filter component {component_type}")

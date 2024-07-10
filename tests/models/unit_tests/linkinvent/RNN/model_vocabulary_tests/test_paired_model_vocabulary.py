@@ -1,6 +1,6 @@
 import unittest
 
-from reinvent.chemistry.tokens import TransformationTokens
+from reinvent.chemistry import tokens
 
 from reinvent.models.linkinvent.model_vocabulary.paired_model_vocabulary import (
     PairedModelVocabulary,
@@ -27,6 +27,5 @@ class TestPairedModelVocabulary(unittest.TestCase):
         self.assertEqual(self.pmv.len(), (11, 16))
 
     def test_correct_tokens(self):
-        warhead_sep = TransformationTokens().ATTACHMENT_SEPARATOR_TOKEN
+        warhead_sep = tokens.ATTACHMENT_SEPARATOR_TOKEN
         self.assertIsNotNone(self.pmv.input.encode(warhead_sep))
-        self.assertIsNone(self.pmv.target.encode(warhead_sep))

@@ -10,7 +10,8 @@ import logging
 
 from . import normalizers
 
-logger = logging.getLogger('reinvent')
+logger = logging.getLogger("reinvent")
+
 
 def normalize_smiles(func: Callable):
     def wrapper(self, smilies: List[str]):

@@ -196,3 +196,37 @@ def test_filter_scorer():
     arth_scorer = Scorer(scorer_config_arth_mean)
     arth_results = arth_scorer.compute_results(smiles, invalid_mask, duplicate_mask)
     assert_array_almost_equal(arth_results.total_scores, expected_result_arth_mean)
+
+
+def test_all_filter_scorer():
+    smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
+    invalid_mask = np.array([True, True, True, True])
+    duplicate_mask = np.array([True, True, True, True])
+
+    scorer_config_arth_mean = {
+        "type": "arithmetic_mean",
+        "component": [
+            {
+                "custom_alerts": {
+                    "endpoint": [
+                        {"name": "Unwanted SMARTS", "weight": 1, "params": {"smarts": ["[#6]"]}}
+                    ]
+                }
+            },
+            {
+                "NumAtomStereoCenters": {
+                    "endpoint": [
+                        {
+                            "name": "Number of stereo centers",
+                            "weight": 1,
+                            "transform": {"type": "LeftStep", "low": 0},
+                        }
+                    ]
+                }
+            },
+        ],
+    }
+    expected_result_arth_mean = [0.0, 0.0, 0.0, 0.0]
+    arth_scorer = Scorer(scorer_config_arth_mean)
+    arth_results = arth_scorer.compute_results(smiles, invalid_mask, duplicate_mask)
+    assert_array_almost_equal(arth_results.total_scores, expected_result_arth_mean)

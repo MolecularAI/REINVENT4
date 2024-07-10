@@ -13,21 +13,9 @@ __all__ = ["setup_reporter", "get_reporter"]
 import requests
 import json
 import logging
-from typing import Mapping, Protocol
+from typing import Mapping, Optional
 
 logger = logging.getLogger(__name__)
-
-
-class Reporter(Protocol):
-    def send(self, *args, **kwargs):
-        ...
-
-
-class NoopReporter:
-    """Does nothing"""
-
-    def send(self, *args, **kwargs) -> None:
-        return
 
 
 HEADERS = {
@@ -48,13 +36,13 @@ class RemoteJSONReporter:
         :param url: URL to send JSON to
         :param token: access token for the URL
         """
-        self.url = url
 
-        self.headers = HEADERS
+        self.url = url
 
         if token:
             self.headers["Authorization"] = token
 
+        self.headers = HEADERS
         self.max_msg = 0
 
     def send(self, record) -> None:
@@ -88,10 +76,10 @@ class RemoteJSONReporter:
             logger.error(f"{response.url=}")
 
 
-_reporter = NoopReporter()
+_reporter = None
 
 
-def get_reporter() -> Reporter:
+def get_reporter() -> Optional[RemoteJSONReporter]:
     """Return the current reporter
 
     :return: reporter object
@@ -100,11 +88,12 @@ def get_reporter() -> Reporter:
     return _reporter
 
 
-def setup_reporter(url, token=None) -> None:
+def setup_reporter(url, token=None) -> bool:
     """Set up the reporter
 
     :param url: URL to send JSON to
     :param token: access token for the URL
+    :returns: whether reporter was setup successfully
     """
 
     global _reporter
@@ -112,3 +101,6 @@ def setup_reporter(url, token=None) -> None:
     if url:
         # assume endpoint is readily available...
         _reporter = RemoteJSONReporter(url, token)
+        return True
+
+    return False

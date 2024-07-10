@@ -1,6 +1,5 @@
 """Various data classes defining DTOs needed in RL sampling."""
 
-
 from dataclasses import dataclass
 from typing import List
 

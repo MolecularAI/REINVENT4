@@ -40,6 +40,7 @@ def test_geometric_mean():
     result = geometric_mean(data)
     assert np.allclose(result, [1.88, 3.97, 1.09, 4.20, 2.62], atol=1e-2)
 
+
 def test_geometric_mean_mismatch():
     data1 = np.array([4.43, 1.94, 8.50, 3.71], dtype=np.float32)
     weight1 = 2.71828
@@ -51,6 +52,7 @@ def test_geometric_mean_mismatch():
     with pytest.raises(ValueError):
         geometric_mean(data)
 
+
 def test_geometric_mean_nan():
     data1 = np.array([4.43, 1.94, 2.93, 8.50, 3.71], dtype=np.float32)
     weight1 = 2.71828
@@ -61,6 +63,7 @@ def test_geometric_mean_nan():
 
     result = geometric_mean(data)
     assert np.allclose(result, [1.88, 3.97, 2.93, 4.20, 2.62], atol=1e-2)
+
 
 def test_geometric_mean_negative():
     data1 = np.array([4.43, 1.94, 2.93, 8.50, 3.71], dtype=np.float32)

@@ -146,6 +146,7 @@ from pydantic.dataclasses import dataclass
 from .component_results import ComponentResults
 from .run_program import run_command
 from .add_tag import add_tag
+from reinvent_plugins.normalize import normalize_smiles
 
 
 @add_tag("__parameters")
@@ -183,6 +184,7 @@ CMD = "{exe} {config} --inp {inp} --out {out} --parameters {params}"
 @add_tag("__component")
 class Maize:
     """Scoring component for the Maize workflow manager"""
+
     def __init__(self, params: Parameters):
         self.executable = params.executable[0]
         self.workflow = params.workflow[0]
@@ -191,12 +193,13 @@ class Maize:
         self.log = params.log[0]
         self.config = params.config[0]
         self.parameters = params.parameters[0]
+        self.smiles_type = "rdkit_smiles"
 
         if len(params.workflow) > 1:
-            raise ValueError(
-                "The Maize component currently only supports a single endpoint")
+            raise ValueError("The Maize component currently only supports a single endpoint")
         self.step_id = 0
 
+    @normalize_smiles
     def __call__(self, smilies: List[str]) -> np.array:
         with tempfile.TemporaryDirectory() as tmp:
             in_json = os.path.join(tmp, "input.json")
@@ -213,7 +216,7 @@ class Maize:
                     config=self.workflow,
                     inp=in_json,
                     out=out_json,
-                    params=extra_params
+                    params=extra_params,
                 )
             )
             if self.debug:

@@ -80,29 +80,56 @@ def read_smiles_csv_file(
 
             if isinstance(columns, int):
                 smiles = row[columns].strip()
+                orig_smiles = smiles
 
                 if actions:
                     for action in actions:
                         if callable(action) and smiles:
-                            smiles = action(smiles)
+                            smiles = action(orig_smiles)
+
+                if not smiles:
+                    continue
+
+                # lib/linkinvent
+                if "." in smiles:  # assume this is the standard SMILES fragment separator
+                    smiles = smiles.replace(".", "|")
+
             else:
                 smiles = tuple(smiles.strip() for smiles in row[columns])
+                tmp_smiles = smiles
 
                 # FIXME: hard input check for libinvent / linkinvent
                 #        for unsupported scaffolds containing multiple
                 #        attachment points to the same atoms.
                 # libinvent
-                if "|" in smiles[1]:
+                new_smiles = smiles[1]
+
+                if "." in new_smiles:  # assume this is the standard SMILES fragment separator
+                    new_smiles = new_smiles.replace(".", "|")
+
+                if "|" in new_smiles:
                     if has_multiple_attachment_points_to_same_atom(smiles[0]):
                         raise ValueError(
-                            f"Not supported: Smiles {smiles[0]} contains multiple attachment points for the same atom"
+                            f"Not supported: Smiles {new_smiles} contains multiple attachment points for the same atom"
                         )
+
+                    tmp_smiles = (smiles[0], new_smiles)
+
                 # linkinvent
-                if "|" in smiles[0]:
+                new_smiles = smiles[0]
+
+                if "." in new_smiles:  # assume this is the standard SMILES fragment separator
+                    new_smiles = new_smiles.replace(".", "|")
+
+                if "|" in new_smiles:
                     if has_multiple_attachment_points_to_same_atom(smiles[1]):
                         raise ValueError(
-                            f"Not supported: Smiles {smiles[1]} contains multiple attachment points for the same atom"
+                            f"Not supported: Smiles {new_smiles} contains multiple attachment points for the same atom"
                         )
+
+                    tmp_smiles = (new_smiles, smiles[1])
+
+                smiles = tmp_smiles
 
             # SMILES transformation may fail
             # FIXME: needs sensible way to report this back to the user
@@ -154,16 +181,3 @@ def write_json(data: str, filename: str) -> None:
     """
     with open(filename, "w") as jf:
         json.dump(data, jf, ensure_ascii=False, indent=4)
-
-
-if __name__ == "__main__":
-    import sys
-    import pprint
-
-    config = read_file(sys.argv[1])
-
-    pp = pprint.PrettyPrinter()
-    pp.pprint(config)
-
-    if len(sys.argv) > 2:
-        write_json(config, sys.argv[2])

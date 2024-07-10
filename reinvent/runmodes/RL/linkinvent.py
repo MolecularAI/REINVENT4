@@ -32,9 +32,9 @@ class LinkinventLearning(Learning):
         return results
 
     def update(self, results: ScoreResults):
-        if self.prior.model._version == 1: # RNN-based
+        if self.prior.version == 1:  # RNN-based
             return self._update_common(results)
-        elif self.prior.model._version == 2:  # Transformer-based
+        elif self.prior.version == 2:  # Transformer-based
             return self._update_common_transformer(results)
 
 

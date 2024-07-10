@@ -52,8 +52,6 @@ class Dataset(tud.Dataset):
         :return: A tensor with the sequences correctly padded.
         """
 
-        seq_lengths = torch.tensor(
-            [len(seq) for seq in encoded_seqs], dtype=torch.int64
-        )
+        seq_lengths = torch.tensor([len(seq) for seq in encoded_seqs], dtype=torch.int64)
 
         return pad_sequence(encoded_seqs, batch_first=True), seq_lengths

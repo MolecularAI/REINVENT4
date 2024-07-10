@@ -97,16 +97,14 @@ class Vocabulary:
         :param tokens: Tokens to encode.
         :return : An numpy array with the tokens encoded.
         """
-
         ohe_vect = np.zeros(len(tokens), dtype=np.float32)
-
-        try:
-            for i, token in enumerate(tokens):
+        for i, token in enumerate(tokens):
+            if token in self._tokens:
                 ohe_vect[i] = self._tokens[token]
-        except KeyError:
-            return None
-        else:
-            return ohe_vect
+            else:
+                raise KeyError(f"{token} is not supported! Supported tokens are {self.tokens()}.")
+        return ohe_vect
+
 
     def decode(self, ohe_vect):
         """

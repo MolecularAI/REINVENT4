@@ -7,6 +7,7 @@ from typing import List, Tuple
 import torch
 import torch.nn as tnn
 
+from reinvent.models import meta_data
 from reinvent.models.model_mode_enum import ModelModeEnum
 from reinvent.models.libinvent.models.decorator import Decorator
 
@@ -19,6 +20,7 @@ class DecoratorModel:
         self,
         vocabulary,
         decorator,
+        meta_data: meta_data.ModelMetaData,
         max_sequence_length=256,
         mode=ModelModeEnum.TRAINING,
         device=torch.device("cpu"),
@@ -27,18 +29,20 @@ class DecoratorModel:
         Implements the likelihood and scaffold_decorating functions of the decorator model.
         :param vocabulary: A DecoratorVocabulary instance with the vocabularies of both the encoder and decoder.
         :param decorator: An decorator network instance.
+        :param meta_data: model meta data
         :param max_sequence_length: Maximium number of tokens allowed to sample.
         :param mode: Mode in which the model should be initialized.
         :return:
         """
 
         self.vocabulary = vocabulary
-        self.max_sequence_length = max_sequence_length
-
-        self._model_modes = ModelModeEnum()
         self.network = decorator
         self.network.to(device)
+        self.meta_data = meta_data
+        self.max_sequence_length = max_sequence_length
         self.device = device
+
+        self._model_modes = ModelModeEnum()
         self.set_mode(mode)
 
         self._nll_loss = tnn.NLLLoss(reduction="none", ignore_index=0)
@@ -64,7 +68,13 @@ class DecoratorModel:
         decorator = Decorator(**save_dict["decorator"]["params"])
         decorator.load_state_dict(save_dict["decorator"]["state"])
 
-        model = cls(decorator=decorator, mode=mode, device=device, **save_dict["model"])
+        model = cls(
+            decorator=decorator,
+            meta_data=save_dict["metadata"],
+            mode=mode,
+            device=device,
+            **save_dict["model"],
+        )
 
         return model
 
@@ -74,6 +84,7 @@ class DecoratorModel:
         save_dict = dict(
             model_type=self._model_type,
             version=self._version,
+            metadata=self.meta_data,
             model=dict(
                 vocabulary=self.vocabulary,
                 max_sequence_length=self.max_sequence_length,

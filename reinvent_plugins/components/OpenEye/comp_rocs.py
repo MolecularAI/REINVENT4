@@ -13,7 +13,6 @@ params.maxconfs = 200
 params.rocs_input = ""
 """
 
-
 from __future__ import annotations
 
 __all__ = ["ROCSSimilarity"]
@@ -28,6 +27,7 @@ from pydantic.dataclasses import dataclass
 from .rocs.rocs_similarity import ROCSOverlay
 from ..component_results import ComponentResults
 from ..add_tag import add_tag
+from reinvent_plugins.normalize import normalize_smiles
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +75,10 @@ class ROCSSimilarity:
             custom_cff=self.custom_cff,
         )
 
+        self.number_of_endpoints = len(params.rocs_input)
+        self.smiles_type = "rdkit_smiles"
+
+    @normalize_smiles
     def __call__(self, smilies: List[str]) -> np.ndarray:
         scores = []
         results = self.rocs.calculate_rocs_score(smilies)

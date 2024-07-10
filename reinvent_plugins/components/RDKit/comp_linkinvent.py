@@ -1,4 +1,5 @@
 """Compute various scores with RDKit"""
+
 import itertools
 from typing import List, Callable
 import logging
@@ -34,27 +35,29 @@ def num_sp3(mol: Chem.Mol) -> int:
     )
     return num_sp3_atoms
 
+
 def num_atom_stereocenters(mol: Chem.Mol) -> int:
     # Chem.CalcNumAtomStereoCenters does not work for labeled mol
     stereo_centers = 0
     for atom in mol.GetAtoms():
-        if atom.HasProp('_CIPCode'):
+        if atom.HasProp("_CIPCode"):
             stereo_centers += 1
     return stereo_centers
+
 
 def effective_length(mol: Chem.Mol) -> int:
     # if a single atom has more than one attachment point, return 0
     attachement_indices = []
     num_attachments = 0
     for atom in mol.GetAtoms():
-        if atom.HasProp('Label'):
-            num_attachments += atom.GetProp('Label').count('_')
+        if atom.HasProp("Label"):
+            num_attachments += atom.GetProp("Label").count("_")
             attachement_indices.append(atom.GetIdx())
     if len(attachement_indices) < num_attachments:
         return 0
     else:
         pairs = itertools.combinations(attachement_indices, 2)
-        return int(min(len(Chem.GetShortestPath(mol, i, j))-1 for i, j in pairs))
+        return int(min(len(Chem.GetShortestPath(mol, i, j)) - 1 for i, j in pairs))
 
 
 def graph_length(mol: Chem.Mol) -> int:
@@ -71,21 +74,26 @@ def length_ratio(mol: Chem.Mol) -> float:
 
 def cap_fragment(smiles):
     mol = Chem.MolFromSmiles(smiles)
+
     if mol:
         # Label attachment points, use neighbor atom because atom * will be replaced by H and become implicit
         i = 1
+
         for atom in mol.GetAtoms():
-            if atom.GetSymbol() == '*':
+            if atom.GetSymbol() == "*":
                 neighbor_atom = atom.GetNeighbors()[0]
                 # keep track of multiple attachment points in a single atom
-                label = neighbor_atom.GetProp('Label') + f'_{i}' if neighbor_atom.HasProp(
-                    'Label') else f'attachment_{i}'
-                neighbor_atom.SetProp(f'Label', label)
+                label = (
+                    neighbor_atom.GetProp("Label") + f"_{i}"
+                    if neighbor_atom.HasProp("Label")
+                    else f"attachment_{i}"
+                )
+                neighbor_atom.SetProp(f"Label", label)
                 i += 1
 
         # Passivated molecule
-        search_patt = Chem.MolFromSmiles('*')
-        sub_patt = Chem.MolFromSmiles('[H]')
+        search_patt = Chem.MolFromSmiles("*")
+        sub_patt = Chem.MolFromSmiles("[H]")
         new_mol = Chem.ReplaceSubstructs(mol, search_patt, sub_patt, replaceAll=True)[0]
         clean_mol = Chem.RemoveHs(new_mol)
 

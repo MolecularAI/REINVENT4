@@ -57,7 +57,7 @@ os.chdir(wd)
 # - The output directory for TensorBoard (optional)
 # - The configuration file in JSON format (optional)
 
-global_parameters="""
+global_parameters = """
 run_type = "staged_learning"
 device = "cuda:0"
 tb_logdir = "tb_stage1"
@@ -72,7 +72,7 @@ json_out_config = "_stage1.json"
 prior_filename = os.path.join(reinvent.__path__[0], "..", "priors", "reinvent.prior")
 agent_filename = prior_filename
 
-parameters=f"""
+parameters = f"""
 [parameters]
 
 prior_file = "{prior_filename}"
@@ -238,10 +238,12 @@ total_batch_duplicate_smilies = len(duplicates)
 all_duplicates = df[df.duplicated(subset=["SMILES"])]
 total_duplicate_smilies = len(all_duplicates)
 
-print(f"Total number of SMILES generated: {total_smilies}\n"
-      f"Total number of invalid SMILES generated: {total_invalid_smilies}\n"
-      f"Total number of batcg duplicate SMILES generated: {total_batch_duplicate_smilies}\n"
-      f"Total number of duplicate SMILES generated: {total_duplicate_smilies}")
+print(
+    f"Total number of SMILES generated: {total_smilies}\n"
+    f"Total number of invalid SMILES generated: {total_invalid_smilies}\n"
+    f"Total number of batcg duplicate SMILES generated: {total_batch_duplicate_smilies}\n"
+    f"Total number of duplicate SMILES generated: {total_duplicate_smilies}"
+)
 # -
 # ### Display all generated duplicates
 
@@ -271,5 +273,3 @@ plt.xlabel("step")
 plt.ylabel("NLL")
 plt.show()
 # -
-
-

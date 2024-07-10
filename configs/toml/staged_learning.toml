@@ -89,6 +89,14 @@ max_score = 0.6  # terminate if this total score is exceeded
 min_steps = 25  # run for at least this number of steps
 max_steps = 100  # terminate entire run when exceeded
 
+# Optionally, a DF can be set for each stage but note that the global DF
+# section above will always overwrite the stage section and you need to
+# delete [diversity_filter] to avoid this
+#
+#[stage.diversity_filter]
+#type = "IdenticalMurckoScaffold"
+# etc.
+
 [stage.scoring]
 type = "geometric_mean"  # aggregation function
 

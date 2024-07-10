@@ -15,5 +15,5 @@ class Generator(nn.Module):
                     Small numbers make the model more confident on each position, but also more conservative.
                     Large values result in more random predictions at each step.
         """
-        logits =self.proj(x)/temperature
+        logits = self.proj(x) / temperature
         return F.log_softmax(logits, dim=-1)

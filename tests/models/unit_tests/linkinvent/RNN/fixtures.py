@@ -5,6 +5,7 @@ from reinvent.models.linkinvent.model_vocabulary.paired_model_vocabulary import 
 from reinvent.models.linkinvent.networks import EncoderDecoder
 from reinvent.models.model_mode_enum import ModelModeEnum
 from reinvent.models.model_parameter_enum import ModelParametersEnum
+from reinvent.models import meta_data
 from tests.test_data import WARHEAD_PAIR, ETHANE, HEXANE, PROPANE, BUTANE
 
 
@@ -29,5 +30,14 @@ def mocked_linkinvent_model():
         parameter_enums.DROPOUT: 0,
     }
     network = EncoderDecoder(encoder_params, decoder_params)
-    model = LinkInventModel(vocabulary, network, mode=ModelModeEnum().INFERENCE)
+
+    metadata = meta_data.ModelMetaData(
+        hash_id=None,
+        hash_id_format="",
+        model_id="",
+        origina_data_source="",
+        creation_date=0,
+    )
+
+    model = LinkInventModel(vocabulary, network, metadata, mode=ModelModeEnum().INFERENCE)
     return model

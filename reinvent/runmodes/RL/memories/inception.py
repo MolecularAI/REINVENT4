@@ -87,7 +87,7 @@ class InceptionMemory:
 
         logger.debug(f"Inception top score: {self.storage[0]}")
 
-        self.storage = seq[:self.maxsize]
+        self.storage = seq[: self.maxsize]
 
     def _from_internal_order(self, seq):
         """Return original order"""
@@ -136,7 +136,7 @@ class Inception:
                     invalid_smilies.append(smi)
 
             raise RuntimeError(
-                f"Found incompatible smilies with the prior: {', '.join(invalid_smilies)}"
+                f"Found smilies incompatible with the prior: {', '.join(invalid_smilies)}"
             )
 
         self.memory = InceptionMemory(maxsize=memory_size, deduplicate=deduplicate)

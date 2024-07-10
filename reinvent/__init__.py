@@ -23,15 +23,15 @@ PATH_MAP = (
     ("reinvent_models.link_invent.model_vocabulary", models.linkinvent.model_vocabulary),
     (
         "reinvent_models.link_invent.model_vocabulary.vocabulary",
-       models.linkinvent.model_vocabulary.vocabulary,
+        models.linkinvent.model_vocabulary.vocabulary,
     ),
     (
         "reinvent_models.link_invent.model_vocabulary.model_vocabulary",
-       models.linkinvent.model_vocabulary.model_vocabulary,
+        models.linkinvent.model_vocabulary.model_vocabulary,
     ),
     (
         "reinvent_models.link_invent.model_vocabulary.paired_model_vocabulary",
-       models.linkinvent.model_vocabulary.paired_model_vocabulary,
+        models.linkinvent.model_vocabulary.paired_model_vocabulary,
     ),
 )
 

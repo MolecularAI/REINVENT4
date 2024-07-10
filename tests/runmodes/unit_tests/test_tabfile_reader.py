@@ -1,7 +1,7 @@
 import pytest
 
 from reinvent.runmodes.scoring.file_io import TabFileReader
-from reinvent.chemistry.enums import FilterTypesEnum
+from reinvent.chemistry.standardization.filter_types_enum import FilterTypesEnum
 from reinvent.chemistry.standardization.filter_configuration import FilterConfiguration
 from reinvent.chemistry.standardization.rdkit_standardizer import RDKitStandardizer
 

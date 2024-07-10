@@ -33,7 +33,7 @@ Similiarity and cheminformatics components:
 * MatchingSubstructure: penalty applied to final score when SMARTS pattern is found
   * _smarts_: list of SMARTS patterns
   * _use_chirality_: check for chirality
-* TanimotoDistance: Tanimoto distance using the Morgan fingerprint (RDKit)
+* TanimotoSimilarity: Tanimoto similarity using the Morgan fingerprint (RDKit)
   * _smiles_: list of SMILES to match against
   * _radius_: Morgan fingerprint radius
   * _use_counts_: Morgan fingerprint, whether to use counts

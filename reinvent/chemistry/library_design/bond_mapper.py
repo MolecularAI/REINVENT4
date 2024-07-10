@@ -3,15 +3,11 @@ from typing import List, Dict, Tuple
 from rdkit.Chem.rdchem import Mol, AtomKekulizeException, Atom
 from rdkit.Chem.rdmolops import FragmentOnBonds, GetMolFrags
 
-from reinvent.chemistry import Conversions, TransformationTokens
+from reinvent.chemistry import conversions, tokens
 from reinvent.chemistry.library_design.dtos import ReactionOutcomeDTO
 
 
 class BondMapper:
-    def __init__(self):
-        self._conversions = Conversions()
-        self._tokens = TransformationTokens()
-
     def convert_building_blocks_to_fragments(
         self, molecule: Mol, neighbor_map: Dict, list_of_outcomes: List[ReactionOutcomeDTO]
     ) -> List[Tuple[Mol]]:
@@ -32,7 +28,7 @@ class BondMapper:
                         all_fragments.append(reaction_fragments)
             except AtomKekulizeException as ex:
                 raise AtomKekulizeException(
-                    f"failed scaffold: {self._conversions.mol_to_smiles(molecule)} \n for reaction: {outcome.reaction_smarts} \n {ex}"
+                    f"failed scaffold: {conversions.mol_to_smiles(molecule)} \n for reaction: {outcome.reaction_smarts} \n {ex}"
                 ) from ex
         return all_fragments
 
@@ -100,7 +96,7 @@ class BondMapper:
         )
 
         for atom in cut_mol.GetAtoms():
-            if atom.GetSymbol() == self._tokens.ATTACHMENT_POINT_TOKEN:
+            if atom.GetSymbol() == tokens.ATTACHMENT_POINT_TOKEN:
                 num = atom.GetIsotope()
                 atom.SetIsotope(0)
                 atom.SetProp("molAtomMapNumber", str(num))

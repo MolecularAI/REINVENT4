@@ -2,9 +2,7 @@ __all__ = ["get_pair_generator"]
 from reinvent.models.transformer.mol2mol.dataset import preprocessing
 
 
-def get_pair_generator(
-    pair_generator_name: str, *args, **kwargs
-) -> preprocessing.PairGenerator:
+def get_pair_generator(pair_generator_name: str, *args, **kwargs) -> preprocessing.PairGenerator:
     """Returns a PairGenerator object.
 
     :param pair_generator_name: name to retrieve the PairGenerator object.

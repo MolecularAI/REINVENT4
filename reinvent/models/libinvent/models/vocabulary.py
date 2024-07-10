@@ -97,14 +97,14 @@ class Vocabulary:
         :param tokens: Tokens to encode.
         :return : An numpy array with the tokens encoded.
         """
+
         ohe_vect = np.zeros(len(tokens), dtype=np.float32)
-        try:
-            for i, token in enumerate(tokens):
+        for i, token in enumerate(tokens):
+            if token in self._tokens:
                 ohe_vect[i] = self._tokens[token]
-        except KeyError:
-            return None
-        else:
-            return ohe_vect
+            else:
+                raise KeyError(f"{token} is not supported! Supported tokens are {self.tokens()}.")
+        return ohe_vect
 
     def decode(self, ohe_vect):
         """
@@ -138,7 +138,7 @@ class SMILESTokenizer:
     REGEXPS = {
         "brackets": re.compile(r"(\[[^\]]*\])"),
         "2_ring_nums": re.compile(r"(%\d{2})"),
-        "brcl": re.compile(r"(Br|Cl)")
+        "brcl": re.compile(r"(Br|Cl)"),
     }
     REGEXP_ORDER = ["brackets", "2_ring_nums", "brcl"]
 
@@ -149,6 +149,7 @@ class SMILESTokenizer:
         :param with_begin_and_end: Appends a begin token and prepends an end token.
         :return : A list with the tokenized version.
         """
+
         def split_by(smiles, regexps):
             if not regexps:
                 return list(smiles)
@@ -203,7 +204,9 @@ class DecoratorVocabulary:
     Encapsulation of the two vocabularies needed for the decorator.
     """
 
-    def __init__(self, scaffold_vocabulary, scaffold_tokenizer, decoration_vocabulary, decoration_tokenizer):
+    def __init__(
+        self, scaffold_vocabulary, scaffold_tokenizer, decoration_vocabulary, decoration_tokenizer
+    ):
         self.scaffold_vocabulary = scaffold_vocabulary
         self.scaffold_tokenizer = scaffold_tokenizer
         self.decoration_vocabulary = decoration_vocabulary
@@ -258,7 +261,9 @@ class DecoratorVocabulary:
         :param encoded_decorations: A one-hot encoded version of the decoration.
         :return : A list with SMILES of all the fragments.
         """
-        return self.decoration_tokenizer.untokenize(self.decoration_vocabulary.decode(encoded_decoration))
+        return self.decoration_tokenizer.untokenize(
+            self.decoration_vocabulary.decode(encoded_decoration)
+        )
 
     @classmethod
     def from_lists(cls, scaffold_list, decoration_list):
@@ -274,4 +279,6 @@ class DecoratorVocabulary:
         decoration_tokenizer = SMILESTokenizer()
         decoration_vocabulary = create_vocabulary(decoration_list, decoration_tokenizer)
 
-        return cls(scaffold_vocabulary, scaffold_tokenizer, decoration_vocabulary, decoration_tokenizer)
+        return cls(
+            scaffold_vocabulary, scaffold_tokenizer, decoration_vocabulary, decoration_tokenizer
+        )

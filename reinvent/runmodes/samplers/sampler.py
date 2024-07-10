@@ -26,10 +26,8 @@ from rdkit import Chem
 from reinvent.models.model_factory.sample_batch import SmilesState
 
 if TYPE_CHECKING:
-    from reinvent.runmodes.dtos import ChemistryHelpers
     from reinvent.models import ModelAdapter
     from reinvent.models.model_factory.sample_batch import SampleBatch
-    from reinvent.chemistry import TransformationTokens
 
 
 logger = logging.getLogger(__name__)
@@ -47,8 +45,6 @@ class Sampler(ABC):
     isomeric: bool = False  # Transformer-based models
     randomize_smiles: bool = True
     unique_sequences: bool = False  # backwards compatibility for R3
-    chemistry: ChemistryHelpers = None
-    tokens: TransformationTokens = None  # LinkInvent only
 
     @abstractmethod
     def sample(self, smilies: List[str]) -> SampleBatch:

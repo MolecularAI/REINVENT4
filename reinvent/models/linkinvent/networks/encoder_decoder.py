@@ -35,9 +35,7 @@ class EncoderDecoder(tnn.Module):
         :param decoder_seq_lengths: The lengths of the decoder sequences.
         :return : The output logits as a tensor (batch, seq_d, dim).
         """
-        encoder_padded_seqs, hidden_states = self.forward_encoder(
-            encoder_seqs, encoder_seq_lengths
-        )
+        encoder_padded_seqs, hidden_states = self.forward_encoder(encoder_seqs, encoder_seq_lengths)
         logits, _, _ = self.forward_decoder(
             decoder_seqs, decoder_seq_lengths, encoder_padded_seqs, hidden_states
         )
@@ -66,9 +64,7 @@ class EncoderDecoder(tnn.Module):
         :param seq_lengths: The length of each sequence in the batch.
         :return : Returns the logits and the hidden state for each element of the sequence passed.
         """
-        return self._decoder(
-            padded_seqs, seq_lengths, encoder_padded_seqs, hidden_states
-        )
+        return self._decoder(padded_seqs, seq_lengths, encoder_padded_seqs, hidden_states)
 
     def get_params(self):
         """

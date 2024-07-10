@@ -11,9 +11,9 @@ from rdkit.Chem.Lipinski import (
 )
 from rdkit.Chem.rdchem import Mol
 
-from reinvent.chemistry import TransformationTokens
+from reinvent.chemistry import tokens
 from reinvent.chemistry.library_design.dtos import FilteringConditionDTO
-from reinvent.chemistry.library_design.enums import MolecularDescriptorsEnum
+from reinvent.chemistry.library_design.molecular_descriptors_enum import MolecularDescriptorsEnum
 
 
 class FragmentFilter:
@@ -23,7 +23,6 @@ class FragmentFilter:
         :param conditions: Conditions to use. When None is given, everything is valid.
         """
         self._descriptors_enum = MolecularDescriptorsEnum()
-        self._tockens = TransformationTokens()
         self.conditions = conditions
 
         self._CONDITIONS_FUNC = {
@@ -48,7 +47,7 @@ class FragmentFilter:
         check = [
             atom.GetDegree() == 1
             for atom in mol.GetAtoms()
-            if atom.GetSymbol() == self._tockens.ATTACHMENT_POINT_TOKEN
+            if atom.GetSymbol() == tokens.ATTACHMENT_POINT_TOKEN
         ]
         return all(check) and len(check) > 0
 

@@ -4,9 +4,9 @@ from collections import defaultdict
 from pathlib import Path
 
 
-config_path = Path(__file__).parent / 'integration_tests_config.json'
+config_path = Path(__file__).parent / "integration_tests_config.json"
 if config_path.exists():
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         config = json.load(f)
 else:
     config = {}

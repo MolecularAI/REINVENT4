@@ -3,6 +3,7 @@ from typing import List, Tuple
 import torch
 from torch import nn as tnn
 
+from reinvent.models import meta_data
 from reinvent.models.linkinvent.model_vocabulary.paired_model_vocabulary import (
     PairedModelVocabulary,
 )
@@ -19,6 +20,7 @@ class LinkInventModel:
         self,
         vocabulary: PairedModelVocabulary,
         network: EncoderDecoder,
+        meta_data: meta_data.ModelMetaData,
         max_sequence_length: int = 256,
         mode: str = ModelModeEnum().TRAINING,
         device=torch.device("cpu"),
@@ -28,6 +30,7 @@ class LinkInventModel:
         self._model_modes = ModelModeEnum()
         self.network = network
         self.network.to(device)
+        self.meta_data = meta_data
         self.device = device
         self.set_mode(mode)
 
@@ -59,9 +62,7 @@ class LinkInventModel:
         model_type = save_dict.get("model_type")
 
         if model_type and model_type != cls._model_type:
-            raise RuntimeError(
-                f"Wrong type: {model_type} but expected {cls._model_type}"
-            )
+            raise RuntimeError(f"Wrong type: {model_type} but expected {cls._model_type}")
 
         network = EncoderDecoder(**save_dict["network_parameter"])
         network.load_state_dict(save_dict["network_state"])
@@ -69,6 +70,7 @@ class LinkInventModel:
         model = cls(
             vocabulary=save_dict["vocabulary"],
             network=network,
+            meta_data=save_dict["metadata"],
             max_sequence_length=save_dict["max_sequence_length"],
             mode=mode,
             device=device,
@@ -82,6 +84,7 @@ class LinkInventModel:
         save_dict = dict(
             model_type=self._model_type,
             version=self._version,
+            metadata=self.meta_data,
             vocabulary=self.vocabulary,
             max_sequence_length=self.max_sequence_length,
             network_parameter=self.network.get_params(),
@@ -102,9 +105,7 @@ class LinkInventModel:
 
     save_to_file = save  # alias for backwards compatibility
 
-    def likelihood(
-        self, warheads_seqs, warheads_seq_lengths, linker_seqs, linker_seq_lengths
-    ):
+    def likelihood(self, warheads_seqs, warheads_seq_lengths, linker_seqs, linker_seq_lengths):
         """
         Retrieves the likelihood of warheads and their respective linker.
         :param warheads_seqs: (batch, seq) A batch of padded scaffold sequences.
@@ -122,9 +123,7 @@ class LinkInventModel:
         return self._nll_loss(log_probs, linker_seqs[:, 1:]).sum(dim=1)  # (batch)
 
     @torch.no_grad()
-    def sample(
-        self, inputs, input_seq_lengths
-    ) -> Tuple[List[str], List[str], List[float]]:
+    def sample(self, inputs, input_seq_lengths) -> Tuple[List[str], List[str], List[float]]:
         """
         Samples as many linker as warhead pairs in the tensor.
         :param inputs: A tensor with the warheads to sample already encoded and padded.
@@ -137,9 +136,7 @@ class LinkInventModel:
             (batch_size, 1), self.vocabulary.target.vocabulary["^"], dtype=torch.long
         )  # (batch, 1)
         seq_lengths = torch.ones(batch_size)  # (batch)
-        encoder_padded_seqs, hidden_states = self.network.forward_encoder(
-            inputs, input_seq_lengths
-        )
+        encoder_padded_seqs, hidden_states = self.network.forward_encoder(inputs, input_seq_lengths)
         nlls = torch.zeros(batch_size)
         not_finished = torch.ones(batch_size, 1, dtype=torch.long)
         sequences = []
@@ -152,15 +149,12 @@ class LinkInventModel:
             input_vector = torch.multinomial(probs, 1) * not_finished  # (batch, 1)
             sequences.append(input_vector)
             nlls += self._nll_loss(log_probs, input_vector.squeeze(dim=1))
-            not_finished = (input_vector > 1).type(
-                torch.long
-            )  # 0 is padding, 1 is end token
+            not_finished = (input_vector > 1).type(torch.long)  # 0 is padding, 1 is end token
             if not_finished.sum() == 0:
                 break
 
         linker_smiles_list = [
-            self.vocabulary.target.decode(seq)
-            for seq in torch.cat(sequences, 1).data.cpu().numpy()
+            self.vocabulary.target.decode(seq) for seq in torch.cat(sequences, 1).data.cpu().numpy()
         ]
         warheads_smiles_list = [
             self.vocabulary.input.decode(seq) for seq in inputs.data.cpu().numpy()

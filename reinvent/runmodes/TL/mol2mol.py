@@ -14,11 +14,9 @@ import tqdm
 from .learning import Learning
 import reinvent.models.transformer.core.dataset.paired_dataset as mol2mol_dataset
 
-from ..reporter import remote
 from ...models.transformer.mol2mol.dataset import get_pair_generator
 
 logger = logging.getLogger(__name__)
-remote_reporter = remote.get_reporter()
 
 
 class Mol2Mol(Learning):
@@ -29,10 +27,12 @@ class Mol2Mol(Learning):
             raise ValueError("The ranking loss penalty is only supported for Tanimoto similarity")
 
         smilies = self.smilies
+
         if self.validation_smilies is None:
             validation_smilies = []
         else:
             validation_smilies = self.validation_smilies
+
         pairs = self._generate_pairs(smilies + validation_smilies)
 
         validation_mask = np.zeros(len(pairs), dtype=bool)

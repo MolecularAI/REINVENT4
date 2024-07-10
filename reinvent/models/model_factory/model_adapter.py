@@ -9,13 +9,10 @@ __all__ = ["ModelAdapter", "SampledSequencesDTO", "BatchLikelihoodDTO"]
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Union, TYPE_CHECKING
+from typing import List
 
 import torch
 import torch.utils.data as tud
-
-if TYPE_CHECKING:
-    from reinvent.models.transformer.core.dto.batch_dto import BatchDTO
 
 
 logger = logging.getLogger(__name__)
@@ -38,25 +35,24 @@ class LinkInventBatchDTO:
 
 @dataclass
 class BatchLikelihoodDTO:
-    batch: Union[BatchDTO, LinkInventBatchDTO]
     likelihood: torch.Tensor
 
 
 class ModelAdapter(ABC):
     def __init__(self, model):
         self.model = model
+        self.model_type = model._model_type
+        self.version = model._version
         self.vocabulary = model.vocabulary
         self.max_sequence_length = model.max_sequence_length
         self.network = model.network
         self.device = model.device
 
         # FIXME: ugly hard-coded list
-        for name in "tokenizer", "device":
-            try:
+        for name in ["tokenizer"]:
+            if hasattr(model, name):
                 attr = getattr(model, name)
                 setattr(self, name, attr)
-            except AttributeError:
-                pass
 
     @abstractmethod
     def likelihood(self, *args, **kwargs):
@@ -93,8 +89,7 @@ class ModelAdapter(ABC):
 
         for _input, _output in dataloader:
             nlls = self.likelihood(*_input, *_output)
-            batch = LinkInventBatchDTO(_input, _output)
-            dto = BatchLikelihoodDTO(batch, nlls)
+            dto = BatchLikelihoodDTO(nlls)
 
             return dto
 

@@ -4,8 +4,8 @@ import logging
 
 import numpy as np
 import pandas as pd
-from reinvent.chemistry.conversions import Conversions
-from reinvent.chemistry.similarity import Similarity
+from reinvent.chemistry import conversions
+from reinvent.chemistry.similarity import calculate_tanimoto_batch
 from reinvent.models.utils.parallel import parallel
 
 from .pair_generator import PairGenerator
@@ -64,7 +64,6 @@ class TanimotoPairGenerator(PairGenerator):
         lth = self.lth
         uth = self.uth
 
-        conversions = Conversions()
         fsmiles, fmolecules = [], []
 
         for smi in smiles:
@@ -104,12 +103,10 @@ class TanimotoPairGenerator(PairGenerator):
         return df
 
     def _build_pairs(self, mols, smiles, *, mol_db, smi_db, lth, uth):
-        similarity = Similarity()
-
         table = []
 
         for i, mol in enumerate(mols):
-            ts = similarity.calculate_tanimoto_batch(mol, mol_db)
+            ts = calculate_tanimoto_batch(mol, mol_db)
             idx = (ts >= lth) & (ts <= uth)
             for smi, t in zip(smi_db[idx], ts[idx]):
                 table.append([smiles[i], smi, t])

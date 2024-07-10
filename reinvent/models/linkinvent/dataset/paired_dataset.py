@@ -13,9 +13,7 @@ from reinvent.models.linkinvent.model_vocabulary.paired_model_vocabulary import 
 class PairedDataset(tud.Dataset):
     """Dataset that takes a list of (input, output) pairs."""
 
-    def __init__(
-        self, input_target_smi_list: List[List[str]], vocabulary: PairedModelVocabulary
-    ):
+    def __init__(self, input_target_smi_list: List[List[str]], vocabulary: PairedModelVocabulary):
         self.vocabulary = vocabulary
         self._encoded_list = []
 

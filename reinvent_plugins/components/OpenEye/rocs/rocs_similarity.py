@@ -64,9 +64,7 @@ class ROCSOverlay:
         self.overlay_prep = overlay_prep
 
     def get_omega_confs(self, imol):
-        enantiomers = list(
-            oeomega.OEFlipper(imol.GetActive(), self.max_stereocenters, False, True)
-        )
+        enantiomers = list(oeomega.OEFlipper(imol.GetActive(), self.max_stereocenters, False, True))
         for k, enantiomer in enumerate(enantiomers):
             # Any other simpler way to combine and add all conformers to imol have failed !!
             # Failure = Creates conformers with wrong indices and wrong connections
@@ -95,9 +93,7 @@ class ROCSOverlay:
             color_getter = "GetFitColorTversky"
             combo_getter = "OEHighestFitTverskyCombo"
         else:
-            raise ValueError(
-                "similarity measure must be Tanimoto, RefTversky or FitTversky"
-            )
+            raise ValueError("similarity measure must be Tanimoto, RefTversky or FitTversky")
 
         self.shape_getter = shape_getter
         self.color_getter = color_getter
@@ -159,19 +155,14 @@ class ROCSOverlay:
                 self.overlay_prep.Prep(imol)
 
                 score = oeshape.OEBestOverlayScore()
-                self.rocs_overlay.BestOverlay(
-                    score, imol, getattr(oeshape, self.combo_getter)()
-                )
+                self.rocs_overlay.BestOverlay(score, imol, getattr(oeshape, self.combo_getter)())
                 best_score_shape = min(getattr(score, self.shape_getter)(), 1)
                 best_score_color = min(getattr(score, self.color_getter)(), 1)
                 best_score = (
-                    (self.shape_weight * best_score_shape)
-                    + (self.color_weight * best_score_color)
+                    (self.shape_weight * best_score_shape) + (self.color_weight * best_score_color)
                 ) / (self.shape_weight + self.color_weight)
 
-                outmol = oechem.OEGraphMol(
-                    imol.GetConf(oechem.OEHasConfIdx(score.GetFitConfIdx()))
-                )
+                outmol = oechem.OEGraphMol(imol.GetConf(oechem.OEHasConfIdx(score.GetFitConfIdx())))
                 self._prep_sdf_file(
                     outmol,
                     score=score,

@@ -2,6 +2,7 @@
 
 __all__ = ["Mol2MolSampler"]
 from typing import List, Tuple
+import logging
 
 from rdkit import Chem
 import torch.utils.data as tud
@@ -11,9 +12,12 @@ from . import params
 from reinvent.models.transformer.core.dataset.dataset import Dataset
 from reinvent.models.transformer.core.vocabulary import SMILESTokenizer
 from reinvent.models.model_factory.sample_batch import SampleBatch
-from reinvent.chemistry.similarity import Similarity
+from reinvent.chemistry import conversions
+from reinvent.chemistry.similarity import calculate_tanimoto as _calc_tanimoto
 
 from ...models import SampledSequencesDTO
+
+logger = logging.getLogger(__name__)
 
 
 class Mol2MolSampler(Sampler):
@@ -27,7 +31,7 @@ class Mol2MolSampler(Sampler):
         """
         # Standardize smiles in the same way as training data
         smilies = [
-            self.chemistry.conversions.convert_to_standardized_smiles(smile) for smile in smilies
+            conversions.convert_to_standardized_smiles(smile) for smile in smilies
         ]
 
         smilies = (
@@ -77,8 +81,8 @@ class Mol2MolSampler(Sampler):
         return sampled
 
     def _get_randomized_smiles(self, smiles: str):
-        input_mol = self.chemistry.conversions.smile_to_mol(smiles)
-        randomized_smile = self.chemistry.conversions.mol_to_random_smiles(
+        input_mol = conversions.smile_to_mol(smiles)
+        randomized_smile = conversions.mol_to_random_smiles(
             input_mol, isomericSmiles=self.isomeric
         )
 
@@ -90,19 +94,20 @@ class Mol2MolSampler(Sampler):
         returns the largest if multiple reference smiles provided
         """
         specific_parameters = {"radius": 2, "use_features": False}
-        ref_fingerprints = self.chemistry.conversions.smiles_to_fingerprints(
+        ref_fingerprints = conversions.smiles_to_fingerprints(
             reference_smiles,
             radius=specific_parameters["radius"],
             use_features=specific_parameters["use_features"],
         )
-        valid_mols, valid_idxs = self.chemistry.conversions.smiles_to_mols_and_indices(smiles)
-        query_fps = self.chemistry.conversions.mols_to_fingerprints(
+        valid_mols, valid_idxs = conversions.smiles_to_mols_and_indices(smiles)
+        query_fps = conversions.mols_to_fingerprints(
             valid_mols,
             radius=specific_parameters["radius"],
             use_features=specific_parameters["use_features"],
         )
-        similarity = Similarity()
-        scores = similarity.calculate_tanimoto(query_fps, ref_fingerprints)
+
+        scores = _calc_tanimoto(query_fps, ref_fingerprints)
+
         return scores
 
     def check_nll(
@@ -121,20 +126,20 @@ class Mol2MolSampler(Sampler):
                 current_smi = smi
 
                 try:
-                    cano_smi = self.chemistry.conversions.convert_to_rdkit_smiles(
+                    cano_smi = conversions.convert_to_rdkit_smiles(
                         smi, sanitize=True, isomericSmiles=True
                     )
                     current_smi = cano_smi
                 except Exception:
-                    print(f"WARNING. SMILES {smi} is invalid")
+                    logger.warning(f"SMILES {smi} is invalid")
 
                 tokenizer = SMILESTokenizer()
                 try:
                     tokenized_smi = tokenizer.tokenize(current_smi)
                     self.model.vocabulary.encode(tokenized_smi)
                 except KeyError as e:
-                    print(
-                        f"WARNING. SMILES {current_smi} contains an invalid token {e}. It will be ignored"
+                    logger.warning(
+                        f"SMILES {current_smi} contains an invalid token {e}. It will be ignored"
                     )
                 else:
                     dto_list.append(SampledSequencesDTO(compound, current_smi, 0))
@@ -156,7 +161,7 @@ class Mol2MolSampler(Sampler):
         target = [dto.output for dto in dto_list]
 
         # Compute Tanimoto
-        valid_mols, valid_idxs = self.chemistry.conversions.smiles_to_mols_and_indices(target)
+        valid_mols, valid_idxs = conversions.smiles_to_mols_and_indices(target)
         valid_scores = self.calculate_tanimoto(input, target)
         tanimoto = [None] * len(target)
         for i, j in enumerate(valid_idxs):

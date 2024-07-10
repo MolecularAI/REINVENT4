@@ -8,4 +8,3 @@ def test_uniquify_header():
     new_header = uniquify_header(header)
 
     assert new_header == result
-

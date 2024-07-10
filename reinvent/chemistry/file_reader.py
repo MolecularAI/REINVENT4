@@ -1,14 +1,13 @@
 import gzip
 from typing import List
 
-from reinvent.chemistry import Conversions
+from reinvent.chemistry import conversions
 from reinvent.chemistry.standardization.filter_configuration import FilterConfiguration
 from reinvent.chemistry.standardization.rdkit_standardizer import RDKitStandardizer
 
 
 class FileReader:
     def __init__(self, configuration: List[FilterConfiguration], logger):
-        self._conversions = Conversions()
         self._standardizer = RDKitStandardizer(configuration, logger)
 
     def read_library_design_data_file(
@@ -63,7 +62,7 @@ class FileReader:
         if standardize:
             actions.append(self._standardizer.apply_filter)
         if randomize:
-            actions.append(self._conversions.randomize_smiles)
+            actions.append(conversions.randomize_smiles)
 
         with open(file_path, "r") as csv_file:
             for i, row in enumerate(csv_file):

@@ -3,7 +3,7 @@ import logging
 
 from rdkit.Chem.rdmolfiles import MolToSmiles
 
-from reinvent.chemistry import Conversions
+from reinvent.chemistry import conversions
 from reinvent.chemistry.standardization.filter_configuration import FilterConfiguration
 from reinvent.chemistry.standardization.filter_registry import FilterRegistry
 
@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class RDKitStandardizer:
-    def __init__(self, filter_configs: Optional[List[FilterConfiguration]], isomeric=False, *args,
-    **kwargs):
-        self._conversions = Conversions()
+    def __init__(
+        self, filter_configs: Optional[List[FilterConfiguration]], isomeric=False, *args, **kwargs
+    ):
         self._filter_configs = self._set_filter_configs(filter_configs)
         self._filters = self._load_filters(self._filter_configs)
         self.isomeric = isomeric
@@ -26,7 +26,7 @@ class RDKitStandardizer:
             logger.info("Stereochemistry kept in input SMILES")
 
     def apply_filter(self, smile: str) -> str:
-        molecule = self._conversions.smile_to_mol(smile)
+        molecule = conversions.smile_to_mol(smile)
 
         for config in self._filter_configs:
             if molecule:

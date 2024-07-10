@@ -12,6 +12,7 @@ import logging
 from rdkit.Chem.Scaffolds import MurckoScaffold
 import numpy as np
 
+from reinvent.chemistry import conversions
 from .bucket_counter import BucketCounter
 
 
@@ -27,7 +28,6 @@ class DiversityFilter(ABC):
         minscore: float,
         minsimilarity: float,
         penalty_multiplier: float,
-        conversions,
         rdkit_smiles_flags: dict,
     ):
         """Set up the diversity filters.
@@ -37,7 +37,6 @@ class DiversityFilter(ABC):
         :param minsimilarity: minimum similarity
         :param penalty_multiplier: pnealty multiplier
         :param rdkit_smiles_flags: RDKit flags for SMILES conversion
-        :param conversions: instance provided conversion functions
         :param rdkit_smiles_flags: RDKit flags for canonicalization
         """
 
@@ -45,7 +44,6 @@ class DiversityFilter(ABC):
         self.minscore = minscore
         self.minsimilarity = minsimilarity
         self.penalty_multiplier = penalty_multiplier
-        self.chemistry = conversions
         self.rdkit_smiles_flags = rdkit_smiles_flags
 
         self.scaffold_memory = BucketCounter(self.bucket_size)
@@ -111,7 +109,7 @@ class DiversityFilter(ABC):
         :returns: scaffold SMILES string
         """
 
-        mol = self.chemistry.smile_to_mol(smile)
+        mol = conversions.smile_to_mol(smile)
         scaffold_smiles = ""
 
         if mol:
@@ -123,7 +121,7 @@ class DiversityFilter(ABC):
 
                 # NOTE: MolToSmiles(canonical=True) by default
                 # FIXME: do not rely on default
-                scaffold_smiles = self.chemistry.mol_to_smiles(scaffold, **self.rdkit_smiles_flags)
+                scaffold_smiles = conversions.mol_to_smiles(scaffold, **self.rdkit_smiles_flags)
             except ValueError:
                 pass
 

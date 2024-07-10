@@ -20,6 +20,7 @@ from pydantic.dataclasses import dataclass
 from .component_results import ComponentResults
 from .run_program import run_command
 from .add_tag import add_tag
+from reinvent_plugins.normalize import normalize_smiles
 
 logger = logging.getLogger(__name__)
 
@@ -50,12 +51,13 @@ class DockStream:
     """
 
     def __init__(self, params: Parameters):
-
         self._internal_step = 0
         self.docker_python_path = params.docker_python_path[0]
         self.docker_script_path = params.docker_script_path[0]
         self.configuration_path = params.configuration_path[0]
+        self.smiles_type = "rdkit_smiles"
 
+    @normalize_smiles
     def __call__(self, smilies: List[str]) -> np.array:
         scores = []
 

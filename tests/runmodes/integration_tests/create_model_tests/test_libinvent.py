@@ -5,7 +5,7 @@ import unittest
 
 import torch
 
-from reinvent.runmodes.create_model.libinvent import create_model
+from reinvent.runmodes.create_model.create_libinvent import create_model
 
 
 @pytest.mark.integration
@@ -37,7 +37,7 @@ class TestCreateModel(unittest.TestCase):
 
         self.assertEqual(
             keys,
-            ["model_type", "version", "model", "decorator"],
+            ["model_type", "version", "metadata", "model", "decorator"],
         )
 
         self.assertEqual(model["model_type"], "Libinvent")

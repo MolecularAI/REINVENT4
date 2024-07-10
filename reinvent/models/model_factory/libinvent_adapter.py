@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["LibinventAdapter"]
+__all__ = ["LibinventAdapter", "LibinventTransformerAdapter"]
 from typing import List, TYPE_CHECKING
 
 import torch
@@ -14,6 +14,7 @@ from reinvent.models.model_factory.model_adapter import (
     SampledSequencesDTO,
     BatchLikelihoodDTO,
 )
+from reinvent.models.model_factory.transformer_adapter import TransformerAdapter
 
 if TYPE_CHECKING:
     pass
@@ -40,3 +41,6 @@ class LibinventAdapter(ModelAdapter):
         # scaffold SMILES, decoration SMILES, NLLs
         sampled = self.model.sample_decorations(scaffold_seqs, scaffold_seq_lengths)
         return SampleBatch(*sampled)
+
+class LibinventTransformerAdapter(TransformerAdapter):
+    pass

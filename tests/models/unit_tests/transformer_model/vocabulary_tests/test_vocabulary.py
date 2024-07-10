@@ -96,11 +96,7 @@ class TestVocabulary(unittest.TestCase):
         self.assertEqual(len(Vocabulary()), 0)
 
     def test_encode(self):
-        npt.assert_almost_equal(
-            self.voc.encode(["^", "C", "C", "$"]), np.array([1, 8, 8, 0])
-        )
+        npt.assert_almost_equal(self.voc.encode(["^", "C", "C", "$"]), np.array([1, 8, 8, 0]))
 
     def test_decode(self):
-        self.assertEqual(
-            self.voc.decode(np.array([0, 8, 9, 8, 1])), ["$", "C", "F", "C", "^"]
-        )
+        self.assertEqual(self.voc.decode(np.array([0, 8, 9, 8, 1])), ["$", "C", "F", "C", "^"])

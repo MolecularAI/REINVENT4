@@ -7,7 +7,7 @@ from rdkit.Chem import rdmolops
 from rdkit.Chem.rdmolfiles import MolFromSmarts, MolFromSmiles
 from rdkit.Chem.rdmolops import RemoveHs
 
-from reinvent.chemistry.enums import FilterTypesEnum
+from reinvent.chemistry.standardization.filter_types_enum import FilterTypesEnum
 from reinvent.models.reinvent.models.vocabulary import split_by, REGEXP_ORDER
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,9 @@ class FilterRegistry:
 
     def _neutralise_charges(self, mol, reactions=None):
         if reactions is None:
-            reactions = [(MolFromSmarts(x), MolFromSmiles(y, False)) for x, y in NEUTRALIZE_PATTERNS]
+            reactions = [
+                (MolFromSmarts(x), MolFromSmiles(y, False)) for x, y in NEUTRALIZE_PATTERNS
+            ]
 
         for i, (reactant, product) in enumerate(reactions):
             while mol.HasSubstructMatch(reactant):
@@ -188,11 +190,9 @@ class FilterRegistry:
             mol = self._unwanted_patterns(mol)
             stage = "token_filters"
         if mol:
-            mol = self._valid_size(
-                mol, min_heavy_atoms, max_heavy_atoms, element_list
-            )
+            mol = self._valid_size(mol, min_heavy_atoms, max_heavy_atoms, element_list)
             stage = "valid_size"
-        
+
         if mol:
             return mol
 

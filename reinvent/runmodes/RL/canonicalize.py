@@ -4,14 +4,13 @@ __all__ = ["canonicalize_smiles"]
 from typing import TYPE_CHECKING
 import logging
 
-from reinvent.chemistry import Conversions
+from reinvent.chemistry import conversions
 
 if TYPE_CHECKING:
     from reinvent_scoring.scoring.score_summary import FinalSummary
 
 
 logger = logging.getLogger(__name__)
-convert = Conversions()
 
 
 def canonicalize_smiles(score_summary: FinalSummary, rdkit_smiles_flags: dict) -> None:
@@ -29,6 +28,6 @@ def canonicalize_smiles(score_summary: FinalSummary, rdkit_smiles_flags: dict) -
         # FIXME: need to control what happens here in RDKit, by default
         #        sanitize=true will also kekulize the SMILES which may lead
         #        to an invalid SMILES when read again
-        smilies[i] = convert.convert_to_rdkit_smiles(smilies[i], **rdkit_smiles_flags)
+        smilies[i] = conversions.convert_to_rdkit_smiles(smilies[i], **rdkit_smiles_flags)
 
     logger.debug(f"total SMILES={len(smilies)}; valid SMILES={len(score_summary.valid_idxs)}")

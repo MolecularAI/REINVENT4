@@ -97,7 +97,7 @@ Run reinforcement learning (RL) and/or curriculum learning (CL).  CL is simply a
 | type                 | use "dap"                                                                                                                      |
 | sigma                | sigma in the reward function                                                                                                   |
 | rate                 | learning rate for the torch optimizer                                                                                          |
-| [diversity\_filter]  | starts the section for the diversity filter                                                                                    |
+| [diversity\_filter]  | starts the section for the diversity filter, overwrites all stage DFs                                                          |
 | type                 | name of the filter type: "IdenticalMurckoScaffold", "IdenticalTopologicalScaffold", "ScaffoldSimilarity", "PenalizeSameSmiles" |
 | bucket\_size         | number of scaffolds to store before molecule is scored zero                                                                    |
 | minscore             | minimum score                                                                                                                  |
@@ -112,6 +112,7 @@ Run reinforcement learning (RL) and/or curriculum learning (CL).  CL is simply a
 | termination          | use "simple", termination criterion                                                                                            |
 | max\_score           | maximum score when to terminate                                                                                                |
 | min\_steps           | minimum number of RL steps to avoid early termination                                                                          |
-| max\_steps           | maximum number of RL steps to run, if maximum is hit **all** stages will be terminated                                           |
+| max\_steps           | maximum number of RL steps to run, if maximum is hit **all** stages will be terminated                                         |
+| [diversity\_filter]  | a per stage DF filter can be defined for each stage, global DF will overwrite this                                             |
 
 The scoring functions are added as in scoring but prefixed with stage.

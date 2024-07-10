@@ -4,7 +4,6 @@ import numpy as np
 
 from reinvent.runmodes.RL.memories.identical_murcko_scaffold import IdenticalMurckoScaffold
 from reinvent.models.model_factory.sample_batch import SmilesState
-from reinvent.chemistry import Conversions
 
 
 @pytest.fixture
@@ -15,7 +14,6 @@ def diversity_filter():
         minscore=0.4,
         minsimilarity=0.4,
         penalty_multiplier=0.5,
-        conversions=Conversions(),
         rdkit_smiles_flags={},
     )
 
@@ -26,8 +24,10 @@ def diversity_filter():
 
 def test_filter(diversity_filter):
     scores = [0.64, 0.55, 0.897, 0.737]
-    smilies = ['CCc1ccccc1', 'CCC=O=O', 'CCCCc1ccccc1', 'CCc1cnccc1']
-    states = np.array([SmilesState.VALID, SmilesState.INVALID, SmilesState.VALID, SmilesState.DUPLICATE])
+    smilies = ["CCc1ccccc1", "CCC=O=O", "CCCCc1ccccc1", "CCc1cnccc1"]
+    states = np.array(
+        [SmilesState.VALID, SmilesState.INVALID, SmilesState.VALID, SmilesState.DUPLICATE]
+    )
 
     # DF needs all valid SMILES including duplicates
     mask = np.where(
@@ -37,7 +37,7 @@ def test_filter(diversity_filter):
     )
 
     diversity_filter.update_score(scores, smilies, mask)
-    
+
     assert diversity_filter.scaffold_memory.max_size == 2
     assert diversity_filter.minscore == 0.4
     assert diversity_filter.minsimilarity == 0.4

@@ -1,52 +1,42 @@
 """Send information to a remote server"""
 
 from __future__ import annotations
-from dataclasses import dataclass
+
+__all__ = ["TLRemoteReporter"]
+from collections import Counter
 import logging
+from typing import TYPE_CHECKING
 
-from reinvent.runmodes.reporter.remote import get_reporter
+if TYPE_CHECKING:
+    from reinvent.runmodes.TL.reports import TLReportData
 
-reporter = get_reporter()
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class RemoteData:
-    epoch: int
-    model_path: str
-    mean_nll: float
-    sampled_smiles: list[str]
-    mean_nll_valid: float = None
+class TLRemoteReporter:
+    def __init__(self, reporter):
+        self.reporter = reporter
 
+    def submit(self, data: TLReportData) -> None:
+        """Send JSON data to a remote server
 
-def send_report(data: RemoteData, reporter) -> None:
-    """Send JSON data to a remote server
+        :param data: data to be sent
+        """
 
-    :param data: data to be sent
-    """
+        smiles_counts = Counter(data.sampled_smilies)
 
-    if not reporter:
-        return
+        record = {
+            "epoch": data.epoch,
+            "model_path": data.model_path,
+            "learning_mean": {
+                "training": data.mean_nll,
+                "validation": data.mean_nll_validation,
+                "sampled": float(data.sampled_nlls.mean()),
+            },
+            "smiles_report": [
+                {"legend": f"Times sampled: {smiles_counts[smiles]:d}", "smiles": smiles}
+                for smiles in smiles_counts
+            ],
+        }
 
-    smiles_counts = {}
-
-    for smi in data.sampled_smiles:
-        if smi not in smiles_counts:
-            smiles_counts[smi] = 0
-        smiles_counts[smi] += 1
-
-    record = {
-        "epoch": data.epoch,
-        "model_path": data.model_path,
-        "learning_mean": {
-            "sampled": data.mean_nll_valid,  # this is actually validation
-            "training": data.mean_nll,
-        },
-        "smiles_report": [
-            {"legend": f"Times sampled: {smiles_counts[smi]:d}", "smiles": smi}
-            for smi in smiles_counts
-        ],
-    }
-
-    logger.debug(f"Remote reporter record:\n{record}")
-    reporter.send(record)
+        self.reporter.send(record)

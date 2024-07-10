@@ -47,18 +47,12 @@ class EncoderDecoder(nn.Module):
         ff = PositionwiseFeedForward(model_dimension, feedforward_dimension, dropout)
         position = PositionalEncoding(model_dimension, dropout)
 
-        self.encoder = Encoder(
-            EncoderLayer(model_dimension, c(attn), c(ff), dropout), num_layers
-        )
+        self.encoder = Encoder(EncoderLayer(model_dimension, c(attn), c(ff), dropout), num_layers)
         self.decoder = Decoder(
             DecoderLayer(model_dimension, c(attn), c(attn), c(ff), dropout), num_layers
         )
-        self.src_embed = nn.Sequential(
-            Embeddings(model_dimension, vocabulary_size), c(position)
-        )
-        self.tgt_embed = nn.Sequential(
-            Embeddings(model_dimension, vocabulary_size), c(position)
-        )
+        self.src_embed = nn.Sequential(Embeddings(model_dimension, vocabulary_size), c(position))
+        self.tgt_embed = nn.Sequential(Embeddings(model_dimension, vocabulary_size), c(position))
         self.generator = Generator(model_dimension, vocabulary_size)
 
         self._init_params()

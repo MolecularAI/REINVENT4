@@ -1,4 +1,4 @@
-from reinvent.chemistry.enums import FilterTypesEnum
+from reinvent.chemistry.standardization.filter_types_enum import FilterTypesEnum
 from tests.chemistry.fixtures.test_data import (
     IBUPROFEN,
     METHYL_3_O_TOLYL_PROPYL_AMINE,

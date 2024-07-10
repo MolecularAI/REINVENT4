@@ -9,7 +9,7 @@ class BatchDTO:
     input_mask: torch.Tensor
     output: torch.Tensor
     output_mask: torch.Tensor
-    tanimoto: torch.Tensor = None # Mol2Mol rankingloss model
+    tanimoto: torch.Tensor = None  # Mol2Mol rankingloss model
 
     def __iter__(self):
         return iter(astuple(self))

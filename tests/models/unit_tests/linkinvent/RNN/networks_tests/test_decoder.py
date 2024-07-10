@@ -44,18 +44,10 @@ class TestDecoder(unittest.TestCase):
 
         self.parameter_1 = dict(num_layers=3, num_dimensions=512, dropout=0)
         self.parameter_2 = dict(num_layers=1, num_dimensions=1, dropout=0)
-        self.encoder_1 = Encoder(
-            **self.parameter_1, vocabulary_size=self.voc_size_input
-        )
-        self.encoder_2 = Encoder(
-            **self.parameter_2, vocabulary_size=self.voc_size_input
-        )
-        self.decoder_1 = Decoder(
-            **self.parameter_1, vocabulary_size=self.voc_size_target
-        )
-        self.decoder_2 = Decoder(
-            **self.parameter_2, vocabulary_size=self.voc_size_target
-        )
+        self.encoder_1 = Encoder(**self.parameter_1, vocabulary_size=self.voc_size_input)
+        self.encoder_2 = Encoder(**self.parameter_2, vocabulary_size=self.voc_size_input)
+        self.decoder_1 = Decoder(**self.parameter_1, vocabulary_size=self.voc_size_target)
+        self.decoder_2 = Decoder(**self.parameter_2, vocabulary_size=self.voc_size_target)
 
     def test_get_params(self):
         p_dict = self.parameter_1
@@ -63,24 +55,16 @@ class TestDecoder(unittest.TestCase):
         self.assertEqual(p_dict, self.decoder_1.get_params())
 
     def test_forward_normal_batch_no_singleton_dimensions(self):
-        self._test_combination(
-            self.data_loader_a, self.encoder_1, self.decoder_1, self.parameter_1
-        )
+        self._test_combination(self.data_loader_a, self.encoder_1, self.decoder_1, self.parameter_1)
 
     def test_forward_normal_batch_size_1_no_singleton_dimensions(self):
-        self._test_combination(
-            self.data_loader_b, self.encoder_1, self.decoder_1, self.parameter_1
-        )
+        self._test_combination(self.data_loader_b, self.encoder_1, self.decoder_1, self.parameter_1)
 
     def test_forward_normal_batch_with_singleton_dimensions(self):
-        self._test_combination(
-            self.data_loader_a, self.encoder_2, self.decoder_2, self.parameter_2
-        )
+        self._test_combination(self.data_loader_a, self.encoder_2, self.decoder_2, self.parameter_2)
 
     def test_forward_normal_batch_size_1_with_singleton_dimensions(self):
-        self._test_combination(
-            self.data_loader_b, self.encoder_2, self.decoder_2, self.parameter_2
-        )
+        self._test_combination(self.data_loader_b, self.encoder_2, self.decoder_2, self.parameter_2)
 
     def _test_combination(
         self,
@@ -94,9 +78,7 @@ class TestDecoder(unittest.TestCase):
             seqs_target,
             seq_lengths_target,
         ) in data_loader:
-            seqs_padded_enc, hidden_states = encoder.forward(
-                seqs_input, seq_lengths_input
-            )
+            seqs_padded_enc, hidden_states = encoder.forward(seqs_input, seq_lengths_input)
             logits, hidden_states, weights = decoder.forward(
                 seqs_target, seq_lengths_target, seqs_padded_enc, hidden_states
             )
@@ -117,14 +99,9 @@ class TestDecoder(unittest.TestCase):
                 seq_lengths_input.max().item(),
             ]
 
-            self.assertTrue(
-                all([isinstance(t, Tensor) for t in [logits, *hidden_states, weights]])
-            )
+            self.assertTrue(all([isinstance(t, Tensor) for t in [logits, *hidden_states, weights]]))
             self.assertEqual(expected_size_logits, list(logits.size()))
-            [
-                self.assertEqual(expected_size_hidden_state, list(hs.size()))
-                for hs in hidden_states
-            ]
+            [self.assertEqual(expected_size_hidden_state, list(hs.size())) for hs in hidden_states]
             self.assertEqual(expected_size_weights, list(weights.size()))
 
             break  # enough to test first batch

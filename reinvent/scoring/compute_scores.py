@@ -34,12 +34,14 @@ def compute_component_scores(
     :returns: the scores
     """
 
-    # Each component may have multiple scores so use tuples here
+    # NOTE: if a component has multiple endpoints it needs to declare this!
+    number_of_endpoints = getattr(scoring_function, "number_of_endpoints", 1)
+
     masked_scores = [(np.nan,)] * len(smilies)
 
     for i, value in enumerate(filter_mask):
         if not value:  # the SMILES will not be passed to scoring_function
-            masked_scores[i] = (0.0,)
+            masked_scores[i] = (0.0,) * number_of_endpoints
 
     scores = {}  # keep track of scores for each SMILES as there may be duplicates
 
@@ -58,13 +60,8 @@ def compute_component_scores(
 
     if smilies_non_cached:
         component_results = scoring_function(smilies_non_cached)
-        number_of_components = len(component_results.scores)
-    else:  # only duplicates: need to set yp "empty" ComponentResults
-        key0 = next(iter(cache))
-        number_of_components = len(cache[key0])
-
-        # this is probably more elaborate than it needs to be
-        _scores = [[] for _ in range(number_of_components)]
+    else:  # only duplicates or masked: need to set noe "empty" ComponentResults
+        _scores = [[] for _ in range(number_of_endpoints)]
         component_results = ComponentResults(_scores)
 
     for data in zip(smilies_non_cached, *component_results.scores):
@@ -72,11 +69,6 @@ def compute_component_scores(
         component_scores = data[1:]
 
         scores[smiles] = component_scores
-
-    # check if we have a score that has not been computed by scoring_function
-    for smiles, score in scores.items():
-        if len(score) != number_of_components:  # should only ever be (0.0, )
-            scores[smiles] = score * number_of_components
 
     cache.update(((k, v) for k, v in scores.items()))
 
@@ -92,7 +84,6 @@ def compute_transform(
     params: Tuple,
     smilies: List[str],
     caches: dict,
-    invalid_mask: np.ndarray[bool],
     valid_mask: np.ndarray[bool],
 ) -> TransformResults:
     """Compute the component score and transform of it
@@ -101,8 +92,7 @@ def compute_transform(
     :param params: parameters for the component
     :param smilies: list of SMILES
     :param caches: the component's cache
-    :param invalid_mask: mask for invalid SMILES
-    :param valid_mask: mask for valid SMILES
+    :param valid_mask: mask for valid SMILES, i.e. false for invalid
     :returns: dataclass with transformed results
     """
 
@@ -116,7 +106,7 @@ def compute_transform(
 
     for scores, transform in zip(component_results.scores, transforms):
         transformed = transform(scores) if transform else scores
-        transformed_scores.append(transformed * invalid_mask * valid_mask)
+        transformed_scores.append(transformed * valid_mask)
 
     transform_types = [transform.params.type if transform else None for transform in transforms]
 

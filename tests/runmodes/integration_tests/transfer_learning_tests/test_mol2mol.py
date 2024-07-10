@@ -5,6 +5,7 @@ import torch
 
 from reinvent.runmodes.TL.run_transfer_learning import run_transfer_learning
 from reinvent.runmodes.utils.helpers import set_torch_device
+from reinvent.models.meta_data import check_valid_hash
 
 
 @pytest.fixture
@@ -17,13 +18,13 @@ def setup(tmp_path, json_config, pytestconfig):
 
     config = {
         "parameters": {
-            "input_model_file": json_config["MOLFORMER_PRIOR_PATH"],
+            "input_model_file": ".m2m_high",
             "smiles_file": json_config["TL_MOLFORMER_SMILES_PATH"],
-            "output_model_file": output_model_file,
+            "output_model_file": str(output_model_file),
             "save_every_n_epochs": 1,
-            "num_epochs": 2,
+            "num_epochs": 1,
             "batch_size": 64,
-            "sample_batch_size": 10,
+            "sample_batch_size": 100,
             "num_refs": 10,
             "pairs": {
                 "type": "tanimoto",
@@ -53,12 +54,14 @@ def test_transfer_learning(setup, tmp_path, pytestconfig):
     keys = list(model.keys())
 
     assert keys == [
-        "model_type",
-        "version",
-        "vocabulary",
         "max_sequence_length",
+        "metadata",
+        "model_type",
         "network_parameter",
         "network_state",
+        "version",
+        "vocabulary",
     ]
 
     assert model["model_type"] == "Mol2Mol"
+    assert check_valid_hash(model)

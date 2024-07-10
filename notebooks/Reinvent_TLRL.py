@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.16.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -31,6 +31,10 @@ import matplotlib.pyplot as plt
 
 import reinvent
 from reinvent.notebooks import load_tb_data, plot_scalars, get_image, create_mol_grid
+from reinvent.scoring.transforms import ReverseSigmoid
+from reinvent.scoring.transforms.sigmoids import Parameters as SigmoidParameters
+
+import ipywidgets as widgets
 
 # %load_ext tensorboard
 # -
@@ -94,8 +98,6 @@ max_score = 1.0
 max_steps = 300
 
 chkpt_file = "{stage1_checkpoint}"
-
-scoring_function.type = "custom_product"
 
 [stage.scoring]
 type = "geometric_mean"
@@ -181,7 +183,7 @@ shutil.rmtree("tb_stage1_0", ignore_errors=True)
 #
 # We use the known Tankyrase-2 binders from [BindingDB](https://www.bindingdb.org/rwd/jsp/dbsearch/PrimarySearch_ki.jsp?tag=pol&submit=Search&target=tankyrase-2&polymerid=50006570,7858,9866).
 
-bdb = pd.read_csv(f"{top}/data/tnks2.csv")
+bdb = pd.read_csv(f"{top}/notebooks/data/tnks2.csv")
 bdb
 
 # #### Clean data and extract "good" binders¶
@@ -214,9 +216,9 @@ TL_train_filename = "tnks2_train.smi"
 TL_validation_filename = "tnks2_validation.smi"
 
 data = good.sample(frac=1)
-n_head = len(data) // 5
+n_head = int(0.8 * len(data))  # 80% of the data for training
 n_tail = len(good) - n_head
-print(n_head, n_tail)
+print(f"number of molecules for: training={n_head}, validation={n_tail}")
 
 train, validation = data.head(n_head), data.tail(n_tail)
 
@@ -270,16 +272,16 @@ shutil.rmtree("tb_TL", ignore_errors=True)
 #
 # The TL run has written out a checkpoint file every second step and now we will have to decide which checkpoint to use for RL.  This is really a judgment call for the user as TL in this context is not really a well defined problem with a well defined solution.  The aim of TL is to create a molecular distribution more like the molecules in the input SMILES but it is not principally clear how to quantify "more like".  On the one hand we do not want to stay too close to the original distribution and on the other hand we we do not want to create a model that, in the extrene, creates only molecules from the input distribution.
 #
-# So here we will use the model from step 40 whre the validation loss is minimal.  From the TensorBoard output we see that number of valid SMILES is slightly decreasing over the TL run but is still at 98% at step 40.  Duplicate SMILES generation initially decreases and increases again after around step 35 with a plateau of close-to-zero between steps 15 and 35.  Internal diversity is also decreasing over time but note from the y-axis that this is really very minimal.  **Please note, that when you run this example the results may be different and you may have to decide on a checkpoint file from a different step.**
+# So here we will use the model from step 30 whre the validation loss is minimal.  From the TensorBoard output we see that number of valid SMILES is slightly decreasing over the TL run but is still at 98% at step 40.  Duplicate SMILES generation initially decreases and increases again after around step 35 with a plateau of close-to-zero between steps 15 and 35.  Internal diversity is also decreasing over time but note from the y-axis that this is really very minimal.  **Please note, that when you run this example the results may be different and you may have to decide on a checkpoint file from a different step.**
 #
 # The TOML file for stage 2 will reuse most of the configuration from stage 1 as we will need to keep the original scoring functions active.  We only need to change the agent to the model file we have obtained from the TL run, increase the number of `max_steps`, and change filenames.
 
 # +
-TL_model_filename = os.path.join(wd, "TL_reinvent.model.40.chkpt")
+TL_model_filename = os.path.join(wd, "TL_reinvent.model.30.chkpt")
 
 stage2_parameters = re.sub("stage1", f"stage2", stage1_parameters)
-stage2_parameters = re.sub("agent_file.*\n", f'agent_file = "{TL_model_filename}"\n', stage2_parameters)
-stage2_parameters = re.sub("max_steps.*\n", f'max_steps = 500\n', stage2_parameters)'
+stage2_parameters = re.sub("agent_file.*\n", f"agent_file = '{TL_model_filename}'\n", stage2_parameters)
+stage2_parameters = re.sub("max_steps.*\n", f"max_steps = 500\n", stage2_parameters)
 # -
 
 # ## Stage 2 RL
@@ -300,12 +302,51 @@ weight = 0.6
 
 params.checkpoint_dir = "{chemprop_path}"
 params.rdkit_2d_normalized = true
+params.target_column = "DG"
 
 transform.type = "reverse_sigmoid"
 transform.high = 0.0
 transform.low = -50.0
 transform.k = 0.4
 """
+
+
+# ### Preview reverse sigmoid transform
+#
+# Plot the function to show how its parameters transform the input.
+
+# +
+def plot_transform(low, high, k):
+    params = SigmoidParameters(type="reverse_sigmoid", high=high, low=low, k=k)
+    reverse_sigmoid = ReverseSigmoid(params)
+    x = np.linspace(low, high, num=25)
+    vf = np.vectorize(reverse_sigmoid)
+    
+    plt.figure(figsize=(6, 3))
+    ax = sns.lineplot(x=x, y=vf(x))
+    ax.set(title="Reverse Sigmoid", xlabel="raw score", ylabel="transformed score")
+    plt.show()
+
+low = widgets.FloatSlider(min=-70, max=-30, step=5, value=-50.0)
+high = widgets.FloatSlider(min=-20, max=20, step=5, value=0.0)
+k = widgets.FloatSlider(min=0.1, max=0.7, step=0.1, value=0.4, orientation='vertical')
+
+# +
+p = widgets.interactive(plot_transform, low=low, high=high, k=k)
+
+low_high_ctrl = widgets.HBox(p.children[:2], layout=widgets.Layout(flex_flow='row wrap'))
+k_ctrl = p.children[2]
+output = p.children[-1]
+vbox = widgets.VBox([output, low_high_ctrl])
+
+display(widgets.HBox([vbox, k_ctrl]))
+# -
+
+# If the widget above doesn't work, plot directly: change cell below to Code.
+
+# + active=""
+# plot_transform(-50.0, 0.0, 0.4)
+# -
 
 # ### Diversity Filter and Inception
 #

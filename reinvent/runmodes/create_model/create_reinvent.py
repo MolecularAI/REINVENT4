@@ -77,7 +77,7 @@ def create_model(
         model_id=uuid.uuid4(),
         origina_data_source=metadata.get("data_source", "unknown"),
         comments=[metadata.get("comment", "")],
-    )    
+    )
 
     pp_params = pprint.pformat(asdict(metadata), indent=4)
     logger.info(f"Writing metadata to model file:\n{pp_params}")
@@ -109,6 +109,7 @@ def create_model(
 
     return model
 
+
 def get_config(filename):
     """Get the config from a TOML file"""
 
@@ -121,9 +122,7 @@ def get_config(filename):
 def main():
 
     logging.basicConfig(
-            format="%(asctime)s <%(levelname)-4.4s> %(message)s",
-            datefmt="%H:%M:%S",
-            level=logging.INFO
+        format="%(asctime)s <%(levelname)-4.4s> %(message)s", datefmt="%H:%M:%S", level=logging.INFO
     )
 
     config = get_config(sys.argv[1])
@@ -154,9 +153,7 @@ def main():
         metadata=metadata,
     )
 
-    logger.info(
-        f"Finished on {datetime.datetime.now().strftime('%Y-%m-%d')}"
-    )
+    logger.info(f"Finished on {datetime.datetime.now().strftime('%Y-%m-%d')}")
 
 
 if __name__ == "__main__":

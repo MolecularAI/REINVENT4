@@ -6,7 +6,6 @@ from reinvent.models.linkinvent.model_vocabulary.paired_model_vocabulary import 
 )
 from tests.test_data import (
     SCAFFOLD_SUZUKI,
-    INVALID,
     ETHANE,
     HEXANE,
     PROPANE,
@@ -17,15 +16,10 @@ from tests.test_data import (
 class TestPairedDataset(unittest.TestCase):
     def setUp(self) -> None:
         self.smiles = [ETHANE, HEXANE, PROPANE, BUTANE]
-        self.paired_model_voc = PairedModelVocabulary.from_lists(
-            self.smiles, self.smiles
-        )
+        self.paired_model_voc = PairedModelVocabulary.from_lists(self.smiles, self.smiles)
         self.paired_data_set = PairedDataset(
             [list(i) for i in zip(self.smiles, self.smiles[::-1])],
             self.paired_model_voc,
-        )
-        self.paired_data_set_invalid = PairedDataset(
-            [[INVALID, SCAFFOLD_SUZUKI]], self.paired_model_voc
         )
         (self.padded_warheads, self.warheads_seq_length), (
             self.padded_linker,
@@ -34,9 +28,6 @@ class TestPairedDataset(unittest.TestCase):
 
     def test_len_both_valid(self):
         self.assertEqual(len(self.paired_data_set), 4)
-
-    def test_len_invalid(self):
-        self.assertEqual(len(self.paired_data_set_invalid), 0)
 
     def test_coll_fn(self):
         self.assertEqual(len(self.padded_linker), len(self.smiles))

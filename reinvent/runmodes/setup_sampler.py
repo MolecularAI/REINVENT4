@@ -6,28 +6,24 @@ import logging
 import warnings
 
 from reinvent.runmodes import samplers
-from reinvent.chemistry import TransformationTokens
 
 if TYPE_CHECKING:
     from reinvent.models import ModelAdapter
-    from reinvent.runmodes.dtos import ChemistryHelpers
 
 logger = logging.getLogger(__name__)
 warnings.filterwarnings("once", category=FutureWarning)
 
-TRANSFORMERS = ["Mol2Mol", "LinkinventTransformer"]
+TRANSFORMERS = ["Mol2Mol", "LinkinventTransformer", "LibinventTransformer"]
 
-def setup_sampler(model_type: str, config: dict, agent: ModelAdapter, chemistry: ChemistryHelpers):
+
+def setup_sampler(model_type: str, config: dict, agent: ModelAdapter):
     """Setup the sampling module.
 
     The sampler module must be for the same model as the optimization strategy.
 
-    FIXME: make sure sampler and optimization strategy always match.
-
     :param model_type: name of the model type
     :param config: the config specific to the sampler
     :param agent: the agent model network
-    :param chemistry: a namespace holding the various chemistry helpers
     :return: the set up sampler
     """
 
@@ -40,9 +36,11 @@ def setup_sampler(model_type: str, config: dict, agent: ModelAdapter, chemistry:
     # Transformer-based models were trained on canonical SMILES
     if model_type in TRANSFORMERS and randomize_smiles:
         randomize_smiles = False
-        logger.warning(f"randomize_smiles is set to be True by user. But the model was trained using canonical SMILES"
-                       f"where randomize_smiles might undermine the performance (this needs more investigation), "
-                       f"but randomize_smiles is reset to be False for now.")
+        logger.warning(
+            f"randomize_smiles is set to be True by user. But the model was trained using canonical SMILES"
+            f"where randomize_smiles might undermine the performance (this needs more investigation), "
+            f"but randomize_smiles is reset to be False for now."
+        )
 
     unique_sequences = config.get("unique_sequences", False)
 
@@ -58,7 +56,6 @@ def setup_sampler(model_type: str, config: dict, agent: ModelAdapter, chemistry:
     else:
         sample_strategy = None
 
-    tokens = TransformationTokens()  # LinkInvent only
     isomeric = False
 
     if model_type in TRANSFORMERS:  # for Transformer-based models
@@ -76,8 +73,6 @@ def setup_sampler(model_type: str, config: dict, agent: ModelAdapter, chemistry:
         isomeric=isomeric,  # needed for Transformer-based models
         randomize_smiles=randomize_smiles,
         unique_sequences=unique_sequences,
-        chemistry=chemistry,
-        tokens=tokens,
     )
 
     return sampler, batch_size

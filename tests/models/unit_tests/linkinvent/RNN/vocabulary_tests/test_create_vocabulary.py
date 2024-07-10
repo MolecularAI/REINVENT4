@@ -7,9 +7,7 @@ from tests.test_data import CELECOXIB, COCAINE, METAMIZOLE, ASPIRIN, SIMPLE_TOKE
 class TestCreateVocabulary(unittest.TestCase):
     def setUp(self):
         smiles = [ASPIRIN, METAMIZOLE, COCAINE, CELECOXIB]
-        self.voc = mv.create_vocabulary(
-            smiles_list=smiles, tokenizer=mv.SMILESTokenizer()
-        )
+        self.voc = mv.create_vocabulary(smiles_list=smiles, tokenizer=mv.SMILESTokenizer())
 
     def test_create(self):
         simple_vocabulary = mv.Vocabulary(tokens=SIMPLE_TOKENS)

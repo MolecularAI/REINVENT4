@@ -84,11 +84,9 @@ class TestEncoder(unittest.TestCase):
         num_dimensions: int,
         num_layers: int,
     ):
-        for (padded_seqs, seqs_length) in data_loader:
+        for padded_seqs, seqs_length in data_loader:
 
-            encoder_padded_seqs, (hidden_1, hidden_2) = encoder.forward(
-                padded_seqs, seqs_length
-            )
+            encoder_padded_seqs, (hidden_1, hidden_2) = encoder.forward(padded_seqs, seqs_length)
             expected_size_encoder_padded_seqs = [
                 data_loader.batch_size,
                 seqs_length.max().item(),
@@ -99,17 +97,12 @@ class TestEncoder(unittest.TestCase):
             # check that all output items are Tensors
             self.assertTrue(
                 all(
-                    [
-                        isinstance(item, Tensor)
-                        for item in [encoder_padded_seqs, hidden_1, hidden_2]
-                    ]
+                    [isinstance(item, Tensor) for item in [encoder_padded_seqs, hidden_1, hidden_2]]
                 )
             )
 
             # check the size of each Tensor
-            self.assertEqual(
-                expected_size_encoder_padded_seqs, list(encoder_padded_seqs.size())
-            )
+            self.assertEqual(expected_size_encoder_padded_seqs, list(encoder_padded_seqs.size()))
             self.assertEqual(expected_size_hidden, list(hidden_1.size()))
             self.assertEqual(expected_size_hidden, list(hidden_2.size()))
 

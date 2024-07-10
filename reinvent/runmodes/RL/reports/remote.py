@@ -4,71 +4,71 @@ from __future__ import annotations
 
 import time
 from typing import List, TYPE_CHECKING
-from dataclasses import dataclass
 import logging
 
 import numpy as np
 
 if TYPE_CHECKING:
     from reinvent.scoring import ScoreResults
+    from reinvent.runmodes.RL.reports import RLReportData
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class RemoteData:
-    step: int
-    score_results: ScoreResults
-    prior_nll: float
-    agent_nll: float
-    fraction_valid_smiles: float
-    number_of_smiles: int
-    start_time: float
-    n_steps: int
-    mean_score: float
-    mask_idx: np.ndarray
+class RLRemoteReporter:
+    """Tensorboard class"""
 
+    def __init__(self, reporter, logging_frequency):
+        self.reporter = reporter
+        self.logging_frequency = logging_frequency
 
-def send_report(data: RemoteData, reporter) -> None:
-    """Send data to a remote endpoint
+    def submit(self, data: RLReportData) -> None:
+        """Send data to a remote endpoint
 
-    :param data: data to be send and transformed into JSON format
-    """
+        :param data: data to be send and transformed into JSON format
+        """
 
-    mask_idx = data.mask_idx
-    step = data.step
+        step = data.step
 
-    score_components = score_summary(data.score_results, mask_idx)
-    score_components["total_score"] = float(data.mean_score)
+        if not (step == 0 or step % self.logging_frequency == 0):
+            return
 
-    learning_curves = {
-        "prior NLL": float(data.prior_nll),
-        "agent NLL": float(data.agent_nll),
-    }
+        logger.info(
+            f"Remote reporting at step {step} with reporter type: {self.__class__.__name__}"
+        )
 
-    smarts_pattern = ""  # get_matching_substructure(data.score_results)
-    smiles_legend_pairs = get_smiles_legend_pairs(
-        np.array(data.score_results.smilies)[mask_idx],
-        data.score_results.total_scores[mask_idx]
-    )
+        mask_idx = data.mask_idx
+        score_components = score_summary(data.score_results, mask_idx)
+        score_components["total_score"] = float(data.mean_score)
 
-    time_estimation = estimate_run_time(data.start_time, data.n_steps, step)
+        learning_curves = {
+            "prior NLL": float(data.prior_mean_nll),
+            "agent NLL": float(data.agent_mean_nll),
+        }
 
-    record = {
-        "step": step,
-        "timestamp": time.time(),  # gives microsecond resolution on Linux
-        "components": score_components,
-        "learning": learning_curves,
-        "time_estimation": time_estimation,
-        "fraction_valid_smiles": float(data.fraction_valid_smiles),
-        "smiles_report": {
-            "smarts_pattern": smarts_pattern,
-            "smiles_legend_pairs": smiles_legend_pairs,
-        },
-        "collected smiles in memory": data.number_of_smiles if data.number_of_smiles else 0,
-    }
+        smarts_pattern = ""  # get_matching_substructure(data.score_results)
+        smiles_legend_pairs = get_smiles_legend_pairs(
+            np.array(data.score_results.smilies)[mask_idx],
+            data.score_results.total_scores[mask_idx],
+        )
 
-    reporter.send(record)
+        time_estimation = estimate_run_time(data.start_time, data.n_steps, step)
+
+        record = {
+            "step": step,
+            "timestamp": time.time(),  # gives microsecond resolution on Linux
+            "components": score_components,
+            "learning": learning_curves,
+            "time_estimation": time_estimation,
+            "fraction_valid_smiles": float(data.fraction_valid_smiles),
+            "smiles_report": {
+                "smarts_pattern": smarts_pattern,
+                "smiles_legend_pairs": smiles_legend_pairs,
+            },
+            "collected smiles in memory": len(data.smilies),
+        }
+
+        self.reporter.send(record)
 
 
 def score_summary(results: ScoreResults, mask_idx: np.ndarray) -> dict:
@@ -115,9 +115,7 @@ def get_smiles_legend_pairs(smilies: List[str], scores: List[str]) -> List:
     combined = [(smiles, float(score)) for smiles, score in zip(smilies, scores)]
     pairs = sorted(combined, key=lambda item: item[1], reverse=True)
 
-    smiles_legend_pairs = [
-        {"smiles": smiles, "legend": f"{score:.2f}"} for smiles, score in pairs
-    ]
+    smiles_legend_pairs = [{"smiles": smiles, "legend": f"{score:.2f}"} for smiles, score in pairs]
 
     return smiles_legend_pairs
 

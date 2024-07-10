@@ -13,5 +13,7 @@ def extra_dependencies(*library_names):
             if execute_function:
                 return func(*args, **kwargs)
             return
+
         return wrapper
+
     return decorator

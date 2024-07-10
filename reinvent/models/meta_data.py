@@ -25,7 +25,7 @@ class ModelMetaData:
     hash_id, hash_id_format need to be excluded or use default for computation
     """
 
-    hash_id: str | None # hash of the entire state dictionary minus the hash fields
+    hash_id: str | None  # hash of the entire state dictionary minus the hash fields
     hash_id_format: str
     model_id: UUID | str  # uuid.uuid4() or https://pypi.org/project/uuid6/
     origina_data_source: str  # e.g. "ChEMBL 33" or "PubChem 2023-11-23"
@@ -39,81 +39,108 @@ class ModelMetaData:
         return asdict(self)
 
 
-def update_model_data(save_dict: dict) -> dict:
+def update_model_data(save_dict: dict, comment: str = "", write_update: bool = True) -> dict:
     """Compute the hash for the model data
 
+    Works on a copy of save_dict.
+    NOTE: This will modify the original save_dict as it converts the tensors
+          to numpy arrays. Use the returned save_dict!
+
     :param save_dict: the model description
-    :returns: updated save dict
+    :param comment: the comment for current update
+    :param write_update: whether to write the update or not
+    :returns: updated save dict with the metadata as dict
     """
 
-    save_dict = copy.deepcopy(save_dict)
+    # copy and sort
     save_dict = {k: v for k, v in sorted(save_dict.items())}
-
     metadata = save_dict["metadata"]
 
-    # check if metadata does not exist, do nothing
-    if metadata is None:
-        return save_dict
-
-    # do not hash the hash and its format itself
-    metadata.hash_id = None
-    metadata.hash_id_format = None
+    if not isinstance(save_dict["metadata"], dict):
+        metadata = metadata.as_dict()
 
     # FIXME: what if this gets "too long"?
-    metadata.updates.append((time.time(),))
+    if write_update:
+        metadata["updates"].append(time.time())
 
+    if comment:
+        metadata["comments"].append(comment)
+
+    # do not hash the hash itself and its format
+    metadata["hash_id"] = None
+    metadata["hash_id_format"] = None
+
+    ref = _get_network(save_dict)
+    network = copy.deepcopy(ref)  # keep original tensors
+
+    # convert to numpy arrays to avoid hashing on torch.tensor metadata
+    # only needed for hashing, will copy back tensors further down
+    for k in sorted(ref.keys()):
+        ref[k] = ref[k].cpu().numpy()
+
+    save_dict["metadata"] = metadata
+
+    data = pickle.dumps(save_dict)
+
+    metadata["hash_id"] = xxhash.xxh3_128_hexdigest(data)
+    metadata["hash_id_format"] = HASH_FORMAT
+
+    return _set_network(save_dict, network)
+
+
+def check_valid_hash(
+    save_dict: dict,
+) -> bool:
+    """Check the hash of the model data
+
+    Works on a copy of save_dict.  save_dict should not be used any further
+    because the parameters, etc. are in numpy format.
+
+    :param save_dict: the model description, metadata expected as dict
+    :returns: whether hash is valid
+    """
+
+    save_dict = copy.deepcopy(save_dict)  # avoid problems modifying the original
+    save_dict = {k: v for k, v in sorted(save_dict.items())}
+    metadata = save_dict["metadata"]
+
+    if isinstance(save_dict["metadata"], dict):  # new models
+        curr_hash_id = metadata["hash_id"]
+        metadata["hash_id"] = None
+        metadata["hash_id_format"] = None
+    else:  # ModelMetaData for legacy models
+        curr_hash_id = metadata.hash_id
+        metadata.hash_id = None
+        metadata.hash_id_format = None
+
+    ref = _get_network(save_dict)
+
+    for k in sorted(ref.keys()):
+        ref[k] = ref[k].cpu().numpy()
+
+    data = pickle.dumps(save_dict)
+    check_hash_id = xxhash.xxh3_128_hexdigest(data)
+
+    return curr_hash_id == check_hash_id
+
+
+def _get_network(save_dict: dict) -> dict:
     if "decorator" in save_dict:  # Libinvent
         ref = save_dict["decorator"]["state"]
-    elif "network_state" in save_dict:  # Linkinvnet, Mol2Mol
+    elif "network_state" in save_dict:  # Linkinvent, Mol2Mol
         ref = save_dict["network_state"]
     else:  # Reinvent
         ref = save_dict["network"]
 
-    for k in ref:
-        ref[k] = ref[k].cpu().numpy()
+    return ref
 
-    data = pickle.dumps(save_dict)
 
-    metadata.hash_id = xxhash.xxh3_128_hexdigest(data)
-    metadata.hash_id_format = HASH_FORMAT
+def _set_network(save_dict, network):
+    if "decorator" in save_dict:  # Libinvent
+        save_dict["decorator"]["state"] = network
+    elif "network_state" in save_dict:  # Linkinvent, Mol2Mol
+        save_dict["network_state"] = network
+    else:  # Reinvent
+        save_dict["network"] = network
 
     return save_dict
-
-
-def check_valid_hash(save_dict: dict) -> bool:
-    """Check the hash of the model data
-
-    :param save_dict: the model description
-    :returns: whether hash is valid
-    """
-
-    save_dict = copy.deepcopy(save_dict)
-    save_dict = {k: v for k, v in sorted(save_dict.items())}
-
-    metadata = save_dict["metadata"]
-
-    curr_hash_id = metadata.hash_id
-    curr_hash_id_format = metadata.hash_id_format
-
-    # do not hash the hash and its format itself
-    metadata.hash_id = None
-    metadata.hash_id_format = None
-
-    if "decorator" in save_dict:  # Libinvent
-        ptr = save_dict["decorator"]["state"]
-    elif "network_state" in save_dict:  # Linkinvnet, Mol2Mol
-        ptr = save_dict["network_state"]
-    else:  # Reinvent
-        ptr = save_dict["network"]
-
-    for k in ptr:
-        ptr[k] = ptr[k].cpu().numpy()
-
-    data = pickle.dumps(save_dict)
-
-    check_hash_id = xxhash.xxh3_128_hexdigest(data)
-
-    metadata.hash_id = curr_hash_id
-    metadata.hash_id_format = curr_hash_id_format
-
-    return curr_hash_id == check_hash_id

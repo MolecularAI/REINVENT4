@@ -2,12 +2,12 @@
 #
 
 run_type = "scoring"
-output_csv = "scoring.csv"  # run on the GPU if true, on the CPU if false
 json_out_config = "_scoring.json"  # write this TOML to JSON
 
 [parameters]
 
 smiles_file = "compounds.smi"  # SMILES file with 1 molecule per line
+output_csv = "scoring.csv"  # name of output CSV to write, optional
 
 
 [scoring]

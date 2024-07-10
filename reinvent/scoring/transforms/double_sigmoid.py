@@ -31,6 +31,8 @@ class DoubleSigmoid(Transform, param_cls=Parameters):
 
     def __call__(self, values) -> np.ndarray:
         values = np.array(values, dtype=np.float32)
-        transformed = double_sigmoid(values, self.low, self.high, self.coef_div, self.coef_si, self.coef_se)
+        transformed = double_sigmoid(
+            values, self.low, self.high, self.coef_div, self.coef_si, self.coef_se
+        )
 
         return transformed

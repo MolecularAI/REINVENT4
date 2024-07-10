@@ -20,7 +20,8 @@ from .run_program import run_command
 from .add_tag import add_tag
 from ..normalize import normalize_smiles
 
-logger = logging.getLogger('reinvent')
+logger = logging.getLogger("reinvent")
+
 
 @add_tag("__parameters")
 @dataclass
@@ -53,19 +54,29 @@ class MMP:
         self.num_of_cuts = params.num_of_cuts
         self.max_variable_heavies = params.max_variable_heavies
         self.max_variable_ratio = params.max_variable_ratio
-        
+
         # needed in the normalize_smiles decorator
         # FIXME: really needs to be configurable for each model separately
-        self.smiles_type = 'rdkit_smiles'
+        self.smiles_type = "rdkit_smiles"
+
+        self.number_of_endpoints = len(params.reference_smiles)
 
     @normalize_smiles
     def __call__(self, smilies: List[str]) -> np.array:
         scores = []
 
-        self.ref_smilies = [[Chem.MolToSmiles(Chem.MolFromSmiles(smi), isomericSmiles=False)
-                             for smi in self.ref_smilies[0] if Chem.MolFromSmiles(smi)]]
-        smilies = [Chem.MolToSmiles(Chem.MolFromSmiles(smi), isomericSmiles=False) for smi in smilies if
-                           Chem.MolFromSmiles(smi)]
+        self.ref_smilies = [
+            [
+                Chem.MolToSmiles(Chem.MolFromSmiles(smi), isomericSmiles=False)
+                for smi in self.ref_smilies[0]
+                if Chem.MolFromSmiles(smi)
+            ]
+        ]
+        smilies = [
+            Chem.MolToSmiles(Chem.MolFromSmiles(smi), isomericSmiles=False)
+            for smi in smilies
+            if Chem.MolFromSmiles(smi)
+        ]
 
         for ref_smilies, ncuts, max_heavy, max_ratio in zip(
             self.ref_smilies, self.num_of_cuts, self.max_variable_heavies, self.max_variable_ratio
@@ -136,7 +147,6 @@ def parse_index_output(index_output: str) -> pd.DataFrame | None:
             "Core",
         ],
     )
-
 
     data = data[
         (data["Source_Mol_ID"].str.contains("Source_ID"))

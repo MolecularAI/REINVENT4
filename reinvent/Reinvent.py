@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 import argparse
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import platform
 import getpass
 import random
@@ -27,6 +27,7 @@ import torch
 from reinvent import version, runmodes, config_parse, setup_logger
 from reinvent.runmodes.utils import set_torch_device
 from reinvent.runmodes.reporter.remote import setup_reporter
+from .validation import ReinventConfig
 
 INPUT_FORMAT_CHOICES = ("toml", "json")
 RDKIT_CHOICES = ("all", "error", "warning", "info", "debug")
@@ -36,6 +37,7 @@ OVERWRITE_STR = "Overwrites setting in the configuration file"
 RESPONDER_TOKEN = "RESPONDER_TOKEN"
 
 rdBase.DisableLog("rdApp.*")
+# rdBase.LogToPythonLogger()
 
 
 def enable_rdkit_log(levels: List[str]):
@@ -96,6 +98,17 @@ def set_seed(seed: int):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
+
+
+def extract_sections(config: dict) -> dict:
+    """Extract the sections of a config file
+
+    :param config: the config file
+    :returns: the extracted sections
+    """
+
+    # FIXME: stages are a list of dicts in RL, may clash with global lists
+    return {k: v for k, v in config.items() if isinstance(v, (dict, list))}
 
 
 def parse_command_line():
@@ -202,6 +215,14 @@ def setup_responder(config):
     setup_reporter(endpoint, token)
 
 
+def write_json_config(global_dict, json_out_config):
+    def dummy(config):
+        global_dict.update(config)
+        config_parse.write_json(global_dict, json_out_config)
+
+    return dummy
+
+
 def main():
     """Simple entry point into Reinvent's run modes."""
 
@@ -211,6 +232,7 @@ def main():
 
     reader = getattr(config_parse, f"read_{args.config_format}")
     input_config = reader(args.config_filename)
+    val_config = ReinventConfig(**input_config)
 
     if args.enable_rdkit_log_levels:
         enable_rdkit_log(args.enable_rdkit_log_levels)
@@ -236,7 +258,12 @@ def main():
     logger.info(f"Command line: {' '.join(sys.argv)}")
 
     if dotenv_loaded:
-        logger.info("Environment loaded from dotenv file")
+        if args.dotenv_filename:
+            filename = args.dotenv_filename
+        else:
+            filename = find_dotenv()
+
+        logger.info(f"Environment loaded from dotenv file {filename}")
 
     logger.info(f"User {getpass.getuser()} on host {platform.node()}")
     logger.info(f"Python version {platform.python_version()}")
@@ -269,8 +296,10 @@ def main():
         logger.info(f"Using CUDA device:{current_device} {device_name}")
 
         free_memory, total_memory = torch.cuda.mem_get_info()
-        logger.info(f"GPU memory: {free_memory // 1024**2} MiB free, "
-                    f"{total_memory // 1024**2} MiB total")
+        logger.info(
+            f"GPU memory: {free_memory // 1024**2} MiB free, "
+            f"{total_memory // 1024**2} MiB total"
+        )
     else:
         logger.info(f"Using CPU {platform.processor()}")
 
@@ -280,26 +309,35 @@ def main():
         set_seed(seed)
         logger.info(f"Set seed for all random generators to {seed}")
 
-    tb_logdir = None
+    tb_logdir = input_config.get("tb_logdir", None)
 
-    if "tb_logdir" in input_config:
-        tb_logdir = os.path.abspath(input_config["tb_logdir"])
+    if tb_logdir:
+        tb_logdir = os.path.abspath(tb_logdir)
         logger.info(f"Writing TensorBoard summary to {tb_logdir}")
+
+    write_config = None
 
     if "json_out_config" in input_config:
         json_out_config = os.path.abspath(input_config["json_out_config"])
         logger.info(f"Writing JSON config file to {json_out_config}")
-        config_parse.write_json(input_config, json_out_config)
+        write_config = write_json_config(val_config.model_dump(), json_out_config)
 
-    responder_config = None
+    responder_config = input_config.get("responder", None)
 
-    if "responder" in input_config:
-        setup_responder(input_config["responder"])
-        responder_config = input_config["responder"]
-        logger.info(f"Using remote monitor endpoint {input_config['responder']['endpoint']} "
-                    f"with frequency {input_config['responder']['frequency']}")
+    if responder_config:
+        setup_responder(responder_config)
+        logger.info(
+            f"Using remote monitor endpoint {input_config['responder']['endpoint']} "
+            f"with frequency {input_config['responder']['frequency']}"
+        )
 
-    runner(input_config, actual_device, tb_logdir, responder_config)
+    runner(
+        input_config=extract_sections(input_config),
+        device=actual_device,
+        tb_logdir=tb_logdir,
+        responder_config=responder_config,
+        write_config=write_config,
+    )
 
     if SYSTEM != "Windows":
         maxrss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss

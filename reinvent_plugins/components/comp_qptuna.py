@@ -39,7 +39,7 @@ class Qptuna:
 
         # needed in the normalize_smiles decorator
         # FIXME: really needs to be configurable for each model separately
-        self.smiles_type = 'rdkit_smiles'
+        self.smiles_type = "rdkit_smiles"
 
         for filename in params.model_file:
             model = load_model(filename)
@@ -48,6 +48,7 @@ class Qptuna:
         metadata = json.dumps(model.metadata, indent=2)
         logger.info(f"Qptuna model metadata:\n{metadata}")
 
+        self.number_of_endpoints = len(params.model_file)
 
     @normalize_smiles
     def __call__(self, smilies: List[str]) -> np.array:

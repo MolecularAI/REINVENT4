@@ -9,33 +9,33 @@ import torch
 
 from reinvent import config_parse, setup_logger, CsvFormatter
 from reinvent.runmodes import Handler, RL, create_adapter
-from reinvent.runmodes.dtos import ChemistryHelpers
 from reinvent.runmodes.setup_sampler import setup_sampler
 from reinvent.runmodes.RL import terminators, memories
 from reinvent.runmodes.RL.data_classes import WorkPackage, ModelState
 from reinvent.runmodes.utils import disable_gradients
 from reinvent.scoring import Scorer
-from reinvent.chemistry import Conversions
-from reinvent.chemistry.library_design import (
-    BondMaker,
-    AttachmentPoints,
-)
+from .validation import RLConfig
 
 if TYPE_CHECKING:
     from reinvent.runmodes.RL import terminator_callable
     from reinvent.models import ModelAdapter
+    from .validation import (
+        SectionDiversityFilter,
+        SectionLearningStrategy,
+        SectionInception,
+        SectionStage,
+    )
 
 logger = logging.getLogger(__name__)
 
 
-def setup_diversity_filter(config: dict, conversions, rdkit_smiles_flags: dict):
+def setup_diversity_filter(config: SectionDiversityFilter, rdkit_smiles_flags: dict):
     """Setup of the diversity filter
 
     Basic setup of the diversity filter memory.  The parameters are from a
     dict, so the keys (parameters) are hard-coded here.
 
     :param config: config parameter specific to the filter
-    :param conversions: chemistry conversions
     :param rdkit_smiles_flags: RDKit flags for canonicalization
     :return: the set up diversity filter
     """
@@ -43,7 +43,7 @@ def setup_diversity_filter(config: dict, conversions, rdkit_smiles_flags: dict):
     if config is None:
         return None
 
-    memory_type = config["type"]
+    memory_type = config.type
 
     if "type" in config:
         diversity_filter = getattr(memories, memory_type)
@@ -53,16 +53,15 @@ def setup_diversity_filter(config: dict, conversions, rdkit_smiles_flags: dict):
     logger.info(f"Using diversity filter {memory_type}")
 
     return diversity_filter(
-        bucket_size=config.get("bucket_size", 20),
-        minscore=config.get("minscore", 1.0),
-        minsimilarity=config.get("minsimilarity", 0.4),
-        penalty_multiplier=config.get("penalty_multiplier", 0.5),
-        conversions=conversions,
+        bucket_size=config.bucket_size,
+        minscore=config.minscore,
+        minsimilarity=config.minsimilarity,
+        penalty_multiplier=config.penalty_multiplier,
         rdkit_smiles_flags=rdkit_smiles_flags,
     )
 
 
-def setup_reward_strategy(config: dict, agent: ModelAdapter):
+def setup_reward_strategy(config: SectionLearningStrategy, agent: ModelAdapter):
     """Setup the Reinforcement Learning reward strategy
 
     Basic parameter setup for RL learning including the reward function. The
@@ -77,10 +76,10 @@ def setup_reward_strategy(config: dict, agent: ModelAdapter):
     :return: the set up RL strategy
     """
 
-    learning_rate = config["rate"]
-    sigma = config["sigma"]  # determines how dominant the score is
+    learning_rate = config.rate
+    sigma = config.sigma  # determines how dominant the score is
 
-    reward_strategy_str = config["type"]
+    reward_strategy_str = config.type
 
     try:
         reward_strategy = getattr(RL, f"{reward_strategy_str}_strategy")
@@ -97,7 +96,7 @@ def setup_reward_strategy(config: dict, agent: ModelAdapter):
     return learning_strategy
 
 
-def setup_inception(config: dict, prior: ModelAdapter):
+def setup_inception(config: SectionInception, prior: ModelAdapter):
     """Setup inception memory
 
     :param config: the config specific to the inception memory
@@ -106,8 +105,8 @@ def setup_inception(config: dict, prior: ModelAdapter):
     """
 
     smilies = []
-    deduplicate = config.get("deduplicate", True)
-    smilies_filename = config.get("smiles_file", None)
+    deduplicate = config.deduplicate
+    smilies_filename = config.smiles_file
 
     if smilies_filename and os.path.exists(smilies_filename):
         smilies = config_parse.read_smiles_csv_file(smilies_filename, columns=0)
@@ -126,8 +125,8 @@ def setup_inception(config: dict, prior: ModelAdapter):
         logger.info("Global SMILES deduplication for inception memory")
 
     inception = memories.Inception(
-        memory_size=config["memory_size"],
-        sample_size=config["sample_size"],
+        memory_size=config.memory_size,
+        sample_size=config.sample_size,
         smilies=smilies,
         scoring_function=None,
         prior=prior,
@@ -139,26 +138,9 @@ def setup_inception(config: dict, prior: ModelAdapter):
     return inception
 
 
-def setup_scoring(config: dict) -> dict:
-    """Update scoring component from file if requested
-
-    :param config: scoring dictionary
-    :returns: scoring dictionary
-    """
-
-    component_filename = config.get("filename", None)
-    component_filetype = config.get("filetype", None)
-
-    if component_filename and component_filetype:
-        logger.info(f"Reading score components from {component_filename}")
-        parser = getattr(config_parse, f"read_{component_filetype.lower()}")
-        components_config = parser(component_filename)
-        config.update(components_config)
-
-    return config
-
-
-def create_packages(reward_strategy: RL.RLReward, stages: list) -> List[WorkPackage]:
+def create_packages(
+    reward_strategy: RL.RLReward, stages: List[SectionStage], rdkit_smiles_flags: dict
+) -> List[WorkPackage]:
     """Create work packages
 
     Collect the stage parameters and build a work package for each stage.  The
@@ -167,21 +149,21 @@ def create_packages(reward_strategy: RL.RLReward, stages: list) -> List[WorkPack
 
     :param reward_strategy: the reward strategy
     :param stages: the parameters for each work package
+    :param rdkit_smiles_flags: RDKit flags for canonicalization
     :return: a list of work packages
     """
     packages = []
 
     for stage in stages:
-        chkpt_filename = stage["chkpt_file"]
+        chkpt_filename = stage.chkpt_file
 
-        scoring_config = setup_scoring(stage["scoring"])
-        scoring_function = Scorer(scoring_config)
+        scoring_function = Scorer(stage.scoring)
 
-        max_score = stage.get("max_score", 1.0)
-        min_steps = stage.get("min_steps", 1)
-        max_steps = stage.get("max_steps", 10)  # hard limit
+        max_score = stage.max_score
+        min_steps = stage.min_steps
+        max_steps = stage.max_steps
 
-        terminator_param = stage.get("termination", "null")
+        terminator_param = stage.termination
         terminator_name = terminator_param.lower().title()
 
         try:
@@ -191,12 +173,18 @@ def create_packages(reward_strategy: RL.RLReward, stages: list) -> List[WorkPack
             logger.critical(msg)
             raise RuntimeError(msg)
 
+        diversity_filter = None
+
+        if stage.diversity_filter:
+            diversity_filter = setup_diversity_filter(stage.diversity_filter, rdkit_smiles_flags)
+
         packages.append(
             WorkPackage(
                 scoring_function,
                 reward_strategy,
                 max_steps,
                 terminator(max_score, min_steps),
+                diversity_filter,
                 chkpt_filename,
             )
         )
@@ -205,10 +193,11 @@ def create_packages(reward_strategy: RL.RLReward, stages: list) -> List[WorkPack
 
 
 def run_staged_learning(
-    config: dict,
+    input_config: dict,
     device: torch.device,
     tb_logdir: str,
     responder_config: dict,
+    write_config: str = None,
     *args,
     **kwargs,
 ):
@@ -218,26 +207,28 @@ def run_staged_learning(
     the scoring function.  A context manager ensures that a checkpoint file is
     written out should the program be terminated.
 
-    :param config: the run configuration
+    :param input_config: the run configuration
     :param device: torch device
     :param tb_logdir: TensorBoard log directory
     :param responder_config: responder configuration
+    :param write_config: callable to write config
     """
 
-    stages = config["stage"]
+    config = RLConfig(**input_config)
+    stages = config.stage
     num_stages = len(stages)
     logger.info(
         f"Starting {num_stages} {'stages' if num_stages> 1 else 'stage'} of Reinforcement Learning"
     )
 
-    parameters = config["parameters"]
+    parameters = config.parameters
 
     # NOTE: The model files are a dictionary with model attributes from
     #       Reinvent and a set of tensors, each with an attribute for the
     #       device (CPU or GPU) and if gradients are required
 
-    prior_model_filename = os.path.abspath(parameters["prior_file"])
-    agent_model_filename = os.path.abspath(parameters["agent_file"])
+    prior_model_filename = parameters.prior_file
+    agent_model_filename = parameters.agent_file
 
     # NOTE: Inference mode means here that torch runs eval() on the network:
     #       switch off some specific layers (dropout, batch normal) but that
@@ -251,7 +242,7 @@ def run_staged_learning(
 
     rdkit_smiles_flags = dict(allowTautomers=True)
 
-    if model_type in ["Mol2Mol", "LinkinventTransformer"]:  # Transformer-based models
+    if model_type in ["Mol2Mol", "LinkinventTransformer", "LibinventTransformer"]:  # Transformer-based models
         agent_mode = "inference"
         rdkit_smiles_flags.update(sanitize=True, isomericSmiles=True)
         rdkit_smiles_flags2 = dict(isomericSmiles=True)
@@ -273,38 +264,27 @@ def run_staged_learning(
     logger.info(f"Prior read from {prior_model_filename}")
     logger.info(f"Agent read from {agent_model_filename}")
 
-    try:
-        smilies_filename = parameters["smiles_file"]
-        smilies = config_parse.read_smiles_csv_file(smilies_filename, columns=0)
-        logger.info(f"Input molecules/fragments read from file {smilies_filename}")
-    except KeyError:  # optional for Reinvent
-        smilies = None
+    smilies = None
 
-    # The chemistry helpers are mostly static functions with little state (only
-    # AttachmentPoints needs constants from TransformationTokens.
-    # AttachmentPoints depends on Conversions and BondMaker on both
-    # Conversions and AttachmentPoints
-    chemistry = ChemistryHelpers(
-        Conversions(),  # Lib/LinkInvent, Mol2Mol
-        BondMaker(),  # LibInvent
-        AttachmentPoints(),  # Lib/LinkInvent
-    )
+    if parameters.smiles_file:
+        smilies = config_parse.read_smiles_csv_file(parameters.smiles_file, columns=0)
+        logger.info(f"Input molecules/fragments read from file {parameters.smiles_file}")
 
-    sampler, _ = setup_sampler(model_type, parameters, agent, chemistry)
-    reward_strategy = setup_reward_strategy(config["learning_strategy"], agent)
-    df_section = config.get("diversity_filter", None)
+    sampler, _ = setup_sampler(model_type, parameters.dict(), agent)
+    reward_strategy = setup_reward_strategy(config.learning_strategy, agent)
 
-    if parameters["use_checkpoint"] and "staged_learning" in agent_save_dict:
+    global_df_only = False
+
+    if config.diversity_filter:
+        global_df_only = True
+
+    if parameters.use_checkpoint and "staged_learning" in agent_save_dict:
         logger.info(f"Using diversity filter from {agent_model_filename}")
         diversity_filter = agent_save_dict["staged_learning"]["diversity_filter"]
     else:
-        diversity_filter = setup_diversity_filter(
-            df_section, chemistry.conversions, rdkit_smiles_flags2
-        )
+        diversity_filter = setup_diversity_filter(config.diversity_filter, rdkit_smiles_flags2)
 
-    purge_diversity_filter = parameters.get("purge_memories", False)
-
-    if purge_diversity_filter:
+    if parameters.purge_memories:
         logger.info("Purging diversity filter memories after each stage")
     else:
         logger.info("Diversity filter memories are retained between stages")
@@ -312,21 +292,23 @@ def run_staged_learning(
     inception = None
 
     # Inception only set up for the very first step
-    if "inception" in config and model_type == "Reinvent":
-        inception = setup_inception(config["inception"], prior)
+    if config.inception and model_type == "Reinvent":
+        inception = setup_inception(config.inception, prior)
 
     if not inception and model_type == "Reinvent":
         logger.warning("Inception disabled but may speed up convergence")
 
-    state = ModelState(agent, diversity_filter)
-    packages = create_packages(reward_strategy, stages)
+    packages = create_packages(reward_strategy, stages, rdkit_smiles_flags2)
 
-    summary_csv_prefix = parameters.get("summary_csv_prefix", "summary")
+    summary_csv_prefix = parameters.summary_csv_prefix
 
     # FIXME: is there a sensible default, this is only needed by Mol2Mol
-    distance_threshold = parameters.get("distance_threshold", 99999)
+    distance_threshold = parameters.distance_threshold
 
     model_learning = getattr(RL, f"{model_type}Learning")
+
+    if callable(write_config):
+        write_config(config.model_dump())
 
     with Handler() as handler:
         for run, package in enumerate(packages):
@@ -346,6 +328,13 @@ def run_staged_learning(
             logger.info(f"Writing tabular data for stage to {csv_filename}")
             logger.info(f"Starting stage {stage_no} <<<")
 
+            if global_df_only:  # global DF always overwrites stage DFs
+                state = ModelState(agent, diversity_filter)
+                logger.debug(f"Using global DF")
+            else:
+                state = ModelState(agent, package.diversity_filter)
+                logger.debug(f"Using stage DF")
+
             optimize = model_learning(
                 max_steps=package.max_steps,
                 prior=prior,
@@ -357,7 +346,6 @@ def run_staged_learning(
                 distance_threshold=distance_threshold,
                 rdkit_smiles_flags=rdkit_smiles_flags,
                 inception=inception,
-                chemistry=chemistry,
                 responder_config=responder_config,
                 tb_logdir=logdir,
             )
@@ -366,7 +354,9 @@ def run_staged_learning(
                 free_memory, total_memory = torch.cuda.mem_get_info()
                 free_memory //= 1024**2
                 used_memory = total_memory // 1024**2 - free_memory
-                logger.info(f"Current GPU memory usage: {used_memory} MiB used, {free_memory} MiB free")
+                logger.info(
+                    f"Current GPU memory usage: {used_memory} MiB used, {free_memory} MiB free"
+                )
 
             handler.out_filename = package.out_state_filename
             handler.register_callback(optimize.get_state_dict)
@@ -377,7 +367,7 @@ def run_staged_learning(
             terminate = optimize(package.terminator)
             state = optimize.state
 
-            if purge_diversity_filter:
+            if state.diversity_filter and parameters.purge_memories:
                 logger.info(f"Purging diversity filter memories in stage {stage_no}")
                 state.diversity_filter.purge_memories()
 

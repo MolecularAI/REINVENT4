@@ -4,16 +4,13 @@ from rdkit.Chem import AllChem, Mol
 from rdkit.Chem.Lipinski import RingCount
 from rdkit.Chem.rdChemReactions import ChemicalReaction
 
-from reinvent.chemistry import Conversions
+from reinvent.chemistry import conversions
 from reinvent.chemistry.library_design import BondMapper
 from reinvent.chemistry.library_design.dtos import ReactionDTO, ReactionOutcomeDTO
-from reinvent.chemistry.tokens import TransformationTokens
 
 
 class FragmentReactions:
     def __init__(self):
-        self._conversions = Conversions()
-        self._tokens = TransformationTokens()
         self._bond_mapper = BondMapper()
 
     def create_reactions_from_smarts(self, smarts: List[str]) -> List[ChemicalReaction]:
@@ -61,7 +58,7 @@ class FragmentReactions:
         self, molecule: Mol, reaction_dto: ReactionDTO
     ) -> ReactionOutcomeDTO:
         """Build list of possible splits of a molecule given a single reaction."""
-        molecule = self._conversions.copy_mol(molecule)
+        molecule = conversions.copy_mol(molecule)
         outcomes = reaction_dto.chemical_reaction.RunReactant(molecule, 0)
         outcome_dto = ReactionOutcomeDTO(reaction_dto.reaction_smarts, list(outcomes), molecule)
         return outcome_dto
@@ -80,8 +77,8 @@ class FragmentReactions:
     def _detect_ring_break(self, molecule_ring_count: int, pair: Tuple[Mol]) -> bool:
         reagent_rings = 0
         for reagent in pair:
-            reagent_smiles = self._conversions.mol_to_smiles(reagent)
-            reagent_mol = self._conversions.smile_to_mol(reagent_smiles)
+            reagent_smiles = conversions.mol_to_smiles(reagent)
+            reagent_mol = conversions.smile_to_mol(reagent_smiles)
             try:
                 reagent_rings = reagent_rings + RingCount(reagent_mol)
             except:

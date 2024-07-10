@@ -1,23 +1,21 @@
 """Compute scores with ChemProp
 
-scoring_function.type = "product"
-scoring_function.parallel = false
-
-[[stage.scoring_function.component]]
-
-type = "chemprop"
+[[component.ChemProp.endpoint]]
 name = "ChemProp Score"
-
 weight = 0.7
 
 # component specific parameters
 param.checkpoint_dir = "ChemProp/3CLPro_6w63"
 param.rdkit_2d_normalized = true
+param.target_column = "dG"
 
+# transform
 transform.type = "reverse_sigmoid"
 transform.high = -5.0
 transform.low = -35.0
 transform.k = 0.4
+
+# In case of multiclass models add endpoints as needed and set the target_column
 """
 
 from __future__ import annotations
@@ -28,7 +26,6 @@ import logging
 
 import chemprop
 import numpy as np
-from pydantic import Field
 from pydantic.dataclasses import dataclass
 
 from .component_results import ComponentResults
@@ -36,7 +33,7 @@ from .add_tag import add_tag
 from reinvent.scoring.utils import suppress_output
 from ..normalize import normalize_smiles
 
-logger = logging.getLogger('reinvent')
+logger = logging.getLogger("reinvent")
 
 
 @add_tag("__parameters")
@@ -51,62 +48,76 @@ class Parameters:
     """
 
     checkpoint_dir: List[str]
-    rdkit_2d_normalized: List[bool] = Field(default_factory=lambda: [False])
+    rdkit_2d_normalized: List[bool]
+    target_column: List[str]
 
 
 @add_tag("__component")
 class ChemProp:
     def __init__(self, params: Parameters):
         logger.info(f"Using ChemProp version {chemprop.__version__}")
-        self.chemprop_params = []
 
         # needed in the normalize_smiles decorator
         # FIXME: really needs to be configurable for each model separately
-        self.smiles_type = 'rdkit_smiles'
+        self.smiles_type = "rdkit_smiles"
 
-        for checkpoint_dir, rdkit_2d_normalized in zip(
-            params.checkpoint_dir, params.rdkit_2d_normalized
-        ):
-            args = [
-                "--checkpoint_dir",  # ChemProp models directory
-                checkpoint_dir,
-                "--test_path",  # required
-                "/dev/null",
-                "--preds_path",  # required
-                "/dev/null",
-            ]
+        args = [
+            "--checkpoint_dir",  # ChemProp models directory
+            params.checkpoint_dir[0],
+            "--test_path",  # required
+            "/dev/null",
+            "--preds_path",  # required
+            "/dev/null",
+        ]
 
-            if rdkit_2d_normalized:
-                args.extend(
-                    ["--features_generator", "rdkit_2d_normalized", "--no_features_scaling"]
+        if params.rdkit_2d_normalized[0]:
+            args.extend(["--features_generator", "rdkit_2d_normalized", "--no_features_scaling"])
+
+        with suppress_output():
+            chemprop_args = chemprop.args.PredictArgs().parse_args(args)
+            chemprop_model = chemprop.train.load_model(args=chemprop_args)
+
+            self.chemprop_params = chemprop_model, chemprop_args
+
+        target_columns = chemprop_model[-1]
+        target_idx = []
+        seen = set()
+
+        for target_column in params.target_column:
+            if target_column not in target_columns:
+                msg = (
+                    f"{__name__}: unknown target column {target_column} (known: "
+                    f"{', '.join(target_columns)})"
                 )
+                logger.critical(msg)
+                raise RuntimeError(msg)
 
-            with suppress_output():
-                chemprop_args = chemprop.args.PredictArgs().parse_args(args)
-                chemprop_model = chemprop.train.load_model(args=chemprop_args)
+            if target_column in seen:
+                msg = f"{__name__}: target columns must be unique ({params.target_column})"
+                logger.critical(msg)
+                raise RuntimeError(msg)
 
-                self.chemprop_params.append((chemprop_model, chemprop_args))
+            seen.add(target_column)
+
+            target_idx.append(target_columns.index(target_column))
+
+        self.keeps = np.array(target_idx)
+        self.number_of_endpoints = len(self.keeps)
 
     @normalize_smiles
     def __call__(self, smilies: List[str]) -> np.array:
         smilies_list = [[smiles] for smiles in smilies]
-        scores = []
 
-        for model, args in self.chemprop_params:
-            with suppress_output():
-                preds = chemprop.train.make_predictions(
-                    model_objects=model,
-                    smiles=smilies_list,
-                    args=args,
-                    return_invalid_smiles=True,
-                    return_uncertainty=False,
-                )
-
-            scores.append(
-                np.array(
-                    [val[0] if "Invalid SMILES" not in val else np.nan for val in preds],
-                    dtype=float,
-                )
+        with suppress_output():
+            preds = chemprop.train.make_predictions(
+                model_objects=self.chemprop_params[0],
+                smiles=smilies_list,
+                args=self.chemprop_params[1],
+                return_invalid_smiles=True,
+                return_uncertainty=False,
             )
 
-        return ComponentResults(scores)
+        scores = np.array(preds).transpose()[self.keeps]
+        scores[scores == "Invalid SMILES"] = np.nan
+
+        return ComponentResults(list(scores.astype(float)))

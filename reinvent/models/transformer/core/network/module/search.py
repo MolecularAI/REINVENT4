@@ -59,9 +59,7 @@ class Node:
 
         self.vocabulary = vocabulary
 
-        self.y = (
-            torch.ones((len(self.x), 1), dtype=torch.long) * self.vocabulary.bos_token
-        )
+        self.y = torch.ones((len(self.x), 1), dtype=torch.long) * self.vocabulary.bos_token
         self.y = self.y.detach()
 
         if self.y.device != self.data_device:
@@ -75,9 +73,7 @@ class Node:
 
     def _get_topk(self, loglikelihood):
         v = loglikelihood.shape[-1]
-        loglikelihood, next_chars = loglikelihood.topk(
-            k=min(v, self.beam_width), axis=-1
-        )
+        loglikelihood, next_chars = loglikelihood.topk(k=min(v, self.beam_width), axis=-1)
         if v < self.beam_width:
             d = self.beam_width - len(self.vocabulary)
             pl = -1e20 * torch.ones(
@@ -101,13 +97,9 @@ class Node:
         self.loglikelihood = loglikelihood.view(-1, 1)
         next_chars = next_chars.view(-1, 1)
 
-        self.y = (
-            self.y.view(len(self.y), 1, -1).repeat(1, self.beam_width, 1).view(-1, 1)
-        )
+        self.y = self.y.view(len(self.y), 1, -1).repeat(1, self.beam_width, 1).view(-1, 1)
         self.x = (
-            self.x[:, None]
-            .repeat(1, self.beam_width, 1, 1)
-            .view((-1,) + tuple(self.x.shape[1:]))
+            self.x[:, None].repeat(1, self.beam_width, 1, 1).view((-1,) + tuple(self.x.shape[1:]))
         )
         self.x_mask = (
             self.x_mask[:, None]
@@ -246,14 +238,10 @@ def beamsearch(node, beamsize, stop_criterion):
 
     a = node.get_actions()
 
-    end_tokens = node.vocabulary.eos_token * torch.logical_not(node.ll_mask).type(
-        node.y.dtype
-    )
+    end_tokens = node.vocabulary.eos_token * torch.logical_not(node.ll_mask).type(node.y.dtype)
 
     node.y = torch.cat((node.y, end_tokens.view(-1, 1)), dim=-1)
 
-    ll_tail = a[torch.arange(len(a)), end_tokens] * torch.logical_not(
-        node.ll_mask
-    ).type(a.dtype)
+    ll_tail = a[torch.arange(len(a)), end_tokens] * torch.logical_not(node.ll_mask).type(a.dtype)
     node.loglikelihood = node.loglikelihood + ll_tail.view(-1, 1)
     return node

@@ -29,44 +29,44 @@ def check_csv_columns_in_file(filename, num_columns):
 def param(request, json_config):
     params = {
         "reinvent": {
-            "prior": json_config["PRIOR_PATH"],
+            "model_file": ".reinvent",
             "num_smiles": 20,
             "smiles_multiplier": 1,
             "smiles_file": None,
             "sample_strategy": None,
-            "num_cols": 2
+            "num_cols": 2,
         },
         "libinvent": {
-            "prior": json_config["LIBINVENT_PRIOR_PATH"],
+            "model_file": ".libinvent",
             "num_smiles": 10,
             "smiles_multiplier": 2,
             "smiles_file": json_config["LIBINVENT_SMILES_SCAFFOLDS"],
             "sample_strategy": None,
-            "num_cols": 4
+            "num_cols": 4,
         },
         "linkinvent": {
-            "prior": json_config["LINKINVENT_PRIOR_PATH"],
+            "model_file": ".linkinvent",
             "num_smiles": 10,
             "smiles_multiplier": 1,
             "smiles_file": json_config["LINKINVENT_SMILES_WARHEADS"],
             "sample_strategy": "multinomial",
-            "num_cols": 4
+            "num_cols": 4,
         },
         "mol2mol-multi": {
-            "prior": json_config["MOLFORMER_PRIOR_PATH"],
+            "model_file": ".m2m_high",
             "num_smiles": 5,
             "smiles_multiplier": 3,
             "smiles_file": json_config["MOLFORMER_SMILES_SET_PATH"],
             "sample_strategy": "multinomial",
-            "num_cols": 4
+            "num_cols": 4,
         },
         "mol2mol-beam": {
-            "prior": json_config["MOLFORMER_PRIOR_PATH"],
+            "model_file": ".m2m_high",
             "num_smiles": 1,
             "smiles_multiplier": 3,
             "smiles_file": json_config["MOLFORMER_SMILES_SET_PATH"],
             "sample_strategy": "beamsearch",
-            "num_cols":4
+            "num_cols": 4,
         },
     }
 
@@ -85,8 +85,7 @@ def setup(tmp_path, pytestconfig):
 
     config = {
         "parameters": {
-            "output_file": output_filename,
-            "batch_size": 128,
+            "output_file": str(output_filename),
             "unique_molecules": False,
             "randomize_smiles": True,
         }
@@ -101,14 +100,15 @@ def test_run_sampling_with_likelihood(param, setup, pytestconfig):
     output_filename, config = setup
     device = pytestconfig.getoption("device")
 
-    cfg_params = config["parameters"]
-    cfg_params["model_file"] = param["prior"]
-    cfg_params["num_smiles"] = param["num_smiles"]
-    cfg_params["smiles_file"] = param["smiles_file"]
-    cfg_params["sample_strategy"] = param["sample_strategy"]
     num_cols = param["num_cols"]
 
-    run_sampling(config, device)
+    cfg_params = config["parameters"]
+    cfg_params["model_file"] = param["model_file"]
+    cfg_params["num_smiles"] = param["num_smiles"]
+    cfg_params["smiles_file"] = param["smiles_file"]
+    cfg_params["sample_strategy"] = param.get("sample_strategy", "")
+
+    run_sampling(config, device, None)
 
     num_lines = check_csv_columns_in_file(output_filename, num_columns=num_cols)
     num_smiles = param["smiles_multiplier"] * param["num_smiles"]

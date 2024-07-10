@@ -1,13 +1,19 @@
 """Create a model adapter from a Torch pickle file"""
 
 __all__ = ["create_adapter"]
+
 import os
+import time
+import uuid
+import pathlib
 import pprint
 import logging
 
 import torch
 
 from reinvent import models
+from reinvent.prior_registry import registry
+from reinvent.models import meta_data
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +27,7 @@ def create_adapter(dict_filename: str, mode: str, device: torch.device) -> tuple
     :returns: the adapter class, the model type
     """
 
-    dict_filename = os.path.abspath(dict_filename)
+    dict_filename = resolve_model_filename(dict_filename)
     save_dict = torch.load(dict_filename, map_location="cpu")
     check_metadata(dict_filename, save_dict)
 
@@ -29,9 +35,8 @@ def create_adapter(dict_filename: str, mode: str, device: torch.device) -> tuple
         model_type = save_dict["model_type"]
 
         # kludge to handle new-style transformers
-        if model_type == "Linkinvent" and "version" in save_dict:
-            if save_dict["version"] == 2:
-                model_type += "Transformer"
+        if model_type in ["Linkinvent", "Libinvent"] and save_dict.get("version", -1) == 2:
+            model_type += "Transformer"
     else:
         model_type = orig_style_priors(save_dict)
 
@@ -51,8 +56,31 @@ def create_adapter(dict_filename: str, mode: str, device: torch.device) -> tuple
     network_params = model.network.parameters()
     num_params = sum([tensor.numel() for tensor in network_params])
     logger.info(f"Number of network parameters: {num_params:,}")
+    logger.info(f"Network architecture:\n{model.network}")
 
     return adapter, save_dict, model_type
+
+
+def resolve_model_filename(name: str) -> str:
+    """Resolve the filename of the model from the name.
+
+    The name may either be a key from a registry or directly a filename.
+
+    :param name: the name of the model
+    :returns: the filename of the model
+    """
+
+    filename = registry.get(name, None)
+
+    if not filename:
+        filename = pathlib.Path(name).resolve()
+
+    if not filename.exists() or not os.access(filename, os.R_OK):
+        msg = f"model file {filename} is not accessible"
+        logger.critical(msg)
+        raise RuntimeError(msg)
+
+    return str(filename)  # torch.load does not like pathlib.Path
 
 
 def check_metadata(dict_filename: str, save_dict: dict) -> None:
@@ -65,9 +93,12 @@ def check_metadata(dict_filename: str, save_dict: dict) -> None:
     """
 
     if "metadata" in save_dict:
-        metadata: models.ModelMetaData = save_dict["metadata"]
+        if save_dict["metadata"] is not None:
+            if isinstance(save_dict["metadata"], dict):
+                metadata = models.ModelMetaData(**save_dict["metadata"])
+            else:  # backward compatibility
+                metadata = save_dict["metadata"]
 
-        if metadata is not None:
             if not metadata.hash_id:
                 logger.warning(f"{dict_filename} does not contain a hash ID")
             else:
@@ -76,15 +107,31 @@ def check_metadata(dict_filename: str, save_dict: dict) -> None:
                 pp_dict = pp.pformat(metadata.as_dict())
 
                 if valid:
-                    logger.info(
-                        f"{dict_filename} has valid hash:\n{pp_dict}")
+                    logger.info(f"{dict_filename} has valid hash:\n{pp_dict}")
                 else:
-                    logger.error(
-                        f"{dict_filename} has invalid hash:\n{pp_dict}")
+                    logger.error(f"{dict_filename} has invalid hash:\n{pp_dict}")
         else:
             logger.warning(f"{dict_filename} contains empty metadata")
+
+            save_dict["metadata"] = meta_data.ModelMetaData(
+                hash_id=None,
+                hash_id_format="",
+                model_id=uuid.uuid4().hex,
+                origina_data_source="unknown",
+                creation_date=time.time(),
+                comments=["REINVENT4"],
+            )
     else:
         logger.warning(f"{dict_filename} does not contain metadata")
+
+        save_dict["metadata"] = meta_data.ModelMetaData(
+            hash_id=None,
+            hash_id_format="",
+            model_id=uuid.uuid4().hex,
+            origina_data_source="unknown",
+            creation_date=time.time(),
+            comments=["REINVENT4"],
+        )
 
 
 def orig_style_priors(save_dict: dict) -> str:

@@ -12,12 +12,15 @@ class AttentionLayer(tnn.Module):
         self.num_dimensions = num_dimensions
 
         self._attention_linear = tnn.Sequential(
-            tnn.Linear(self.num_dimensions*2, self.num_dimensions),
-            tnn.Tanh()
+            tnn.Linear(self.num_dimensions * 2, self.num_dimensions), tnn.Tanh()
         )
 
-    def forward(self, padded_seqs: torch.Tensor, encoder_padded_seqs: torch.Tensor, decoder_mask: torch.Tensor) \
-            -> (torch.Tensor, torch.Tensor):  # pylint: disable=arguments-differ
+    def forward(
+        self,
+        padded_seqs: torch.Tensor,
+        encoder_padded_seqs: torch.Tensor,
+        decoder_mask: torch.Tensor,
+    ) -> (torch.Tensor, torch.Tensor):  # pylint: disable=arguments-differ
         """
         Performs the forward pass.
         :param padded_seqs: A tensor with the output sequences (batch, seq_d, dim).
@@ -27,11 +30,17 @@ class AttentionLayer(tnn.Module):
         """
         # scaled dot-product
         # (batch, seq_d, 1, dim)*(batch, 1, seq_e, dim) => (batch, seq_d, seq_e*)
-        attention_weights = (padded_seqs.unsqueeze(dim=2)*encoder_padded_seqs.unsqueeze(dim=1))\
-            .sum(dim=3).div(math.sqrt(self.num_dimensions))\
+        attention_weights = (
+            (padded_seqs.unsqueeze(dim=2) * encoder_padded_seqs.unsqueeze(dim=1))
+            .sum(dim=3)
+            .div(math.sqrt(self.num_dimensions))
             .softmax(dim=2)
+        )
         # (batch, seq_d, seq_e*)@(batch, seq_e, dim) => (batch, seq_d, dim)
         attention_context = attention_weights.bmm(encoder_padded_seqs)
 
-        return (self._attention_linear(torch.cat([padded_seqs, attention_context], dim=2))*decoder_mask,
-                attention_weights)
+        return (
+            self._attention_linear(torch.cat([padded_seqs, attention_context], dim=2))
+            * decoder_mask,
+            attention_weights,
+        )

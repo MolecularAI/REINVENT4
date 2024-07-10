@@ -20,7 +20,7 @@ def test_comp_rdkit_descriptors():
         "NumAliphaticRings": np.array([0.0, 0.0]),
         "MolLogP": np.array([1.6866, 1.8098]),
         "fr_amide": np.array([0.0, 0.0]),
-        "BertzCT": np.array([71.96100506, 53.8428331])
+        "BertzCT": np.array([71.96100506, 53.8428331]),
     }
 
     for component, result in component_result.items():
@@ -34,4 +34,4 @@ def test_comp_rdkit_descriptors():
 
 @pytest.mark.xfail
 def test_comp_rdkit_descriptors_unknown_descriptor():
-    params = Parameters(['unknown'])
+    params = Parameters(["unknown"])

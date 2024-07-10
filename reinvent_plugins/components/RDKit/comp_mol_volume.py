@@ -29,6 +29,7 @@ class MolVolume:
     def __init__(self, params: Parameters):
         self.grid_spacings = params.grid_spacing
         self.box_margin = params.box_margin
+        self.number_of_endpoints = len(params.grid_spacing)
 
     @molcache
     def __call__(self, mols: List[Chem.Mol]) -> np.array:

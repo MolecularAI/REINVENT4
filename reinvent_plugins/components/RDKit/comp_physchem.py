@@ -52,6 +52,7 @@ def num_sp3(mol: Chem.Mol) -> int:
     )
     return num_sp3_atoms
 
+
 def graph_length(mol: Chem.Mol) -> int:
     return int(np.max(Chem.GetDistanceMatrix(mol)))
 

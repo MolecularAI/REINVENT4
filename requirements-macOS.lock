@@ -112,9 +112,9 @@ numpy==1.24.2
     #   xarray
 oauthlib==3.2.2
     # via requests-oauthlib
-openeye-toolkits==2022.2.2
+openeye-toolkits==2023.2.3
     # via reinvent (pyproject.toml)
-openeye-toolkits-python3-linux-x64==2022.2.2
+openeye-toolkits-python3-linux-x64==2023.2.3
     # via openeye-toolkits
 packaging==23.0
     # via
@@ -242,12 +242,12 @@ tomli==2.0.1
     # via
     #   pytest
     #   reinvent (pyproject.toml)
-torch==1.12.1
+torch==2.3.1
     # via
     #   chemprop
     #   reinvent (pyproject.toml)
     #   torchvision
-torchvision==0.13.1
+torchvision==0.18.1
     # via reinvent (pyproject.toml)
 tqdm==4.65.0
     # via

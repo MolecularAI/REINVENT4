@@ -7,7 +7,7 @@ import logging
 
 from rdkit import Chem
 
-logger = logging.getLogger('reinvent')
+logger = logging.getLogger("reinvent")
 
 
 def normalize(smilies: List[str]) -> List:
@@ -24,7 +24,7 @@ def normalize(smilies: List[str]) -> List:
         if not mol:
             logger.warning(f"{__name__}: {smiles} could not be converted")
             continue
-            
+
         for atom in mol.GetAtoms():
             atom.SetIsotope(0)
             atom.SetAtomMapNum(0)

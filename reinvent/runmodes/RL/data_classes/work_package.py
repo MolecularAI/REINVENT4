@@ -11,6 +11,7 @@ from typing import Callable, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from reinvent.runmodes.RL.reward import RLReward
+    from reinvent.runmodes.RL.memories.diversity_filter import DiversityFilter
     from reinvent.scoring import Scorer
 
 
@@ -22,4 +23,5 @@ class WorkPackage:
     learning_strategy: RLReward
     max_steps: int
     terminator: Callable
+    diversity_filter: DiversityFilter = None
     out_state_filename: str = None

@@ -28,8 +28,3 @@ class ReinventAdapter(ModelAdapter):
         # NOTE: keep the sequences and nlls as Tensor as they are needed for
         #       later computations
         return SampleBatch(sequences, smilies, nlls)
-
-    # NOTE: unique to Reinvent, only needed for TL (adaptive learning)
-    def sample_smiles(self, dataloader, num: int = 128, batch_size: int = 128):
-        # Tuple[List[str], np.ndarray]: list of SMILES, likelihoods
-        return self.model.sample_smiles(num, batch_size)

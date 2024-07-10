@@ -8,7 +8,9 @@ import numpy as np
 class Vocabulary:
     """Stores the tokens and their conversion to one-hot vectors."""
 
-    def __init__(self, tokens=None, starting_id=0, pad_token=0, bos_token=1, eos_token=2, unk_token=None):
+    def __init__(
+        self, tokens=None, starting_id=0, pad_token=0, bos_token=1, eos_token=2, unk_token=None
+    ):
         self._tokens = {}
         self._current_id = starting_id
 
@@ -122,12 +124,13 @@ class Vocabulary:
         return {k: self._tokens[k] for k in self._tokens if isinstance(k, str)}
 
     def get_dictionary(self):
-        return {"tokens": self.word2idx(),
-                "pad_token": getattr(self, "pad_token", 0),
-                "bos_token": getattr(self, "bos_token", 1),
-                "eos_token": getattr(self, "eos_token", 2),
-                "unk_token": getattr(self, "unk_token", None),
-                }
+        return {
+            "tokens": self.word2idx(),
+            "pad_token": getattr(self, "pad_token", 0),
+            "bos_token": getattr(self, "bos_token", 1),
+            "eos_token": getattr(self, "eos_token", 2),
+            "unk_token": getattr(self, "unk_token", None),
+        }
 
     @classmethod
     def load_from_dictionary(cls, dictionary: dict):
@@ -157,6 +160,7 @@ class SMILESTokenizer:
         :param with_begin_and_end: Appends a begin token and prepends an end token.
         :return : A list with the tokenized version.
         """
+
         def split_by(data, regexps):
             if not regexps:
                 return list(data)
@@ -191,7 +195,9 @@ class SMILESTokenizer:
 
 
 # for linkinvent and libinvent
-def build_vocabulary(smiles_list, tokenizer=SMILESTokenizer(), add_unused=False, num_unused_tokens=50) -> Vocabulary:
+def build_vocabulary(
+    smiles_list, tokenizer=SMILESTokenizer(), add_unused=False, num_unused_tokens=50
+) -> Vocabulary:
     """
     Creates a vocabulary for the SMILES syntax.
     :param smiles_list: A list with SMILES.
@@ -202,9 +208,7 @@ def build_vocabulary(smiles_list, tokenizer=SMILESTokenizer(), add_unused=False,
     for smi in smiles_list:
         tokens.update(tokenizer.tokenize(smi, with_begin_and_end=False))
     vocabulary = Vocabulary()
-    vocabulary.update(
-        ["<PAD>", "^", "$", "<UNK>"] + sorted(tokens)
-    )  # pad=0, start=1, end=2
+    vocabulary.update(["<PAD>", "^", "$", "<UNK>"] + sorted(tokens))  # pad=0, start=1, end=2
 
     if add_unused:
         unnsed_tokens = [f"Unused{i+1}" for i in range(num_unused_tokens)]
@@ -216,7 +220,8 @@ def build_vocabulary(smiles_list, tokenizer=SMILESTokenizer(), add_unused=False,
     vocabulary.unk_token = 3  # 3 is an unknown symbol
     return vocabulary
 
-#Todo clean, check usage
+
+# Todo clean, check usage
 def create_vocabulary(smiles_list, tokenizer, property_condition=None):
     """Creates a vocabulary for the SMILES syntax."""
     tokens = set()

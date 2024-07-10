@@ -10,7 +10,7 @@ import logging
 
 from rdkit import Chem
 
-logger = logging.getLogger('reinvent')
+logger = logging.getLogger("reinvent")
 cache = {}
 
 
@@ -26,7 +26,7 @@ def molcache(func: Callable):
             else:
                 mol = Chem.MolFromSmiles(smiles)
                 cache[smiles] = mol
-                
+
                 if not mol:
                     logger.warning(f"{__name__}: {smiles} could not be converted")
 

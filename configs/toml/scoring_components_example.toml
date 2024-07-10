@@ -2,11 +2,11 @@
 ## with appropratie transforms
 version = 4
 run_type = "scoring"
-output_csv = "scoring_all_test.csv"
 json_out_config = "scoring_all_test_config.json"
 
 [parameters]
 smiles_file = "YOUR_SMILES_FILE.smi"
+output_csv = "scoring_all_test.csv"
 
 [scoring]
 type = "geometric_mean"

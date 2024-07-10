@@ -19,6 +19,9 @@ from reinvent.models.model_factory.model_adapter import (
 from reinvent.models.transformer.core.dataset.paired_dataset import PairedDataset
 from reinvent.models.transformer.core.enums.sampling_mode_enum import SamplingModesEnum
 
+# Internal batch size for computing the likelihood
+LIKELIHOOD_BATCH_SIZE = 32
+
 
 class TransformerAdapter(ModelAdapter, ABC):
     def likelihood(self, src, src_mask, trg, trg_mask) -> torch.Tensor:
@@ -31,15 +34,16 @@ class TransformerAdapter(ModelAdapter, ABC):
         output = [dto.output for dto in sampled_sequence_list]
         dataset = PairedDataset(input, output, vocabulary=self.vocabulary, tokenizer=self.tokenizer)
         data_loader = tud.DataLoader(
-            dataset, len(dataset), shuffle=False, collate_fn=PairedDataset.collate_fn
+            dataset, LIKELIHOOD_BATCH_SIZE, drop_last=False, shuffle=False, collate_fn=PairedDataset.collate_fn
         )
+        likelihood = []
 
         for batch in data_loader:
-            likelihood = self.likelihood(
-                batch.input, batch.input_mask, batch.output, batch.output_mask
+            likelihood.append(
+                self.likelihood(batch.input, batch.input_mask, batch.output, batch.output_mask)
             )
-            dto = BatchLikelihoodDTO(batch, likelihood)
-            return dto
+        dto = BatchLikelihoodDTO(torch.cat(likelihood, 0))
+        return dto
 
     def sample(self, src, src_mask, decode_type=SamplingModesEnum.MULTINOMIAL) -> Tuple:
         # input SMILES, output SMILES, NLLs

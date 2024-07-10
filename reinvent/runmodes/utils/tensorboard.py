@@ -2,7 +2,6 @@
 Patch for Tensorboard add_histogram
 """
 
-
 import numpy as np
 import torch
 from torch.utils.tensorboard import SummaryWriter
@@ -90,7 +89,7 @@ def make_histogram(values, bins, max_bins=None):
     )
 
 
-__version = torch.__version__.split('.')
+__version = torch.__version__.split(".")
 __major = int(__version[0])
 
 if __major == 1:

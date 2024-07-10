@@ -11,7 +11,7 @@ from reinvent_plugins.components.component_results import ComponentResults
 
 @dataclass(frozen=True)
 class TransformResults:
-    component_type: str # internal component type
+    component_type: str  # internal component type
     component_names: List[str]  # user supplied name for the component score
     transform_types: List[str]
     transformed_scores: List[np.ndarray]

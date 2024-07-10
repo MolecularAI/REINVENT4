@@ -30,6 +30,8 @@ class PMI:
         if not "npr1" in self.properties and not "npr2" in self.properties:
             raise RuntimeError(f"{__name__}: need one or both of: 'npr1', 'npr2'")
 
+        self.number_of_endpoints = len(params.property)
+
     @molcache
     def __call__(self, mols: List[Chem.Mol]) -> np.array:
         scores1 = []

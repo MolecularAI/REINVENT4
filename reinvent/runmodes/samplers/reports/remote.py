@@ -2,48 +2,37 @@
 
 from __future__ import annotations
 
+__all__ = ["SamplingRemoteReporter"]
 import collections
-from dataclasses import dataclass, asdict
+from typing import TYPE_CHECKING
 
-from reinvent.models.model_factory.sample_batch import SampleBatch
-from reinvent.runmodes.reporter.remote import get_reporter
-from reinvent.runmodes.samplers.reports.report import report_setup
+from reinvent.runmodes.samplers.reports.common import common_report
+
+if TYPE_CHECKING:
+    from reinvent.models.model_factory.sample_batch import SampleBatch
 
 ROWS = 20
 COLS = 5
 
 
-@dataclass
-class RemoteData:
-    fraction_valid_smiles: float
-    fraction_unique_molecules: float
-    time: int
-    additional_report: dict
-    smiles_report: dict
+class SamplingRemoteReporter:
+    def __init__(self, reporter):
+        self.reporter = reporter
 
-def setup_RemoteData(sampled: SampleBatch, time: int, **kwargs):
-    fraction_valid_smiles, fraction_unique_molecules, time,  additional_report = \
-        report_setup(sampled, time, **kwargs)
+    def submit(self, sampled: SampleBatch, **kwargs):
+        fraction_valid_smiles, fraction_unique_molecules, additional_report = common_report(
+            sampled, **kwargs
+        )
 
-    counter = collections.Counter(sampled.smilies)
-    top_sampled = counter.most_common(ROWS * COLS)
-    smiles_report = [{"smiles": smiles, "legend": legend} for smiles, legend in top_sampled]
+        counter = collections.Counter(sampled.smilies)
+        top_sampled = counter.most_common(ROWS * COLS)
+        smiles_report = [{"smiles": smiles, "legend": legend} for smiles, legend in top_sampled]
 
-    return RemoteData(fraction_valid_smiles,
-                      fraction_unique_molecules,
-                      time,
-                      additional_report,
-                      smiles_report
-                      )
+        data = dict(
+            fraction_valid_smiles=fraction_valid_smiles,
+            fraction_unique_molecules=fraction_unique_molecules,
+            smiles_report=smiles_report,
+            additional_report=additional_report,
+        )
 
-
-def send_report(data: RemoteData) -> None:
-    """Send data to a remote endpoint
-
-    :param data: data to be send and transformed into JSON format
-    """
-    reporter = get_reporter()
-    if not reporter:
-        return
-    record = dict(asdict(data))
-    reporter.send(record)
+        self.reporter.send(data)

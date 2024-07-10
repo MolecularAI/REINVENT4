@@ -51,7 +51,9 @@ class REST:
 
         # needed in the normalize_smiles decorator
         # FIXME: really needs to be configurable for each model separately
-        self.smiles_type = 'rdkit_smiles'
+        self.smiles_type = "rdkit_smiles"
+
+        self.number_of_endpoints = len(params.server_url)
 
     @normalize_smiles
     def __call__(self, smilies: List[str]) -> np.array:

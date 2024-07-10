@@ -68,6 +68,7 @@ class ExternalProcess:
         # FIXME: multiple endpoints
         self.executables = params.executable
         self.args = params.args
+        self.number_of_endpoints = len(params.executable)
 
     def __call__(self, smilies: List[str]) -> np.array:
         scores = []

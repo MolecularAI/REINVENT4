@@ -41,6 +41,8 @@ class RDKitDescriptors:
 
         self.calc = MolecularDescriptorCalculator(descriptors).CalcDescriptors
 
+        self.number_of_endpoints = len(params.descriptor)
+
         logger.info(f"Known RDKit descriptors: {' '.join(KNOWN_DESCRIPTORS.keys())}")
 
     @molcache

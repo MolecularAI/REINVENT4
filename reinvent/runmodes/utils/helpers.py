@@ -12,7 +12,7 @@ from typing import List, TYPE_CHECKING
 import torch
 from rdkit import Chem
 
-from reinvent.chemistry.library_design import BondMaker, AttachmentPoints
+from reinvent.chemistry.library_design import bond_maker, attachment_points
 
 if TYPE_CHECKING:
     from rdkit import Chem
@@ -20,9 +20,6 @@ if TYPE_CHECKING:
     from reinvent.models.model_factory.sample_batch import SampleBatch
 
 
-# FIXME: really just containers of static functions
-attachment_points = AttachmentPoints()
-bond_maker = BondMaker()
 logger = logging.getLogger(__name__)
 
 
@@ -47,7 +44,7 @@ def set_torch_device(args_device: str = None, device: str = None) -> torch.devic
 
     # NOTE: ChemProp > 1.5 would need "spawn" but hits performance 4-5 times
     #       Windows requires "spawn"
-    #torch.multiprocessing.set_start_method('fork')
+    # torch.multiprocessing.set_start_method('fork')
 
     if args_device:  # command line overwrites config file
         # NOTE: this will throw a RuntimeError if the device is not available
@@ -65,7 +62,9 @@ def set_torch_device(args_device: str = None, device: str = None) -> torch.devic
     return actual_device
 
 
-def join_fragments(sequences: SampleBatch, reverse: bool, keep_labels: bool = False) -> List[Chem.Mol]:
+def join_fragments(
+    sequences: SampleBatch, reverse: bool, keep_labels: bool = False
+) -> List[Chem.Mol]:
     """Join two fragments: for LibInvent and LinkInvent
 
     :param sequences: a batch of sequences

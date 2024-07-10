@@ -1,7 +1,9 @@
 import torch.nn as nn
 
 from reinvent.models.transformer.core.network.encode_decode.clones import clones
-from reinvent.models.transformer.core.network.encode_decode.sublayer_connection import SublayerConnection
+from reinvent.models.transformer.core.network.encode_decode.sublayer_connection import (
+    SublayerConnection,
+)
 
 
 class DecoderLayer(nn.Module):

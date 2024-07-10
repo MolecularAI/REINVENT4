@@ -81,9 +81,10 @@ def convert_model(in_filename: str, out_filename: str) -> None:
 
     model = torch.load(in_filename)
 
-    if "network_parameter" in model and isinstance(model["network_parameter"], MolformerNetworkParameters):
+    if "network_parameter" in model and isinstance(
+        model["network_parameter"], MolformerNetworkParameters
+    ):
         model["network_parameter"] = model["network_parameter"].__dict__
-
 
     if "network" in model:
         model_type = "Reinvent"

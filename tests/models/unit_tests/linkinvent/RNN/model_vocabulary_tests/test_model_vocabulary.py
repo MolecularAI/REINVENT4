@@ -16,7 +16,6 @@ from tests.test_data import (
     SCAFFOLD_SUZUKI,
     WARHEAD_PAIR,
     ETHANE,
-    INVALID,
 )
 
 
@@ -37,15 +36,11 @@ class TestModelVocabulary(unittest.TestCase):
     def test_from_list(self):
         model_vocabulary = ModelVocabulary.from_list(self.smiles_list)
         self.assertTrue(isinstance(model_vocabulary, ModelVocabulary))
-        self.assertEqual(
-            model_vocabulary.vocabulary.tokens(), self.model_voc.vocabulary.tokens()
-        )
+        self.assertEqual(model_vocabulary.vocabulary.tokens(), self.model_voc.vocabulary.tokens())
 
     def test_encode_decode(self):
         self.assertEqual(self.model_voc.decode(self.model_voc.encode(ASPIRIN)), ASPIRIN)
-        self.assertEqual(
-            self.model_voc.decode(self.model_voc.encode(WARHEAD_PAIR)), WARHEAD_PAIR
-        )
+        self.assertEqual(self.model_voc.decode(self.model_voc.encode(WARHEAD_PAIR)), WARHEAD_PAIR)
         self.assertEqual(
             self.model_voc.decode(self.model_voc.encode(SCAFFOLD_SUZUKI)),
             SCAFFOLD_SUZUKI,
@@ -54,7 +49,6 @@ class TestModelVocabulary(unittest.TestCase):
     def test_encode(self):
         assert_almost_equal(self.model_voc.encode(ETHANE), [2, 10, 10, 1])
         self.assertIsNotNone(self.model_voc.encode("*[*]|"))
-        self.assertIsNone(self.model_voc.encode(INVALID))
 
     def _decode_with_and_without_padding(self, smiles, encoded):
         self.assertEqual(self.model_voc.decode(encoded), smiles)
@@ -63,9 +57,7 @@ class TestModelVocabulary(unittest.TestCase):
 
     def test_decode(self):
         self._decode_with_and_without_padding(ETHANE, [2, 10, 10, 1])
-        self._decode_with_and_without_padding(
-            WARHEAD_PAIR, self.model_voc.encode(WARHEAD_PAIR)
-        )
+        self._decode_with_and_without_padding(WARHEAD_PAIR, self.model_voc.encode(WARHEAD_PAIR))
         self._decode_with_and_without_padding(
             SCAFFOLD_SUZUKI, self.model_voc.encode(SCAFFOLD_SUZUKI)
         )

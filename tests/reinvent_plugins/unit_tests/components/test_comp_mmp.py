@@ -11,10 +11,7 @@ from tests.test_data import CHEMBL4440201, CHEMBL4475970
 @pytest.mark.parametrize(
     "reference_smiles, expected_results",
     [
-        (
-            [[CHEMBL4440201]],
-            ["MMP", "MMP", "MMP", "No MMP", "No MMP", "No MMP"]
-        ),
+        ([[CHEMBL4440201]], ["MMP", "MMP", "MMP", "No MMP", "No MMP", "No MMP"]),
         (
             [[CHEMBL4440201, CHEMBL4475970]],
             ["MMP", "MMP", "MMP", "No MMP", "MMP", "MMP"],

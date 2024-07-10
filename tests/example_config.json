@@ -4,6 +4,7 @@
   },
   "MAIN_TEST_PATH": "/tmp/REINVENT_tests",
   "PRIOR_PATH": "/projects/reinvent.model",
+  "LIBINVENT_CHEMBL_PRIOR_PATH": "/projects/libinvent_chembl.model",
   "LIBINVENT_PRIOR_PATH": "/projects/libinvent.model",
   "LINKINVENT_CHEMBL_PRIOR_PATH": "/projects/linkinvent_chembl.model",
   "LINKINVENT_PRIOR_PATH": "/projects/linkinvent_pubchem.model",

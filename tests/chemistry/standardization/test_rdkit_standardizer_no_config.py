@@ -1,13 +1,11 @@
 import unittest
 
-from reinvent.chemistry import Conversions
 from reinvent.chemistry.standardization.rdkit_standardizer import RDKitStandardizer
 from tests.chemistry.fixtures.test_data import CELECOXIB2
 
 
 class TestRDKitStandardizerNoConfig(unittest.TestCase):
     def setUp(self):
-        self.chemistry = Conversions()
         filter_configs = []
         self.standardizer = RDKitStandardizer(filter_configs)
 

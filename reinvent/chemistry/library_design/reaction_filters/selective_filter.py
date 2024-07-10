@@ -15,7 +15,6 @@ class SelectiveFilter(BaseReactionFilter):
     def __init__(self, configuration: ReactionFilterConfiguration):
         self._chemistry = FragmentReactions()
         self._reactions = self._configure_reactions(configuration.reactions)
-        self._score_cutoff = 0.5
 
     def _configure_reactions(self, reaction_smarts: Dict[str, List[str]]):
         reactions = {}
@@ -32,7 +31,7 @@ class SelectiveFilter(BaseReactionFilter):
     def score_molecule(self, molecule):
         new_bonds = self._find_new_bonds(molecule)
         count = self._count_applicable_reactions_on_molecule(molecule, new_bonds)
-        score = self._score_cutoff + (1 - self._score_cutoff) * (count / len(new_bonds))
+        score = 1.0 if len(new_bonds) == count else 0.0
         return score
 
     def _find_new_bonds(self, molecule) -> dict:
