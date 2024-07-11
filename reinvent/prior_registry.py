@@ -10,7 +10,7 @@ import reinvent
 
 
 if "REINVENT_PRIOR_BASE" in os.environ:
-    PRIOR_BASE = os.environ["REINVENT_PRIOR_BASE"]
+    PRIOR_BASE = pathlib.Path(os.environ["REINVENT_PRIOR_BASE"])
 else:
     PRIOR_BASE = pathlib.Path(reinvent.__file__).parents[1] / "priors"
 
