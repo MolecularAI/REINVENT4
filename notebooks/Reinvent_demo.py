@@ -111,8 +111,6 @@ max_steps = 300
 
 chkpt_file = 'stage1.chkpt'
 
-scoring_function.type = "custom_product"
-
 [stage.scoring]
 type = "geometric_mean"
 
