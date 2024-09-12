@@ -40,7 +40,9 @@ class PMI:
         for mol in mols:
             try:
                 mol3d = Chem.AddHs(mol)
-                Chem.EmbedMolecule(mol3d)
+                embed_result = Chem.EmbedMolecule(mol3d)
+                if embed_result == -1:  # embedding failed
+                    raise ValueError("Embedding failed")
 
                 npr1 = Chem.CalcNPR1(mol3d)
                 npr2 = Chem.CalcNPR2(mol3d)
