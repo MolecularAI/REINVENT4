@@ -70,7 +70,7 @@ class DockStream:
             "-output_prefix",
             str(self._internal_step),
             "-smiles",
-            '"' + ";".join(smilies) + '"',
+            ";".join(smilies),
             "-print_scores",
         ]
 
