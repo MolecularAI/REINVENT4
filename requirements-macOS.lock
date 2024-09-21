@@ -155,7 +155,7 @@ pyasn1==0.4.8
     #   rsa
 pyasn1-modules==0.2.8
     # via google-auth
-pydantic==1.10.5
+pydantic==2.9.2
     # via reinvent (pyproject.toml)
 pygments==2.14.0
     # via sphinx
@@ -254,7 +254,7 @@ tqdm==4.65.0
     #   reinvent (pyproject.toml)
 typed-argument-parser==1.7.2
     # via chemprop
-typing-extensions==4.5.0
+typing-extensions==4.8.0
     # via
     #   pydantic
     #   reinvent (pyproject.toml)

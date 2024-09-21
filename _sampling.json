@@ -1,0 +1,25 @@
+{
+    "run_type": "sampling",
+    "device": "mps",
+    "use_cuda": true,
+    "tb_logdir": null,
+    "json_out_config": "_sampling.json",
+    "parameters": {
+        "model_file": "priors/reinvent.prior",
+        "num_smiles": 157,
+        "smiles_file": null,
+        "target_smiles_path": "",
+        "sample_strategy": "multinomial",
+        "output_file": "sampling.csv",
+        "target_nll_file": "target_nll.csv",
+        "unique_molecules": true,
+        "randomize_smiles": true
+    },
+    "scoring": null,
+    "scheduler": null,
+    "responder": null,
+    "stage": null,
+    "learning_strategy": null,
+    "diversity_filter": null,
+    "inception": null
+}
