@@ -74,7 +74,7 @@ Basic Usage
 
 REINVENT is a command line tool and works principally as follows
 ```shell
-reinvent -l sampling.log sampling.toml
+reinvent -l sampling.log configs/toml/sampling.toml
 ```
 
 This writes logging information to the file `sampling.log`.  If you wish to write
