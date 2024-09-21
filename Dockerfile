@@ -17,7 +17,7 @@ SHELL ["conda", "run", "-n", "reinvent4", "/bin/bash", "-c"]
 RUN conda install pip -y
 
 # Install any needed packages specified in requirements-linux-64.lock
-RUN pip install --no-cache-dir -r requirements-linux-64.lock
+RUN pip install --no-cache-dir -r requirements-macOS.lock
 
 # Install REINVENT
 RUN pip install --no-deps .

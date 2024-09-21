@@ -114,8 +114,6 @@ oauthlib==3.2.2
     # via requests-oauthlib
 openeye-toolkits==2023.2.3
     # via reinvent (pyproject.toml)
-openeye-toolkits-python3-linux-x64==2023.2.3
-    # via openeye-toolkits
 packaging==23.0
     # via
     #   matplotlib
