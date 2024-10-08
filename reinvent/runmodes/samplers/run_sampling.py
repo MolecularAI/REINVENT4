@@ -8,11 +8,10 @@ the negative log likelihood if requested.
 __all__ = ["run_sampling"]
 import logging
 
-
 from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 import torch
-
+from rdkit import Chem
 
 from reinvent.runmodes import create_adapter
 from reinvent.runmodes.samplers.reports import (
@@ -24,8 +23,8 @@ from reinvent.runmodes.setup_sampler import setup_sampler
 from reinvent.config_parse import read_smiles_csv_file
 from reinvent.models.model_factory.sample_batch import SampleBatch, SmilesState
 from reinvent.chemistry import conversions
-from .validation import SamplingConfig
 from reinvent_plugins.normalizers.rdkit_smiles import normalize
+from .validation import SamplingConfig
 
 logger = logging.getLogger(__name__)
 
@@ -92,11 +91,13 @@ def run_sampling(
     with torch.no_grad():
         sampled = sampler.sample(input_smilies)
 
+    # FIXME: remove atom map numbers from SMILES in chemistry code
     if model_type == "Libinvent":
-        sampled.smilies = normalize(sampled.smilies)
+        sampled.smilies = normalize(sampled.smilies, keep_all=True)
 
     kwargs = {}
     scores = [-1] * len(sampled.items2)
+    state = np.array(sampled.states)
 
     if model_type == "Mol2Mol":
         # compute Tanimoto similarity between generated compounds and input compounds; return largest
@@ -124,6 +125,9 @@ def run_sampling(
     elif model_type in FRAGMENT_GENERATORS:
         records = zip(sampled.smilies, sampled.items1, sampled.items2, nlls)
     elif model_type == "Mol2Mol":
+        if parameters.unique_molecules:
+            mask_idx = np.nonzero(state == SmilesState.VALID)[0]
+            scores = [scores[i] for i in mask_idx]
         records = zip(sampled.smilies, sampled.items1, scores, nlls)
 
         if parameters.target_smiles_path:
@@ -147,7 +151,7 @@ def filter_valid(sampled: SampleBatch) -> SampleBatch:
     """
 
     state = np.array(sampled.states)
-    mask_idx = np.nonzero(state == SmilesState.VALID)[0]
+    mask_idx = state == SmilesState.VALID
 
     # For Reinvent, items1 is None
     items1 = list(np.array(sampled.items1)[mask_idx]) if sampled.items1 else None
@@ -156,7 +160,7 @@ def filter_valid(sampled: SampleBatch) -> SampleBatch:
     nlls = sampled.nlls[mask_idx]
 
     smilies = list(np.array(sampled.smilies)[mask_idx])
-    states = np.array([SmilesState.VALID] * len(mask_idx))
+    states = sampled.states[mask_idx]
 
     return SampleBatch(items1, items2, nlls, smilies, states)
 
