@@ -30,7 +30,7 @@ Similiarity and cheminformatics components:
   * _smarts_: SMARTS patterns 
 * GroupCount: count how many times the SMARTS pattern is found
   * _smarts_: SMARTS pattern 
-* MatchingSubstructure: preserve the final score when the SMARTS pattern is found, otherwise penalize it
+* MatchingSubstructure: preserve the final score when the SMARTS pattern is found, otherwise penalize it (multiply by 0.5)
   * _smarts_: SMARTS pattern
   * _use_chirality_: check for chirality
 * TanimotoSimilarity: Tanimoto similarity using the Morgan fingerprint (RDKit)
