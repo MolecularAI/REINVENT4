@@ -45,7 +45,7 @@ def setup_diversity_filter(config: SectionDiversityFilter, rdkit_smiles_flags: d
 
     memory_type = config.type
 
-    if "type" in config:
+    if hasattr(config, "type"):
         diversity_filter = getattr(memories, memory_type)
     else:
         return None
