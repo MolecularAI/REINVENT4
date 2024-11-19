@@ -157,7 +157,7 @@ pyasn1==0.4.8
     #   rsa
 pyasn1-modules==0.2.8
     # via google-auth
-pydantic==1.10.5
+pydantic==2.7.0
     # via reinvent (pyproject.toml)
 pygments==2.14.0
     # via sphinx
