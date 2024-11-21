@@ -93,7 +93,7 @@ def run_sampling(
 
     # FIXME: remove atom map numbers from SMILES in chemistry code
     if model_type == "Libinvent":
-        sampled.smilies = normalize(sampled.smilies, keep_all=True)
+        sampled.smilies = normalize(sampled.smilies)
 
     kwargs = {}
     scores = [-1] * len(sampled.items2)
