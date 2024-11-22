@@ -24,7 +24,7 @@ import tqdm
 from tqdm.contrib.logging import tqdm_logging_redirect
 
 from reinvent.runmodes.TL.reports import TLTBReporter, TLRemoteReporter, TLReportData
-from reinvent.runmodes.reporter.remote import get_reporter
+from reinvent.utils.logmon import get_reporter
 from reinvent.runmodes.setup_sampler import setup_sampler
 from reinvent.runmodes.utils.tensorboard import SummaryWriter  # monkey patch
 from reinvent.models.meta_data import update_model_data
@@ -210,10 +210,12 @@ class Learning(ABC):
     __call__ = optimize
 
     @abstractmethod
-    def train_epoch(self): ...
+    def train_epoch(self):
+        ...
 
     @abstractmethod
-    def compute_nll(self, batch): ...
+    def compute_nll(self, batch):
+        ...
 
     def _train_epoch_common(self) -> float:
         """Run one epoch of training

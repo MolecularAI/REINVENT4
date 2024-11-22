@@ -9,7 +9,6 @@ from typing import Optional, TYPE_CHECKING
 from rdkit.Chem import AllChem as Chem
 from rdkit.Chem.MolStandardize import rdMolStandardize as Standardizer
 from .regex import SMILES_TOKENS_REGEX
-from .. import normalizer
 from ..logger import setup_mp_logger
 
 if TYPE_CHECKING:
@@ -54,6 +53,8 @@ class RDKitFilter:
 
             cleanup_params = Standardizer.CleanupParameters()
             self.normalizer = Standardizer.NormalizerFromData(self.transforms, cleanup_params)
+
+            self.tautomer_enumerator = Standardizer.TautomerEnumerator()
 
             self.instantiated = True
 
@@ -109,13 +110,23 @@ class RDKitFilter:
         if self.config.uncharge:
             Standardizer.ReionizeInPlace(mol)
 
-        new_smiles = Chem.MolToSmiles(
-            mol,
-            canonical=True,
-            isomericSmiles=config.keep_stereo,
-            kekuleSmiles=self.config.kekulize,
-            doRandom=self.config.randomize_smiles,
-        )
+        # NOTE: this can be vary slow, easily by a factor of 10 or more
+        if config.canonical_tautomer:
+            mol = self.tautomer_enumerator.Canonicalize(mol)
+
+        try:
+            new_smiles = Chem.MolToSmiles(
+                mol,
+                canonical=True,
+                isomericSmiles=config.keep_stereo,
+                kekuleSmiles=self.config.kekulize,
+                doRandom=self.config.randomize_smiles,
+            )
+        except RuntimeError as e:
+            if "Invariant Violation" in e.args[0]:
+                return None
+            else:
+                raise
 
         # FIXME: an atom may have 3 ring numbers or more e.g.
         #        C%108%11 which is %10 8 %11 and should become 8%11 %10

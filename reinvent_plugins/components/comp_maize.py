@@ -268,12 +268,12 @@ def parse_output(filename: str) -> List[float]:
     """
 
     if not os.path.isfile(filename):
-        raise RuntimeError(f"{__name__}: failed, missing output file")
+        raise ValueError(f"{__name__}: failed, missing output file")
 
     with open(filename, "r", encoding="utf-8") as jfile:
         data = json.load(jfile)
 
     if "scores" not in data:
-        raise RuntimeError(f"{__name__}: JSON file does not contain 'scores'")
+        raise ValueError(f"{__name__}: JSON file does not contain 'scores'")
 
     return data["scores"]

@@ -35,7 +35,7 @@ class RDKitDescriptors:
             desc = descriptor.lower()
 
             if desc not in KNOWN_DESCRIPTORS:
-                raise RuntimeError(f"{__name__}: unknown descriptor {desc}")
+                raise ValueError(f"{__name__}: unknown descriptor {desc}")
 
             descriptors.append(KNOWN_DESCRIPTORS[desc])
 

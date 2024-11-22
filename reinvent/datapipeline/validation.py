@@ -20,6 +20,7 @@ class FilterSection(GlobalConfig):
     keep_stereo: bool = True
     keep_isotope_molecules: bool = True
     uncharge: bool = True
+    canonical_tautomer: bool = False
     kekulize: bool = False
     randomize_smiles: bool = False
     report_errors: bool = False

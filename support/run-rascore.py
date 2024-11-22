@@ -17,7 +17,7 @@
 # # The --no-capture-output is necessary to pass through stdout from REINVENT4
 # params.executable = "/home/user/miniconda3/condabin/mamba"
 # params.args = "run --no-capture-output -n rascore /home/user/projects/RAScore/run-rascore.py
-# # No transform needed as score is alread between 0 and 1
+# # No transform needed as score is already between 0 and 1
 #
 
 
@@ -27,7 +27,7 @@ import json
 from RAscore import RAscore_NN
 
 
-# Created from default model in the repository
+# Created from default model in the repository:
 # from tensorflow import keras
 # model = keras.models.load_model("models/DNN_chembl_fcfp_counts/model.tf")
 # model.save("/home/user/projects/RAScore/new_tf_2.5")

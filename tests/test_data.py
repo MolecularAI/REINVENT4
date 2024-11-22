@@ -53,6 +53,12 @@ SCAFFOLD_QUADRUPLE_POINT = "[*]C(=O)C1CC(O)CN1C(O)C([n+]1cc([*])n(-c2ccc([*])c(F
 THREE_DECORATIONS = "[*]c1ncncc1|[*]c1ncncc1|[*]C"
 FOUR_DECORATIONS = "[*]c1ncncc1|[*]c1ncncc1|[*]C|[*]C"
 
+PEPINVENT_INPUT1 = "?|N[C@@H](CO)C(=O)|?|N[C@@H](Cc1ccc(O)cc1)C(=O)|N(C)[C@@H]([C@@H](C)O)C(=O)|N[C@H](Cc1c[nH]cn1)C(=O)|N[C@@H](CC(=O)N)C2(=O)"
+PEPINVENT_INPUT2 = "?|?|?|N[C@@H](CCC(=O)O)C(=O)|N[C@@H]([C@@H](C)O)C(=O)|NCC(=O)|N[C@@H](CCC(=O)O)C(=O)|N[C@@H](Cc1ccccc1)C(=O)|N[C@@H](CC(C)C)C(=O)O"
+PEPINVENT_INPUT3 = "?|NCC(=O)|N[C@@H](CC(=O)O)C(=O)|N[C@@H]([C@H]1C[C@H](OC(C)(C)O1)CO)C(=O)|N(C)[C@@H](CCC(=O)O)C(=O)|?|N(C)[C@@H](Cc1c[nH]c2ccccc12)C(=O)|?|N[C@@H](CCSC)C(=O)|?|N[C@@H](Cc1c[nH]cn1)C(=O)|N[C@@H](c1sc(S3)nc1c1ccc(F)cc1)C(=O)O"
+PEPINVENT_OUTPUT1 = "N2[C@@H](CC(=O)N)C(=O)|N[C@@H](CNC(=O)N1CCC[C@@H]1[C@H](O)C(F)(F)F)C(=O)"
+PEPINVENT_OUTPUT2 = "N[C@@H](Cc1ccccc1)C(=O)|N[C@@H]([C@@H](C)O)C(=O)|NCC(=O)|N(C)[C@@H](CC(C)C)C(=O)|N1[C@@H](CCC1)C(=O)"
+
 IBUPROFEN_TOKENIZED = [
     "^",
     "C",

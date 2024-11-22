@@ -105,7 +105,6 @@ class Vocabulary:
                 raise KeyError(f"{token} is not supported! Supported tokens are {self.tokens()}.")
         return ohe_vect
 
-
     def decode(self, ohe_vect):
         """
         Decodes a one-hot encoded vector matrix to a list of tokens.

@@ -5,14 +5,14 @@ from typing import List
 import logging
 
 import torch.utils.data as tud
+from rdkit import Chem
 
 from .sampler import Sampler, validate_smiles, remove_duplicate_sequences
 from . import params
 from reinvent.models.linkinvent.dataset.dataset import Dataset
 from reinvent.models.model_factory.sample_batch import SampleBatch
-from reinvent.runmodes.utils.helpers import join_fragments
 from reinvent.chemistry import conversions, tokens
-from reinvent.chemistry.library_design import attachment_points
+from reinvent.chemistry.library_design import attachment_points, bond_maker
 from ...models.transformer.core.dataset.dataset import Dataset as TransformerDataset
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ class LinkinventSampler(Sampler):
         """Samples the model for the given number of SMILES
 
         :param smilies: list of SMILES used for sampling
-        :returns: list of SampledSequencesDTO
+        :returns: SampleBatch
         """
 
         if self.model.version == 2:  # Transformer-based
@@ -76,7 +76,7 @@ class LinkinventSampler(Sampler):
         if self.unique_sequences:
             sampled = remove_duplicate_sequences(sampled)
 
-        mols = join_fragments(sampled, reverse=True)
+        mols = self._join_fragments(sampled)
 
         sampled.smilies, sampled.states = validate_smiles(
             mols, sampled.output, isomeric=self.isomeric
@@ -116,6 +116,29 @@ class LinkinventSampler(Sampler):
             randomized_warhead_pair_list.append(warhead_pair_randomized)
 
         return randomized_warhead_pair_list
+
+    def _join_fragments(self, sequences: SampleBatch) -> List[Chem.Mol]:
+        """Join input warheads with generated linker
+
+        :param sequences: a batch of sequences
+        :returns: a list of RDKit molecules
+        """
+
+        mols = []
+
+        for sample in sequences:
+            warheads = sample.input
+            generated_linker = sample.output
+
+            linker = attachment_points.add_attachment_point_numbers(
+                generated_linker, canonicalize=False
+            )
+            mol: Chem.Mol = bond_maker.join_scaffolds_and_decorations(  # may return None
+                linker, warheads
+            )
+            mols.append(mol)
+
+        return mols
 
 
 LinkinventTransformerSampler = LinkinventSampler

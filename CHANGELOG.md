@@ -10,6 +10,214 @@ This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 - CAZP scoring component
 
 
+## [4.5.11] 2024-11-18
+
+### Changed
+
+- Convert float nan and infs to valid json format before remote reporting
+
+
+## [4.5.10] 2024-11-16
+
+### Added
+
+- optional tautomer canonicalisation in data pipeline
+
+
+## [4.5.9] 2024-11-07
+
+### Fixed
+
+- read configuration file from stdin
+
+
+## [4.5.8] 2024-11-07
+
+### Changed
+
+- refactor of top level code
+
+
+## [4.5.7] 2024-11-07
+
+### Fixed
+
+- check if DF is set
+
+
+## [4.5.6] 2024-11-05
+
+### Added
+
+- YAML configuration file reader
+
+
+## [4.5.5] 2024-11-05
+
+### Added
+
+- Logging of configuration file absolute path
+
+### Changed
+
+- Automatic configuration file format detection
+
+
+## [4.5.4] 2024-10-28
+
+### Added
+
+- Exponential decay transform
+
+### Fixed
+
+- Ambiguity in parsing optional parameters with multiple endpoints and multiple optional parameters
+
+
+## [4.5.3] 2024-10-23
+
+### Added
+
+- component-level parameters for scoring components
+
+
+## [4.5.2] 2024-10-23
+
+### Added
+
+- executable module: can run `python -m reinvent`
+
+
+## [4.5.1] 2024-10-23
+
+### Added
+
+- SIGUSR1 for controlled termination
+
+
+## [4.5.0] 2024-10-08
+
+### Added
+
+- PepInvent in Sampling and Staged learning mode with example toml config provided 
+- PepInvent prior
+
+
+## [4.4.37] 2024-10-07
+
+### Fixed
+
+- Atom map number removal for Libinvent sampling dropped SMILES
+
+
+## [4.4.36] 2024-09-27
+
+### Added
+
+- Stage number for JSON to remote monitor
+
+### Changed
+
+- Relaxed dependencies
+
+
+## [4.4.35] 2024-09-26
+
+### Added
+
+- Terminate staged learning on SIGTERM and check if running in multiprocessing environment
+
+### Changed
+
+- ValueError for all scoring components such that the staged learning handler can handle failing components
+
+
+## [4.4.34] 2024-09-16
+
+### Fixed
+
+- SMILES in DF memory were wrongly computed
+
+
+## [4.4.33] 2024-09-14
+
+### Fixed
+
+- run-qsartuna.py: convert ndarray to list to make it JSON serializble
+
+
+## [4.4.32] 2024-09-13
+
+### Fixed
+
+- PMI component: check for embedding failure in RDKit's conformer generator
+
+
+## [4.4.31] 2024-09-13
+
+### Fixed
+
+- Dockstream component wrongly quoted the SMILES string
+- Diversity filter setup in config was ignored
+
+
+## [4.4.30] 2024-09-12
+
+### Fixed
+
+- Fixed config reading bug for DF
+
+
+## [4.4.29] 2024-09-05
+
+### Changed
+
+- Changed Molformer sampling valid and unique from percentage to fraction on tensorboard
+
+
+## [4.4.28] 2024-08-29
+
+### Fixed
+
+- Fixed incorrect tanimoto similarity log in Mol2Mol sampling mode
+
+
+## [4.4.27] 2024-07-23
+
+### Fixed
+
+- Corrected typo in Libinvent report
+
+
+## [4.4.26] 2024-07-21
+
+### Fixed
+
+- Report for sampling returned np.array which is incompatibile with JSON serialization
+
+
+## [4.4.25] 2024-07-19
+
+### Fixed
+
+- Allowed responder as an optional input in scoring input validation
+
+
+## [4.4.24] 2024-07-19
+
+### Fixed
+
+- Fixed remote for Libinvent
+- Batchsize defaults to 1 for TL
+
+
+## [4.4.23] 2024-07-18
+
+### Fixed
+
+- Added temperature parameter in Sampling and RL config validation 
+
+
 ## [4.4.22] 2024-07-10
 
 ### Fixed
@@ -314,7 +522,7 @@ Various code improvements.
 
 ### Added
 
-- Stages can now defined their own diversity filters.  Global filter always overwrites stage settings.  Currently no mechanism to carry over DF from previous stage, use single stage runs.
+- Stages can now define their own diversity filters.  Global filter always overwrites stage settings.  Currently no mechanism to carry over DF from previous stage, use single stage runs.
 
 
 ## [4.3.11] 2024-04-30

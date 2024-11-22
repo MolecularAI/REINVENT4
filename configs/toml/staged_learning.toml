@@ -45,6 +45,13 @@ agent_file = "priors/reinvent.prior"
 #sample_strategy = "multinomial"  # multinomial or beamsearch (deterministic)
 #distance_threshold = 100
 
+## Pepinvent
+#prior_file = "priors/pepinvent.prior"
+#agent_file = "priors/pepinvent.prior"
+#smiles_file = "pepinvent.smi"
+#sample_strategy = "multinomial"  # multinomial or beamsearch (deterministic)
+#distance_threshold = 100
+
 batch_size = 64          # network
 
 unique_sequences = true  # if true remove all duplicates raw sequences in each step

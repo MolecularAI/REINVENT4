@@ -85,7 +85,7 @@ class RLTBReporter:
 
         labels = [f"score={score:.2f}" for score in results.total_scores]
         sample_size = ROWS * COLUMNS
-    
+
         image_tensor = make_grid_image(data.smilies, labels, sample_size, ROWS)
 
         if image_tensor is not None:

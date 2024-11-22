@@ -7,7 +7,7 @@ from typing import List, TYPE_CHECKING
 
 import torch
 
-from reinvent import config_parse, setup_logger, CsvFormatter
+from reinvent.utils import setup_logger, CsvFormatter, config_parse
 from reinvent.runmodes import Handler, RL, create_adapter
 from reinvent.runmodes.setup_sampler import setup_sampler
 from reinvent.runmodes.RL import terminators, memories
@@ -28,6 +28,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+TRANSFORMERS = ["Mol2Mol", "LinkinventTransformer", "LibinventTransformer", "Pepinvent"]
+
 
 def setup_diversity_filter(config: SectionDiversityFilter, rdkit_smiles_flags: dict):
     """Setup of the diversity filter
@@ -40,17 +42,12 @@ def setup_diversity_filter(config: SectionDiversityFilter, rdkit_smiles_flags: d
     :return: the set up diversity filter
     """
 
-    if config is None:
+    if config is None or not hasattr(config, "type"):
         return None
 
-    memory_type = config.type
+    diversity_filter = getattr(memories, config.type)
 
-    if hasattr(config, "type"):
-        diversity_filter = getattr(memories, memory_type)
-    else:
-        return None
-
-    logger.info(f"Using diversity filter {memory_type}")
+    logger.info(f"Using diversity filter {config.type}")
 
     return diversity_filter(
         bucket_size=config.bucket_size,
@@ -242,7 +239,7 @@ def run_staged_learning(
 
     rdkit_smiles_flags = dict(allowTautomers=True)
 
-    if model_type in ["Mol2Mol", "LinkinventTransformer", "LibinventTransformer"]:  # Transformer-based models
+    if model_type in TRANSFORMERS:  # Transformer-based models
         agent_mode = "inference"
         rdkit_smiles_flags.update(sanitize=True, isomericSmiles=True)
         rdkit_smiles_flags2 = dict(isomericSmiles=True)
@@ -275,14 +272,12 @@ def run_staged_learning(
 
     global_df_only = False
 
-    if config.diversity_filter:
-        global_df_only = True
-
     if parameters.use_checkpoint and "staged_learning" in agent_save_dict:
         logger.info(f"Using diversity filter from {agent_model_filename}")
         diversity_filter = agent_save_dict["staged_learning"]["diversity_filter"]
-    else:
+    elif config.diversity_filter:
         diversity_filter = setup_diversity_filter(config.diversity_filter, rdkit_smiles_flags2)
+        global_df_only = True
 
     if parameters.purge_memories:
         logger.info("Purging diversity filter memories after each stage")
@@ -337,6 +332,7 @@ def run_staged_learning(
 
             optimize = model_learning(
                 max_steps=package.max_steps,
+                stage_no=stage_no,
                 prior=prior,
                 state=state,
                 scoring_function=package.scoring_function,

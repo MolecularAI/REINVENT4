@@ -29,6 +29,7 @@ def join_scaffolds_and_decorations(
             return None
     return mol
 
+
 def join_molecule_fragments(scaffold: Mol, decoration: Mol, keep_label_on_atoms=False):
     """
     Joins a RDKit MOL scaffold with a decoration. They must be labelled.
@@ -110,6 +111,7 @@ def join_molecule_fragments(scaffold: Mol, decoration: Mol, keep_label_on_atoms=
 
     return scaffold
 
+
 def add_attachment_point_num(atom, idx):
     idxs = []
     if atom.HasProp("molAtomMapNumber"):
@@ -126,6 +128,7 @@ def add_attachment_point_num(atom, idx):
     #  The heart of the issue is that molAtomMapNumber needs to be integer type, so we cannot store a list here.
     #  instead, keep the last attachement point only. This implies that reaction filters will not be compatible
     #  in the case of attachment points on the same atom (they did not work in R3 either)
+
 
 def randomize_scaffold(scaffold: Mol):
     smi = conversions.mol_to_random_smiles(scaffold)

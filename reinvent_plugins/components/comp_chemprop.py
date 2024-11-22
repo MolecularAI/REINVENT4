@@ -90,12 +90,12 @@ class ChemProp:
                     f"{', '.join(target_columns)})"
                 )
                 logger.critical(msg)
-                raise RuntimeError(msg)
+                raise ValueError(msg)
 
             if target_column in seen:
                 msg = f"{__name__}: target columns must be unique ({params.target_column})"
                 logger.critical(msg)
-                raise RuntimeError(msg)
+                raise ValueError(msg)
 
             seen.add(target_column)
 

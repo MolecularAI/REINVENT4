@@ -4,251 +4,51 @@
 from __future__ import annotations
 import os
 import sys
-import argparse
 from dotenv import load_dotenv, find_dotenv
 import platform
 import getpass
-import random
-import logging
 import datetime
-import subprocess as sp
-from typing import List, Optional
+from typing import Any
+
+from reinvent.utils import (
+    parse_command_line,
+    get_cuda_driver_version,
+    set_seed,
+    extract_sections,
+    write_json_config,
+    enable_rdkit_log,
+    setup_responder,
+    config_parse,
+)
 
 SYSTEM = platform.system()
 
 if SYSTEM != "Windows":
     import resource  # Unix only
 
-from rdkit import rdBase, RDLogger
-import numpy as np
+from rdkit import rdBase
 import rdkit
 import torch
 
-from reinvent import version, runmodes, config_parse, setup_logger
+from reinvent import version, runmodes
+from reinvent.utils import setup_logger
 from reinvent.runmodes.utils import set_torch_device
-from reinvent.runmodes.reporter.remote import setup_reporter
+from reinvent.runmodes.handler import StageInterruptedControlled
 from .validation import ReinventConfig
 
-INPUT_FORMAT_CHOICES = ("toml", "json")
-RDKIT_CHOICES = ("all", "error", "warning", "info", "debug")
-LOGLEVEL_CHOICES = tuple(level.lower() for level in logging._nameToLevel.keys())
-VERSION_STR = f"{version.__progname__} {version.__version__} {version.__copyright__}"
-OVERWRITE_STR = "Overwrites setting in the configuration file"
-RESPONDER_TOKEN = "RESPONDER_TOKEN"
 
 rdBase.DisableLog("rdApp.*")
-# rdBase.LogToPythonLogger()
 
 
-def enable_rdkit_log(levels: List[str]):
-    """Enable logging messages from RDKit for a specific logging level.
+def main(args: Any):
+    """Simple entry point into Reinvent's run modes.
 
-    :param levels: the specific level(s) that need to be silenced
+    :param args: arguments object, can be argparse.Namespace or any other class
     """
 
-    if "all" in levels:
-        RDLogger.EnableLog("rdApp.*")
-        return
-
-    for level in levels:
-        RDLogger.EnableLog(f"rdApp.{level}")
-
-
-def get_cuda_driver_version() -> Optional[str]:
-    """Get the CUDA driver version via modinfo if possible.
-
-    This is for Linux only.
-
-    :returns: driver version or None
-    """
-
-    # Alternative
-    # result = sp.run(["/usr/bin/nvidia-smi"], shell=False, capture_output=True)
-    # if "Driver Version:" in str_line:
-    #    version = str_line.split()[5]
-
-    try:
-        result = sp.run(["/sbin/modinfo", "nvidia"], shell=False, capture_output=True)
-    except Exception:
-        return
-
-    for line in result.stdout.splitlines():
-        str_line = line.decode()
-
-        if str_line.startswith("version:"):
-            cuda_driver_version = str_line.split()[1]
-            return cuda_driver_version
-
-
-def set_seed(seed: int):
-    """Set global seed for reproducibility
-
-    :param seed: the seed to initialize the random generators
-    """
-
-    if seed is None:
-        return
-
-    random.seed(seed)
-
-    os.environ["PYTHONHASHSEED"] = str(seed)
-
-    np.random.seed(seed)
-
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.backends.cudnn.deterministic = True
-
-
-def extract_sections(config: dict) -> dict:
-    """Extract the sections of a config file
-
-    :param config: the config file
-    :returns: the extracted sections
-    """
-
-    # FIXME: stages are a list of dicts in RL, may clash with global lists
-    return {k: v for k, v in config.items() if isinstance(v, (dict, list))}
-
-
-def parse_command_line():
-    parser = argparse.ArgumentParser(
-        description=f"{version.__progname__}: a molecular design "
-        f"tool for de novo design, "
-        "scaffold hopping, R-group replacement, linker design, molecule "
-        "optimization, and others",
-        epilog=f"{VERSION_STR}",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "config_filename",
-        nargs="?",
-        default=None,
-        metavar="FILE",
-        type=os.path.abspath,
-        help="Input configuration file with runtime parameters",
-    )
-
-    parser.add_argument(
-        "-f",
-        "--config-format",
-        metavar="FORMAT",
-        choices=INPUT_FORMAT_CHOICES,
-        default="toml",
-        help=f"File format of the configuration file: {', '.join(INPUT_FORMAT_CHOICES)}",
-    )
-
-    parser.add_argument(
-        "-d",
-        "--device",
-        metavar="DEV",
-        default=None,
-        help=f"Device to run on: cuda, cpu. {OVERWRITE_STR}.",
-    )
-
-    parser.add_argument(
-        "-l",
-        "--log-filename",
-        metavar="FILE",
-        default=None,
-        type=os.path.abspath,
-        help=f"File for logging information, otherwise writes to stderr.",
-    )
-
-    parser.add_argument(
-        "--log-level",
-        metavar="LEVEL",
-        choices=LOGLEVEL_CHOICES,
-        default="info",
-        help=f"Enable this and 'higher' log levels: {', '.join(LOGLEVEL_CHOICES)}.",
-    )
-
-    parser.add_argument(
-        "-s",
-        "--seed",
-        metavar="N",
-        type=int,
-        default=None,
-        help="Sets the random seeds for reproducibility",
-    )
-
-    parser.add_argument(
-        "--dotenv-filename",
-        metavar="FILE",
-        default=None,
-        type=os.path.abspath,
-        help=f"Dotenv file with environment setup needed for some scoring components. "
-        "By default the one from the installation directory will be loaded.",
-    )
-
-    parser.add_argument(
-        "--enable-rdkit-log-levels",
-        metavar="LEVEL",
-        choices=RDKIT_CHOICES,
-        nargs="+",
-        help=f"Enable specific RDKit log levels: {', '.join(RDKIT_CHOICES)}.",
-    )
-
-    parser.add_argument(
-        "-V",
-        "--version",
-        action="version",
-        version=f"{VERSION_STR}.",
-    )
-
-    return parser.parse_args()
-
-
-def setup_responder(config):
-    """Setup for remote monitor
-
-    :param config: configuration
-    """
-
-    endpoint = config.get("endpoint", False)
-
-    if not endpoint:
-        return
-
-    token = os.environ.get(RESPONDER_TOKEN, None)
-    setup_reporter(endpoint, token)
-
-
-def write_json_config(global_dict, json_out_config):
-    def dummy(config):
-        global_dict.update(config)
-        config_parse.write_json(global_dict, json_out_config)
-
-    return dummy
-
-
-def main():
-    """Simple entry point into Reinvent's run modes."""
-
-    args = parse_command_line()
-
-    dotenv_loaded = load_dotenv(args.dotenv_filename)  # set up the environment for scoring
-
-    reader = getattr(config_parse, f"read_{args.config_format}")
-    input_config = reader(args.config_filename)
-    val_config = ReinventConfig(**input_config)
-
-    if args.enable_rdkit_log_levels:
-        enable_rdkit_log(args.enable_rdkit_log_levels)
-
-    run_type = input_config["run_type"]
-    runner = getattr(runmodes, f"run_{run_type}")
     logger = setup_logger(
         name=__package__, level=args.log_level.upper(), filename=args.log_filename
     )
-
-    have_version = input_config.get("version", version.__config_version__)
-
-    if have_version < version.__config_version__:
-        msg = f"Need at least version 4.  Input file is for version {have_version}."
-        logger.fatal(msg)
-        raise RuntimeError(msg)
 
     logger.info(
         f"Started {version.__progname__} {version.__version__} {version.__copyright__} on "
@@ -256,6 +56,35 @@ def main():
     )
 
     logger.info(f"Command line: {' '.join(sys.argv)}")
+
+    dotenv_loaded = load_dotenv(args.dotenv_filename)  # set up the environment for scoring
+
+    ext = None
+
+    if args.config_filename:
+        ext = args.config_filename.suffix
+
+    if ext in (f".{e}" for e in config_parse.INPUT_FORMAT_CHOICES):
+        fmt = ext[1:]
+    else:
+        fmt = args.config_format
+
+    logger.info(f"Reading run configuration from {args.config_filename} using format {fmt}")
+    input_config = config_parse.read_config(args.config_filename, fmt)
+    val_config = ReinventConfig(**input_config)
+
+    if args.enable_rdkit_log_levels:
+        enable_rdkit_log(args.enable_rdkit_log_levels)
+
+    run_type = input_config["run_type"]
+    runner = getattr(runmodes, f"run_{run_type}")
+
+    have_version = input_config.get("version", version.__config_version__)
+
+    if have_version < version.__config_version__:
+        msg = f"Need at least version 4.  Input file is for version {have_version}."
+        logger.fatal(msg)
+        raise RuntimeError(msg)
 
     if dotenv_loaded:
         if args.dotenv_filename:
@@ -331,13 +160,16 @@ def main():
             f"with frequency {input_config['responder']['frequency']}"
         )
 
-    runner(
-        input_config=extract_sections(input_config),
-        device=actual_device,
-        tb_logdir=tb_logdir,
-        responder_config=responder_config,
-        write_config=write_config,
-    )
+    try:
+        runner(
+            input_config=extract_sections(input_config),
+            device=actual_device,
+            tb_logdir=tb_logdir,
+            responder_config=responder_config,
+            write_config=write_config,
+        )
+    except StageInterruptedControlled as e:
+        logger.info(f"Requested to terminate: {e.args[0]}")
 
     if SYSTEM != "Windows":
         maxrss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -356,5 +188,12 @@ def main():
     )
 
 
+def main_script():
+    """Main entry point from the command line"""
+
+    args = parse_command_line()
+    main(args)
+
+
 if __name__ == "__main__":
-    main()
+    main_script()

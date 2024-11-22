@@ -29,7 +29,7 @@ def run_command(command: List[str], env: dict = None, input=None, cwd=None) -> s
         out = error.stdout
         err = error.stderr
 
-        raise RuntimeError(
+        raise ValueError(
             f"{__name__}: {' '.join(command)} has failed with exit "
             f"code {ret}: stdout={out}, stderr={err}"
         )

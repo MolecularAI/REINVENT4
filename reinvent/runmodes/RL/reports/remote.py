@@ -29,6 +29,7 @@ class RLRemoteReporter:
         """
 
         step = data.step
+        stage = data.stage
 
         if not (step == 0 or step % self.logging_frequency == 0):
             return
@@ -45,7 +46,6 @@ class RLRemoteReporter:
             "prior NLL": float(data.prior_mean_nll),
             "agent NLL": float(data.agent_mean_nll),
         }
-
         smarts_pattern = ""  # get_matching_substructure(data.score_results)
         smiles_legend_pairs = get_smiles_legend_pairs(
             np.array(data.score_results.smilies)[mask_idx],
@@ -56,6 +56,7 @@ class RLRemoteReporter:
 
         record = {
             "step": step,
+            "stage": stage,
             "timestamp": time.time(),  # gives microsecond resolution on Linux
             "components": score_components,
             "learning": learning_curves,
@@ -65,7 +66,7 @@ class RLRemoteReporter:
                 "smarts_pattern": smarts_pattern,
                 "smiles_legend_pairs": smiles_legend_pairs,
             },
-            "collected smiles in memory": len(data.smilies),
+            "collected smiles in memory": data.df_memory_smilies,
         }
 
         self.reporter.send(record)

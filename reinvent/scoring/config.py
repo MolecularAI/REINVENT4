@@ -3,7 +3,7 @@
 __all__ = ["get_components"]
 from dataclasses import dataclass
 from collections import defaultdict
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 import logging
 
 from .importer import get_registry
@@ -45,6 +45,7 @@ def get_components(components: list[dict[str, dict]]) -> ComponentType:
     for component in components:
         component_type, component_value = list(component.items())[0]
         endpoints: dict = component_value["endpoint"]
+        complevel_params = component_value.get("params", {})  # Component-level params, if exist.
 
         component_type_lookup = component_type.lower().replace("-", "").replace("_", "")
 
@@ -67,7 +68,11 @@ def get_components(components: list[dict[str, dict]]) -> ComponentType:
             if weight < 0:
                 raise RuntimeError(f"weight must be equal to or larger than zero but is {weight}")
 
-            parameters.append(params)
+            # Merge component-level params with this endpoint params.
+            # Endpoint params take precedence.
+            merged_params = {**complevel_params, **params}
+
+            parameters.append(merged_params)
 
             transform = None
 
@@ -111,12 +116,13 @@ def get_components(components: list[dict[str, dict]]) -> ComponentType:
     return ComponentType(scorers, filters, penalties)
 
 
-def collect_params(params: List[Dict]) -> defaultdict:
+def collect_params(params: List[Dict]) -> Dict[str, List[Any]]:
     """Convert a list of dictionaries to a dictionary
 
     Collect the values with the same key in each dictionary of the list into
     a dictionary. The number of key/value pairs in the dictionaries in each
-    item of the passed in parameters may be different.
+    item of the passed in parameters may be different. Missing keys will be
+    filled with None.
 
     :param params: list of dictionaries
     :returns: a dictionary
@@ -124,8 +130,13 @@ def collect_params(params: List[Dict]) -> defaultdict:
 
     collected_params = defaultdict(list)
 
+    # Collect all keys from all dictionaries
+    keys = set()
     for param_dict in params:
-        for key, value in param_dict.items():
-            collected_params[key].append(value)
+        keys.update(param_dict.keys())
 
+    # Go through each dictionary and collect values for each key
+    for param_dict in params:
+        for key in keys:
+            collected_params[key].append(param_dict.get(key, None))
     return collected_params

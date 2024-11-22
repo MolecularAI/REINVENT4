@@ -54,7 +54,7 @@ class TanimotoSimilarity:
             )
 
             if not fingerprints:
-                raise RuntimeError(f"{__name__}: unable to convert any SMILES to fingerprints")
+                raise ValueError(f"{__name__}: unable to convert any SMILES to fingerprints")
 
             self.fp_params.append((fingerprints, radius, use_counts, use_features))
 

@@ -5,7 +5,9 @@ from reinvent.models.model_factory.sample_batch import SmilesState, SampleBatch
 
 def common_report(sampled: SampleBatch, **kwargs):
     valid_mask = np.where(
-        (sampled.states == SmilesState.VALID) | (sampled.states == SmilesState.DUPLICATE), True, False
+        (sampled.states == SmilesState.VALID) | (sampled.states == SmilesState.DUPLICATE),
+        True,
+        False,
     )
     unique_mask = np.where(sampled.states == SmilesState.VALID, True, False)
 
@@ -18,9 +20,9 @@ def common_report(sampled: SampleBatch, **kwargs):
         tanimoto_scores = kwargs["Tanimoto"]
         nlls = sampled.nlls.cpu().detach().numpy()
 
-        additional_report["Tanimoto_valid"] = np.array(tanimoto_scores)[valid_mask]
-        additional_report["Tanimoto_unique"] = np.array(tanimoto_scores)[unique_mask]
-        additional_report["Output_likelihood_valid"] = nlls[valid_mask]
-        additional_report["Output_likelihood_unique"] = nlls[unique_mask]
+        additional_report["Tanimoto_valid"] = np.array(tanimoto_scores)[valid_mask].tolist()
+        additional_report["Tanimoto_unique"] = np.array(tanimoto_scores)[unique_mask].tolist()
+        additional_report["Output_likelihood_valid"] = nlls[valid_mask].tolist()
+        additional_report["Output_likelihood_unique"] = nlls[unique_mask].tolist()
 
     return fraction_valid_smiles, fraction_unique_molecules, additional_report

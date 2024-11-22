@@ -15,8 +15,7 @@ if TYPE_CHECKING:
 
 
 class LibinventLearning(Learning):
-    """LibInvent optimization
-    """
+    """LibInvent optimization"""
 
     def update(self, results: ScoreResults):
         if self.prior.version == 1:  # RNN-based

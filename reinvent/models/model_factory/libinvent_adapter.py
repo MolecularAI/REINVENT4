@@ -42,5 +42,6 @@ class LibinventAdapter(ModelAdapter):
         sampled = self.model.sample_decorations(scaffold_seqs, scaffold_seq_lengths)
         return SampleBatch(*sampled)
 
+
 class LibinventTransformerAdapter(TransformerAdapter):
     pass

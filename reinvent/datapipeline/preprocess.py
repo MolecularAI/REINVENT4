@@ -54,10 +54,7 @@ def parse_command_line():
     return parser.parse_args()
 
 
-def main():
-    mp.set_start_method("spawn", force=True)
-
-    args = parse_command_line()
+def main(args):
 
     with open(args.config_filename, "rb") as tf:
         cfg = tomli.load(tf)
@@ -245,5 +242,12 @@ def main():
         listener.join()
 
 
+def main_script():
+    mp.set_start_method("spawn", force=True)
+
+    args = parse_command_line()
+    main(args)
+
+
 if __name__ == "__main__":
-    main()
+    main_script()

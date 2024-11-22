@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 warnings.filterwarnings("once", category=FutureWarning)
 
-TRANSFORMERS = ["Mol2Mol", "LinkinventTransformer", "LibinventTransformer"]
+TRANSFORMERS = ["Mol2Mol", "LinkinventTransformer", "LibinventTransformer", "Pepinvent"]
 
 
 def setup_sampler(model_type: str, config: dict, agent: ModelAdapter):
@@ -37,9 +37,8 @@ def setup_sampler(model_type: str, config: dict, agent: ModelAdapter):
     if model_type in TRANSFORMERS and randomize_smiles:
         randomize_smiles = False
         logger.warning(
-            f"randomize_smiles is set to be True by user. But the model was trained using canonical SMILES"
-            f"where randomize_smiles might undermine the performance (this needs more investigation), "
-            f"but randomize_smiles is reset to be False for now."
+            f"randomize_smiles was set to True but the model was not trained "
+            f"with randomized SMILES.  Setting randomize_smiles to False."
         )
 
     unique_sequences = config.get("unique_sequences", False)

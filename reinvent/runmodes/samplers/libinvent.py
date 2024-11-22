@@ -1,17 +1,16 @@
 """The LibInvent sampling module"""
 
 __all__ = ["LibinventSampler", "LibinventTransformerSampler"]
-from typing import List, Tuple
+from typing import List
 import logging
 
-import torch
 import torch.utils.data as tud
+from rdkit import Chem
 
 from .sampler import Sampler, validate_smiles, remove_duplicate_sequences
 from . import params
 from reinvent.models.libinvent.models.dataset import Dataset
 from reinvent.models.model_factory.sample_batch import SampleBatch
-from reinvent.runmodes.utils.helpers import join_fragments
 from reinvent.chemistry import conversions
 from reinvent.chemistry.library_design import attachment_points, bond_maker
 from reinvent.models.transformer.core.dataset.dataset import Dataset as TransformerDataset
@@ -26,7 +25,7 @@ class LibinventSampler(Sampler):
         """Samples the LibInvent model for the given number of SMILES
 
         :param smilies: list of SMILES used for sampling
-        :returns: list of SampledSequencesDTO
+        :returns: SampleBatch
         """
 
         if self.model.version == 2:  # Transformer-based
@@ -78,7 +77,7 @@ class LibinventSampler(Sampler):
         if self.unique_sequences:
             sampled = remove_duplicate_sequences(sampled)
 
-        mols = join_fragments(sampled, reverse=False, keep_labels=True)
+        mols = self._join_fragments(sampled)
 
         sampled.smilies, sampled.states = validate_smiles(
             mols, sampled.output, isomeric=self.isomeric
@@ -87,8 +86,7 @@ class LibinventSampler(Sampler):
         return sampled
 
     def _standardize_input(self, scaffold_list: List[str]):
-        return [conversions.convert_to_standardized_smiles(scaffold)
-                    for scaffold in scaffold_list]
+        return [conversions.convert_to_standardized_smiles(scaffold) for scaffold in scaffold_list]
 
     def _get_randomized_smiles(self, scaffolds: List[str]):
         """Randomize the scaffold SMILES"""
@@ -97,6 +95,30 @@ class LibinventSampler(Sampler):
         randomized = [bond_maker.randomize_scaffold(mol) for mol in scaffold_mols]
 
         return randomized
+
+    def _join_fragments(self, sequences: SampleBatch) -> List[Chem.Mol]:
+        """Join input scaffold and generated decorators
+
+        :param sequences: a batch of sequences
+        :returns: a list of RDKit molecules
+        """
+
+        mols = []
+
+        for sample in sequences:
+            input_scaffold = sample.input
+            decorators = sample.output
+
+            scaffold = attachment_points.add_attachment_point_numbers(
+                input_scaffold, canonicalize=False
+            )
+            mol: Chem.Mol = bond_maker.join_scaffolds_and_decorations(  # may return None
+                scaffold, decorators, keep_labels_on_atoms=True
+            )
+
+            mols.append(mol)
+
+        return mols
 
 
 LibinventTransformerSampler = LibinventSampler

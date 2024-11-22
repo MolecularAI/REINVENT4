@@ -9,7 +9,7 @@ from reinvent.validation import GlobalConfig
 
 class SectionParameters(GlobalConfig):
     num_epochs: int = Field(ge=1)
-    batch_size: int = Field(ge=10)
+    batch_size: int = Field(ge=1)
     input_model_file: str
     output_model_file: str  # FIXME: consider for removal
     smiles_file: str

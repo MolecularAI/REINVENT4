@@ -1,9 +1,9 @@
 {
     "run_type": "scoring",
-    "output_csv": "scoring.csv",
     "json_out_config": "_scoring.json",
     "parameters": {
-        "smiles_file": "compounds.smi"
+        "smiles_file": "compounds.smi",
+        "output_csv": "scoring.csv"
     },
     "scoring": {
         "type": "geometric_mean",

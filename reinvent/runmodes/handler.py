@@ -7,7 +7,9 @@ torch.save is used to pickle the data.
 """
 
 import signal
+import multiprocessing as mp
 import platform
+import logging
 from pathlib import Path
 from typing import Callable, Dict
 
@@ -16,15 +18,19 @@ import torch
 from reinvent.models.meta_data import update_model_data
 
 
+logger = logging.getLogger(__name__)
+
 if platform.system() != "Windows":
-    # NOTE: SIGTERM (signal 15) seems to be triggered by terminating processes.  So
-    #       multiprocessing triggers the handler for every terminating child.
-    SUPPORTED_SIGNALS = (signal.SIGINT, signal.SIGQUIT)
+    SUPPORTED_SIGNALS = (signal.SIGINT, signal.SIGQUIT, signal.SIGTERM, signal.SIGUSR1)
 else:
     SUPPORTED_SIGNALS = (signal.SIGINT,)
 
 
-class StageInterrupted(Exception):
+class StageInterruptedUncontrolled(Exception):
+    pass
+
+
+class StageInterruptedControlled(Exception):
     pass
 
 
@@ -59,18 +65,21 @@ class Handler:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Save the data and reset the signal handler"""
 
-        # FIXME: check if exc_type is really the one we want?
-
         for _signal in SUPPORTED_SIGNALS:
             signal.signal(_signal, signal.SIG_IGN)
 
-        self.save()
+        msg = ""
+
+        if exc_val and exc_val.args:
+            msg = exc_val.args[0]
+
+        logger.critical(f"Received exception ('{msg}'): saving checkpoint and then terminate")
+
+        if mp.current_process().name == "MainProcess":
+            self.save()
 
         for _signal, _handler in self._default_handlers:
             signal.signal(_signal, _handler)
-
-        # prevent exception from bubbling up
-        # return True
 
     @property
     def out_filename(self):
@@ -126,4 +135,7 @@ class Handler:
         :raises: StageInterrrupted
         """
 
-        raise StageInterrupted
+        if signum == signal.SIGUSR1 and signal.SIGUSR1 in SUPPORTED_SIGNALS:
+            raise StageInterruptedControlled(f"Signal {signum}")
+        else:
+            raise StageInterruptedUncontrolled(f"Signal {signum}")

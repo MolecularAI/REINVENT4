@@ -20,7 +20,7 @@ import numpy as np
 from .reports import RLTBReporter, RLCSVReporter, RLRemoteReporter, RLReportData
 from reinvent.runmodes.RL.data_classes import ModelState
 from reinvent.models.model_factory.sample_batch import SmilesState
-from reinvent.runmodes.reporter.remote import get_reporter
+from reinvent.utils import get_reporter
 from reinvent_plugins.normalizers.rdkit_smiles import normalize
 
 if TYPE_CHECKING:
@@ -36,9 +36,11 @@ logger = logging.getLogger(__name__)
 class Learning(ABC):
     """Partially abstract base class for the Template Method pattern"""
 
+    # FIXME: too many arguments
     def __init__(
         self,
         max_steps: int,
+        stage_no: int,
         prior: ModelAdapter,
         state: ModelState,
         scoring_function: Scorer,
@@ -54,6 +56,7 @@ class Learning(ABC):
         """Setup of the common framework"""
 
         self.max_steps = max_steps
+        self.stage_no = stage_no
         self.prior = prior
 
         # Seed the starting state, need update in every stage
@@ -117,7 +120,7 @@ class Learning(ABC):
 
             results = self.score()
             if self.prior.model_type == "Libinvent":
-                results.smilies = normalize(results.smilies)
+                results.smilies = normalize(results.smilies, keep_all=True)
 
             if self._state.diversity_filter:
                 df_mask = np.where(self.invalid_mask, True, False)
@@ -308,11 +311,12 @@ class Learning(ABC):
 
         smilies = np.array(self.sampled.smilies)[mask_valid]
         if self.prior.model_type == "Libinvent":
-            smilies = normalize(smilies)
+            smilies = normalize(smilies, keep_all=True)
         mask_idx = (np.argwhere(mask_valid).flatten(),)
 
         report_data = RLReportData(
             step=step_no,
+            stage=self.stage_no,
             smilies=smilies,
             scaffolds=scaffolds,
             sampled=self.sampled,
@@ -326,6 +330,7 @@ class Learning(ABC):
             loss=loss,
             fraction_valid_smiles=fract_valid_smiles,
             fraction_duplicate_smiles=fract_duplicate_smiles,
+            df_memory_smilies=len(diversity_filter.smiles_memory) if diversity_filter else 0,
             bucket_max_size=(
                 diversity_filter.scaffold_memory.max_size if diversity_filter else None
             ),

@@ -28,7 +28,7 @@ class PMI:
         self.properties = params.property
 
         if not "npr1" in self.properties and not "npr2" in self.properties:
-            raise RuntimeError(f"{__name__}: need one or both of: 'npr1', 'npr2'")
+            raise ValueError(f"{__name__}: need one or both of: 'npr1', 'npr2'")
 
         self.number_of_endpoints = len(params.property)
 

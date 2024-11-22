@@ -19,9 +19,10 @@ MODEL_SPECIFIC_HEADERS = {
     ],  # Named so to be different from Scaffold from diversity filter
     "Linkinvent": ["Warheads", "Linker"],
     "Mol2Mol": ["Input_SMILES"],
+    "Pepinvent": ["Masked_input_peptide", "Fillers"],
 }
 
-FRAGMENT_GENERATORS = ["Libinvent", "Linkinvent"]
+FRAGMENT_GENERATORS = ["Libinvent", "Linkinvent", "Pepinvent"]
 
 
 class RLCSVReporter:

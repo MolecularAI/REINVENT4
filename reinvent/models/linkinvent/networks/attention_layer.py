@@ -5,7 +5,6 @@ from torch import nn as tnn
 
 
 class AttentionLayer(tnn.Module):
-
     def __init__(self, num_dimensions: int):
         super(AttentionLayer, self).__init__()
 

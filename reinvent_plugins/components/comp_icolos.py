@@ -107,18 +107,18 @@ def parse_output(filename: str, name: str) -> List:
     """
 
     if not os.path.isfile(filename):
-        raise RuntimeError(f"{__name__}: failed, missing output file")
+        raise ValueError(f"{__name__}: failed, missing output file")
 
     with open(filename, "r") as jfile:
         data = json.load(jfile)
 
     # TODO: this should be properly validated
     if "results" not in data:
-        raise RuntimeError(f"{__name__}: JSON file does not contain 'results'")
+        raise ValueError(f"{__name__}: JSON file does not contain 'results'")
 
     # FIXME: check if scores are really in the same order as the SMILES
     for entry in data["results"]:
         if entry["values_key"] == name:
             return entry["values"]
 
-    raise RuntimeError(f"{__name__}: JSON file does not contain scores for {name}")
+    raise ValueError(f"{__name__}: JSON file does not contain scores for {name}")

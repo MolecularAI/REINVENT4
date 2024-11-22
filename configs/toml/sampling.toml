@@ -30,6 +30,13 @@ model_file = "priors/reinvent.prior"
 #temperature = 1.0 # temperature in multinomial sampling
 #tb_logdir = "tb_logs"  # name of the TensorBoard logging directory
 
+## Pepinvent
+#model_file = "priors/pepinvent.prior"
+#smiles_file = "pepinvent.smi"
+#sample_strategy = "beamsearch"  # multinomial or beamsearch (deterministic)
+#temperature = 1.0 # temperature in multinomial sampling
+#tb_logdir = "tb_logs"  # name of the TensorBoard logging directory
+
 output_file = 'sampling.csv'  # sampled SMILES and NLL in CSV format
 
 num_smiles = 157  # number of SMILES to be sampled, 1 per input SMILES

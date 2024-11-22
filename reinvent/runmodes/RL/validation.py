@@ -19,6 +19,7 @@ class SectionParameters(GlobalConfig):
     batch_size: int = 100
     randomize_smiles: bool = True
     unique_sequences: bool = False
+    temperature: float = 1.0
 
 
 class SectionLearningStrategy(GlobalConfig):

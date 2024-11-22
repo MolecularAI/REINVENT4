@@ -5,19 +5,14 @@ FIXME: may need to move some/all of these
 
 from __future__ import annotations
 
-__all__ = ["disable_gradients", "set_torch_device", "join_fragments"]
+__all__ = ["disable_gradients", "set_torch_device"]
 import logging
 from typing import List, TYPE_CHECKING
 
 import torch
-from rdkit import Chem
-
-from reinvent.chemistry.library_design import bond_maker, attachment_points
 
 if TYPE_CHECKING:
-    from rdkit import Chem
     from reinvent.models import ModelAdapter
-    from reinvent.models.model_factory.sample_batch import SampleBatch
 
 
 logger = logging.getLogger(__name__)
@@ -60,32 +55,3 @@ def set_torch_device(args_device: str = None, device: str = None) -> torch.devic
     logger.debug(f"{actual_device=}")
 
     return actual_device
-
-
-def join_fragments(
-    sequences: SampleBatch, reverse: bool, keep_labels: bool = False
-) -> List[Chem.Mol]:
-    """Join two fragments: for LibInvent and LinkInvent
-
-    :param sequences: a batch of sequences
-    :param reverse: order of fragments  FIXME: needs better name!
-    :returns: a list of RDKit molecules
-    """
-
-    mols = []
-
-    for sample in sequences:
-        if not reverse:  # LibInvent
-            frag1 = sample.input
-            frag2 = sample.output
-        else:  # LinkInvent
-            frag1 = sample.output
-            frag2 = sample.input
-
-        scaffold = attachment_points.add_attachment_point_numbers(frag1, canonicalize=False)
-        mol: Chem.Mol = bond_maker.join_scaffolds_and_decorations(  # may return None
-            scaffold, frag2, keep_labels_on_atoms=keep_labels
-        )
-        mols.append(mol)
-
-    return mols

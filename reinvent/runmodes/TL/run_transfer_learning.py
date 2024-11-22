@@ -10,8 +10,7 @@ import torch
 import torch.optim as topt
 
 from reinvent.runmodes import TL, create_adapter
-from reinvent.config_parse import read_smiles_csv_file
-from reinvent.runmodes.reporter.remote import setup_reporter
+from reinvent.utils import setup_reporter, read_smiles_csv_file
 from reinvent.chemistry import conversions
 from reinvent.chemistry.standardization.rdkit_standardizer import (
     RDKitStandardizer,

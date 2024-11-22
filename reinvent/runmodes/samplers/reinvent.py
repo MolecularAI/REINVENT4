@@ -4,11 +4,9 @@ __all__ = ["ReinventSampler"]
 import logging
 
 from rdkit import Chem
-from torch import Tensor
 
 from .sampler import Sampler, remove_duplicate_sequences, validate_smiles
-from reinvent.models.model_factory.sample_batch import SampleBatch
-
+from ...models.model_factory.sample_batch import SampleBatch
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +18,7 @@ class ReinventSampler(Sampler):
         """Samples the Reinvent model for the given number of SMILES
 
         :param dummy: Reinvent does not need SMILES input
-        :returns: a dataclass
+        :returns: SampleBatch
         """
 
         sampled = self.model.sample(self.batch_size)

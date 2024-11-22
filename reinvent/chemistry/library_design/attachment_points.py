@@ -5,6 +5,7 @@ from rdkit.Chem.rdchem import Mol
 
 from reinvent.chemistry import conversions, tokens
 
+
 def add_attachment_point_numbers(mol_or_smi, canonicalize=True):
     """
     Adds the numbers for the attachment points throughout the molecule.
@@ -36,16 +37,15 @@ def add_attachment_point_numbers(mol_or_smi, canonicalize=True):
                 idx += 1
         return conversions.mol_to_smiles(mol)
 
+
 def get_attachment_points(smile: str) -> List:
     """
     Gets all attachment points from SMILES string.
     :param smile: A SMILES string
     :return : A list with the numbers ordered by appearance.
     """
-    return [
-        int(match.group(1))
-        for match in re.finditer(tokens.ATTACHMENT_POINT_NUM_REGEXP, smile)
-    ]
+    return [int(match.group(1)) for match in re.finditer(tokens.ATTACHMENT_POINT_NUM_REGEXP, smile)]
+
 
 def get_attachment_points_for_molecule(molecule: Mol) -> List:
     """
@@ -61,6 +61,7 @@ def get_attachment_points_for_molecule(molecule: Mol) -> List:
             and atom.HasProp("molAtomMapNumber")
         ]
 
+
 def add_first_attachment_point_number(smi, num):
     """
     Changes/adds a number to the first attachment point.
@@ -75,6 +76,7 @@ def add_first_attachment_point_number(smi, num):
         count=1,
     )
 
+
 def remove_attachment_point_numbers(smile: str) -> str:
     """
     Removes the numbers for the attachment points throughout the molecule.
@@ -88,6 +90,7 @@ def remove_attachment_point_numbers(smile: str) -> str:
     )
     return result
 
+
 def remove_attachment_point_numbers_from_mol(molecule: Mol) -> Mol:
     """
     Removes the numbers for the attachment points throughout the molecule.
@@ -98,6 +101,7 @@ def remove_attachment_point_numbers_from_mol(molecule: Mol) -> Mol:
         for atom in molecule.GetAtoms():
             atom.ClearProp("molAtomMapNumber")
     return molecule
+
 
 def add_brackets_to_attachment_points(scaffold: str):
     """

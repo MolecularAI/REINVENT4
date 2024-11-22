@@ -34,7 +34,11 @@ class TransformerAdapter(ModelAdapter, ABC):
         output = [dto.output for dto in sampled_sequence_list]
         dataset = PairedDataset(input, output, vocabulary=self.vocabulary, tokenizer=self.tokenizer)
         data_loader = tud.DataLoader(
-            dataset, LIKELIHOOD_BATCH_SIZE, drop_last=False, shuffle=False, collate_fn=PairedDataset.collate_fn
+            dataset,
+            LIKELIHOOD_BATCH_SIZE,
+            drop_last=False,
+            shuffle=False,
+            collate_fn=PairedDataset.collate_fn,
         )
         likelihood = []
 

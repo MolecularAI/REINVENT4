@@ -11,16 +11,14 @@ import logging
 from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 import torch
-from rdkit import Chem
 
 from reinvent.runmodes import create_adapter
 from reinvent.runmodes.samplers.reports import (
     SamplingTBReporter,
     SamplingRemoteReporter,
 )
-from reinvent.runmodes.reporter.remote import get_reporter
+from reinvent.utils import get_reporter, read_smiles_csv_file
 from reinvent.runmodes.setup_sampler import setup_sampler
-from reinvent.config_parse import read_smiles_csv_file
 from reinvent.models.model_factory.sample_batch import SampleBatch, SmilesState
 from reinvent.chemistry import conversions
 from reinvent_plugins.normalizers.rdkit_smiles import normalize
@@ -35,9 +33,16 @@ HEADERS = {
     "LibinventTransformer": ("SMILES", "Scaffold", "R-groups", "NLL"),
     "LinkinventTransformer": ("SMILES", "Warheads", "Linker", "NLL"),
     "Mol2Mol": ("SMILES", "Input_SMILES", "Tanimoto", "NLL"),
+    "Pepinvent": ("SMILES", "Masked_input_peptide", "Fillers", "NLL"),
 }
 
-FRAGMENT_GENERATORS = ["Libinvent", "Linkinvent", "LinkinventTransformer"]
+FRAGMENT_GENERATORS = [
+    "Libinvent",
+    "Linkinvent",
+    "LinkinventTransformer",
+    "LibinventTransformer",
+    "Pepinvent",
+]
 
 
 def run_sampling(

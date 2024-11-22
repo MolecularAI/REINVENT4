@@ -2,8 +2,8 @@ import pytest
 
 import numpy as np
 
-from reinvent_plugins.components.comp_unwanted_substructures import Parameters
-from reinvent_plugins.components.comp_unwanted_substructures import UnwantedSubstructures
+from reinvent_plugins.components.RDKit_extra.comp_unwanted_substructures import Parameters
+from reinvent_plugins.components.RDKit_extra.comp_unwanted_substructures import UnwantedSubstructures
 
 SMILIES = [
     "CC1=C(C=C(C=C1)N2C(=O)C(=C(N2)C)N=NC3=CC=CC(=C3O)C4=CC(=CC=C4)C(=O)O)C", # Eltrombopag

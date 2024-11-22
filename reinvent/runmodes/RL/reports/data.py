@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 @dataclass
 class RLReportData:
     step: int
+    stage: int
     smilies: list
     scaffolds: list
     sampled: SampleBatch
@@ -28,6 +29,7 @@ class RLReportData:
     loss: float
     fraction_valid_smiles: float
     fraction_duplicate_smiles: float
+    df_memory_smilies: int
     bucket_max_size: int
     num_full_buckets: int
     num_total_buckets: int

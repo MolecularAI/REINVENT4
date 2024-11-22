@@ -5,8 +5,8 @@ Namespace setup and backward compatibility
 
 import sys
 
-from .logger import *
 from reinvent import models
+from reinvent.version import *
 from reinvent.models.libinvent.models import vocabulary  # not sure why needed
 
 

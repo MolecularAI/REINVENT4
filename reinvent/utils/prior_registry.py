@@ -3,6 +3,7 @@
 Maps a key to an actual prior filename.
 """
 
+__all__ = ["prior_registry"]
 import os
 import pathlib
 
@@ -14,7 +15,7 @@ if "REINVENT_PRIOR_BASE" in os.environ:
 else:
     PRIOR_BASE = pathlib.Path(reinvent.__file__).parents[1] / "priors"
 
-registry = {
+prior_registry = {
     ".reinvent": PRIOR_BASE / "reinvent.prior",
     ".libinvent": PRIOR_BASE / "libinvent.prior",
     ".linkinvent": PRIOR_BASE / "linkinvent.prior",

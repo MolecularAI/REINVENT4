@@ -32,7 +32,12 @@ def get_registry() -> dict[str, Tuple[type, type]]:
         if not basename.startswith("comp_"):
             continue
 
-        module = importlib.import_module(name)
+        try:
+            module = importlib.import_module(name)
+        except ImportError as e:
+            logger.error(f"Component {name} could not be imported: {e}")
+            continue
+
         component_classes = []
         param_class = None
 

@@ -59,6 +59,7 @@ def param(request, json_config):
             "smiles_file": json_config["MOLFORMER_SMILES_SET_PATH"],
             "sample_strategy": "multinomial",
             "num_cols": 4,
+            "temperature": 1,
         },
         "mol2mol-beam": {
             "model_file": ".m2m_high",

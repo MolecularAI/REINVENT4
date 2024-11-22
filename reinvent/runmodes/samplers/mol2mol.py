@@ -27,12 +27,10 @@ class Mol2MolSampler(Sampler):
         """Samples the Mol2Mol model for the given number of SMILES
 
         :param smilies: list of SMILES used for sampling
-        :returns: list of SampledSequencesDTO
+        :returns: SampleBatch
         """
         # Standardize smiles in the same way as training data
-        smilies = [
-            conversions.convert_to_standardized_smiles(smile) for smile in smilies
-        ]
+        smilies = [conversions.convert_to_standardized_smiles(smile) for smile in smilies]
 
         smilies = (
             [self._get_randomized_smiles(smiles) for smiles in smilies]
@@ -82,9 +80,7 @@ class Mol2MolSampler(Sampler):
 
     def _get_randomized_smiles(self, smiles: str):
         input_mol = conversions.smile_to_mol(smiles)
-        randomized_smile = conversions.mol_to_random_smiles(
-            input_mol, isomericSmiles=self.isomeric
-        )
+        randomized_smile = conversions.mol_to_random_smiles(input_mol, isomericSmiles=self.isomeric)
 
         return randomized_smile
 

@@ -10,7 +10,7 @@ from rdkit import Chem
 logger = logging.getLogger("reinvent")
 
 
-def normalize(smilies: List[str]) -> List:
+def normalize(smilies: List[str], keep_all: bool=False) -> List:
     """Remove annotations from SMILES
 
     :param smilies: list of SMILES strings
@@ -22,7 +22,11 @@ def normalize(smilies: List[str]) -> List:
         mol = Chem.MolFromSmiles(smiles)
 
         if not mol:
+            if keep_all:
+                cleaned_smilies.append(smiles)
+
             logger.warning(f"{__name__}: {smiles} could not be converted")
+
             continue
 
         for atom in mol.GetAtoms():

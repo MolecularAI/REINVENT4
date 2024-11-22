@@ -12,7 +12,7 @@ import logging
 import torch
 
 from reinvent import models
-from reinvent.prior_registry import registry
+from reinvent.utils import prior_registry
 from reinvent.models import meta_data
 
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ def resolve_model_filename(name: str) -> str:
     :returns: the filename of the model
     """
 
-    filename = registry.get(name, None)
+    filename = prior_registry.get(name, None)
 
     if not filename:
         filename = pathlib.Path(name).resolve()

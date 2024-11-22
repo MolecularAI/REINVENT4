@@ -146,9 +146,9 @@ Unit and Integration Tests
 --------------------------
 
 This is primarily for developers and admins/users who wish to ensure that the
-installation works.  The information here is not relevant to the
-practical use of REINVENT.  Please refer to _Basic Usage_ for instructions on
-how to use the `reinvent` command.
+installation works.  The information here is not relevant to the practical use
+of REINVENT.  Please refer to _Basic Usage_ for instructions on how to use the 
+`reinvent` command.
 
 The REINVENT project uses the `pytest` framework for its tests.  Before you run
 them you first have to create a configuration file for the tests.

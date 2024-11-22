@@ -31,10 +31,9 @@ class Encoder(tnn.Module):
             bidirectional=True,
         )
 
-    def forward(self, padded_seqs: torch.Tensor, seq_lengths: torch.Tensor) -> (
-        torch.Tensor,
-        (torch.Tensor, torch.Tensor),
-    ):  # pylint: disable=arguments-differ
+    def forward(
+        self, padded_seqs: torch.Tensor, seq_lengths: torch.Tensor
+    ) -> (torch.Tensor, (torch.Tensor, torch.Tensor),):  # pylint: disable=arguments-differ
         """
         Performs the forward pass.
         :param padded_seqs: A tensor with the sequences (batch, seq).

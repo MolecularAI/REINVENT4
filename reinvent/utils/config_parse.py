@@ -3,10 +3,13 @@
 FIXME: about everything
 """
 
-__all__ = ["read_smiles_csv_file", "read_toml", "read_json", "write_json"]
+__all__ = ["read_smiles_csv_file", "read_config", "write_json"]
 import sys
+import io
+from pathlib import Path
 import csv
 import json
+import yaml
 from typing import List, Tuple, Union, Optional, Callable
 
 import tomli
@@ -14,9 +17,54 @@ import tomli
 from rdkit import Chem
 
 smiles_func = Callable[[str], str]
+FMT_CONVERT = {"toml": tomli, "json": json, "yaml": yaml}
+INPUT_FORMAT_CHOICES = tuple(FMT_CONVERT.keys())
 
 
-def has_multiple_attachment_points_to_same_atom(smiles):
+def monkey_patch_yaml_load(fct):
+    def load(filehandle, loader=yaml.SafeLoader) -> dict:
+        """Monkey patch for PyYAML's load
+
+        yaml.load requires a loader or yaml.safe_load with a default
+
+        :param filehandle: the filehandle to read the YAML from
+        :returns: the parsed dictionary
+        """
+
+        return fct(filehandle, loader)
+
+    return load
+
+
+def yaml_loads(s) -> dict:
+    """loads() implementation for PyWAML
+
+    PyWAML does not have loading from string
+
+    :param s: the string to load
+    :returns: the parsed dictionary
+    """
+
+    fh = io.StringIO(s)
+    data = yaml.safe_load(fh)
+
+    return data
+
+
+# only read first YAML document
+yaml.load = monkey_patch_yaml_load(yaml.load)
+yaml.loads = yaml_loads
+
+
+def has_multiple_attachment_points_to_same_atom(smiles) -> bool:
+    """Check a molecule for multiple attachment points on one atom
+
+    An attachment point is a dummy atoom ("[*]")
+
+    :param smiles: the SMILES string
+    :returns: True if multiple attachment points exist, False otherwise
+    """
+
     mol = Chem.MolFromSmiles(smiles)
 
     if not mol:
@@ -141,34 +189,22 @@ def read_smiles_csv_file(
     return smilies
 
 
-def read_toml(filename: Optional[str]) -> dict:
-    """Read a TOML file.
+def read_config(filename: Optional[Path], fmt: str) -> dict:
+    """Read a config file in TOML, JON or (Py)YAML (safe load) format.
 
     :param filename: name of input file to be parsed as TOML, if None read from stdin
+    :param fmt: name of the format of the configuration
+    :returns: parsed dictionary
     """
 
-    if isinstance(filename, str):
+    pkg = FMT_CONVERT[fmt]
+
+    if isinstance(filename, (str, Path)):
         with open(filename, "rb") as tf:
-            config = tomli.load(tf)
+            config = pkg.load(tf)
     else:
         config_str = "\n".join(sys.stdin.readlines())
-        config = tomli.loads(config_str)
-
-    return config
-
-
-def read_json(filename: Optional[str]) -> dict:
-    """Read JSON file.
-
-    :param filename: name of input file to be parsed as JSON, if None read from stdin
-    """
-
-    if isinstance(filename, str):
-        with open(filename, "rb") as jf:
-            config = json.load(jf)
-    else:
-        config_str = "\n".join(sys.stdin.readlines())
-        config = json.loads(config_str)
+        config = pkg.loads(config_str)
 
     return config
 
@@ -179,5 +215,6 @@ def write_json(data: str, filename: str) -> None:
     :param data: data in a format JSON accepts
     :param filename: output filename
     """
+
     with open(filename, "w") as jf:
         json.dump(data, jf, ensure_ascii=False, indent=4)

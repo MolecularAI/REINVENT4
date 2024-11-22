@@ -44,8 +44,8 @@ class SamplingTBReporter:
 
         self.reporter.add_text(
             "Data",
-            f"Valid SMILES: {fraction_valid_smiles}%  "
-            f"Unique Molecules: {fraction_unique_molecules}% ",
+            f"Valid SMILES fraction: {fraction_valid_smiles}  "
+            f"Unique Molecules fraction: {fraction_unique_molecules} ",
         )
 
         if image_tensor is not None:

@@ -1,10 +1,6 @@
 import pytest
 
-from reinvent.runmodes.reporter.remote import (
-    setup_reporter,
-    get_reporter,
-    RemoteJSONReporter,
-)
+from reinvent.utils.logmon import RemoteJSONReporter, get_reporter, setup_reporter
 
 
 def test_noop_reporter_without_setup():

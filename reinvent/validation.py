@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class GlobalConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid", protected_namespaces = ())
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
 class ReinventConfig(GlobalConfig):
@@ -18,9 +18,9 @@ class ReinventConfig(GlobalConfig):
     parameters: dict
 
     # run mode dependent
-    scoring: Optional[dict] = None # RL, scoring
+    scoring: Optional[dict] = None  # RL, scoring
     scheduler: Optional[dict] = None  # TL
-    responder: Optional[dict] = None # Rl, TL, sampling
+    responder: Optional[dict] = None  # Rl, TL, sampling
 
     # RL
     stage: Optional[list] = None

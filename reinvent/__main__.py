@@ -1,3 +1,3 @@
-from .Reinvent import main
+from .Reinvent import main_script
 
-main()
+main_script()

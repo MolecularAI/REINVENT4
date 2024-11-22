@@ -119,7 +119,7 @@ class ROCSOverlay:
         if oeshape.OEReadShapeQuery(self.rocs_input, qry):
             overlay.SetupRef(qry)
         else:
-            raise Exception("error reading in SQ file")
+            raise ValueError("error reading in SQ file")
         self.rocs_overlay = overlay
 
     def _setup_overlay_from_sdf_file(self):
@@ -130,7 +130,7 @@ class ROCSOverlay:
         if input_stream.open(self.rocs_input):
             oechem.OEReadMolecule(input_stream, refmol)
         else:
-            raise Exception("error reading in ROCS sdf file")
+            raise ValueError("error reading in ROCS sdf file")
         self.overlay_prep.Prep(refmol)
         overlay = oeshape.OEMultiRefOverlay()
         overlay.SetupRef(refmol)
