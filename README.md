@@ -98,7 +98,7 @@ Tutorials / `Jupyter` notebooks
 
 Basic instructions can be found in the comments in the config examples in `config/toml`.
 
-Notebooks are provided in the `notebook/` directory.  Please note that we
+Notebooks are provided in the `notebooks/` directory.  Please note that we
 provide the notebooks in jupytext "light script" format.  To work with the light
 scripts you will need to install jupytext.  A few other packages will come in handy too.
 
@@ -106,7 +106,7 @@ scripts you will need to install jupytext.  A few other packages will come in ha
 pip install jupytext mols2grid seaborn
 ```
 
-The Python files in `notebook/` can then be converted to a notebook e.g.
+The Python files in `notebooks/` can then be converted to a notebook e.g.
 
 ```shell
 jupytext -o Reinvent_demo.ipynb Reinvent_demo.py
