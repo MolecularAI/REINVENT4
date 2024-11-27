@@ -98,7 +98,7 @@ Tutorials / `Jupyter` notebooks
 
 Basic instructions can be found in the comments in the config examples in `config/toml`.
 
-Notebooks are provided in the `notebook/` directory.  Please note that we
+Notebooks are provided in the `notebooks/` directory.  Please note that we
 provide the notebooks in jupytext "light script" format.  To work with the light
 scripts you will need to install jupytext.  A few other packages will come in handy too.
 
