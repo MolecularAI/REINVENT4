@@ -106,7 +106,7 @@ scripts you will need to install jupytext.  A few other packages will come in ha
 pip install jupytext mols2grid seaborn
 ```
 
-The Python files in `notebook/` can then be converted to a notebook e.g.
+The Python files in `notebooks/` can then be converted to a notebook e.g.
 
 ```shell
 jupytext -o Reinvent_demo.ipynb Reinvent_demo.py
