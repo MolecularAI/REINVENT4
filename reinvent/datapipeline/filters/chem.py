@@ -128,33 +128,6 @@ class RDKitFilter:
             else:
                 raise
 
-        # FIXME: an atom may have 3 ring numbers or more e.g.
-        #        C%108%11 which is %10 8 %11 and should become 8%11 %10
-        #        for the tokenizer or be caught in a single regex maybe like
-        #        "\d*(?:%\d+){1,}"
         #        clean up unwanted halogens here!
-        if "%" in new_smiles:
-            smiles_patterns = SMILES_TOKENS_REGEX.findall(new_smiles)
-            patterns = []
-
-            for pattern in smiles_patterns:
-                # This needs to be done here because RDKit may change
-                # ring numbering
-                # Handles labels in the form %NNN or %NNNN
-                if pattern[0] == "%":
-                    # FIXME: safeguard against multi ring labels for now
-                    if int(pattern[1:]) > config.max_num_rings:
-                        return None
-
-                    elem_len = len(pattern[1:])
-
-                    if elem_len == 3:
-                        pattern = f"{pattern[3:]}%{pattern[1:3]}"
-                    elif elem_len == 4:
-                        pattern = f"%{pattern[1:3]}%{pattern[3:]}"
-
-                patterns.append(pattern)
-
-            new_smiles = "".join(patterns)
 
         return new_smiles

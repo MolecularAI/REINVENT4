@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 # adapted from SmilesPE-0.0.3
 SMILES_TOKENS_REGEX = re.compile(
-    r"(\[[^]]+]|Br?|Cl?|N|O|S|P|F|I|b|c|n|o|s|p|\(|\)|\.|=|#|-|\+|\\|/|:|~|@|\?|>>?|\*|\$|%\d+|\d)"
+    r"(\[[^]]+]|Br?|Cl?|N|O|S|P|F|I|b|c|n|o|s|p|\(|\)|\.|=|#|-|\+|\\|/|:|~|@|\?|>>?|\*|\$|%\d{2}|\d)"
 )
 ELEMENT = re.compile(r"[A-Za-z]+")
 ISOTOPE = re.compile(r"\[\d+")
