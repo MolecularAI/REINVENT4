@@ -79,7 +79,7 @@ Run reinforcement learning (RL) and/or curriculum learning (CL).  CL is simply a
 
 | Parameter            | Description                                                                                                                    |
 |----------------------|--------------------------------------------------------------------------------------------------------------------------------|
-| run\_type            | set to "transfer\_learning"                                                                                                    |
+| run\_type            | set to "staged\_learning"                                                                                                    |
 | device               | set the torch device e.g "cuda:0" or "cpu"                                                                                     |
 | use\_cuda            | (deprecated) "true" to use GPU, "false" to use CPU                                                                             |
 | json\_out\_config    | filename of the TOML file in JSON format                                                                                       |
