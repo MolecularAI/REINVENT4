@@ -33,14 +33,15 @@ Interface to the scoring component.  Does not use any models.
 | Parameter           | Description                                                                                             |
 |---------------------|---------------------------------------------------------------------------------------------------------|
 | run\_type           | set to "scoring"                                                                                        |
-| device             | set the torch device e.g "cuda:0" or "cpu"                                                             |
-| use\_cuda          | (deprecated) "true" to use GPU, "false" to use CPU                                                     |
-| json\_out\_config     | filename of the TOML file in JSON format                                                                |
+| device              | set the torch device e.g "cuda:0" or "cpu"                                                              |
+| use\_cuda           | (deprecated) "true" to use GPU, "false" to use CPU                                                      |
+| json\_out\_config   | filename of the TOML file in JSON format                                                                |
 | [parameters]        | starts the parameter section                                                                            |
 | smiles\_file        | SMILES filename, SMILES are expected in the first column                                                |
+| output\_csv         | Name of the output CSV file to write                                                                    |
 | [scoring\_function] | starts the section for scoring function setup                                                           |
 | [[components]]      | start the section for a component within [scoring\_function] , note the double brackets to start a list |
-| type                | "custom\_sum" for weighted arithmetic mean or "custom\_produc" for weighted geometric mean                |
+| type                | "custom\_sum" for weighted arithmetic mean or "custom\_produc" for weighted geometric mean              |
 | component\_type     | name of the component, FIXME: list all                                                                  |
 | name                | a user chosen name for ouput in CSV files, etc.                                                         |
 | weight              | the weight for this component                                                                           |
