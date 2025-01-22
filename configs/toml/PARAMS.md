@@ -66,6 +66,7 @@ Run transfer learning on a set of input SMILES.
 | sample\_batch\_size    | batch size to calculate the sample loss and other statistics  |
 | num\_refs              | number of references for similarity if > 0, DO NOT use with large dataset (> 200 molecules) |
 | input\_model\_file     | filename of input prior model                                 |
+| validation\_smiles\_file | SMILES file for validation                                  |
 | smiles\_file           | SMILES file for Lib/Linkinvent and Molformer                  |
 | output\_model\_file     | filename of the final model                                   |
 | pairs.upper\_threshold | Molformer: upper similarity                                   |
