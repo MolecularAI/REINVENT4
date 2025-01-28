@@ -17,6 +17,10 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 
+#ISIM imports
+from iSIM.comp import calculate_isim
+from iSIM.utils import binary_fps
+
 from .reports import RLTBReporter, RLCSVReporter, RLRemoteReporter, RLReportData
 from reinvent.runmodes.RL.data_classes import ModelState
 from reinvent.models.model_factory.sample_batch import SmilesState
@@ -310,6 +314,10 @@ class Learning(ABC):
         fract_duplicate_smiles = num_duplicate_smiles / len(mask_duplicates)
 
         smilies = np.array(self.sampled.smilies)[mask_valid]
+        #Lines to compute iSIM
+        fingerprints = binary_fps(smilies, fp_type='RDKIT', n_bits=None) #Use isim utilities to compute RDKIT binary fingerprints
+        isim = calculate_isim(fingerprints, n_ary ='JT') #Use isim calculator for average Tanimoto similarity
+
         if self.prior.model_type == "Libinvent":
             smilies = normalize(smilies, keep_all=True)
         mask_idx = (np.argwhere(mask_valid).flatten(),)
@@ -318,6 +326,7 @@ class Learning(ABC):
             step=step_no,
             stage=self.stage_no,
             smilies=smilies,
+            isim=isim, #Add isim to report_data
             scaffolds=scaffolds,
             sampled=self.sampled,
             score_results=score_results,

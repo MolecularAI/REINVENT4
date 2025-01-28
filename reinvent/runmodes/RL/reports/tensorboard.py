@@ -56,6 +56,8 @@ class RLTBReporter:
             self.reporter.add_scalar(f"{name} (raw)", np.nanmean(_scores[mask_idx]), step)
 
         self.reporter.add_scalar(f"Loss", data.loss, step)
+        #Add iSIM to board as scalar per step 
+        self.reporter.add_scalar(f"iSIM: Average similarity", data.isim, step)
 
         # NOTE: for some reason this breaks on Windows because the necessary
         #       subdirectory cannot be created

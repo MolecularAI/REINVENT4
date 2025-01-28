@@ -17,6 +17,7 @@ class RLReportData:
     step: int
     stage: int
     smilies: list
+    isim: float
     scaffolds: list
     sampled: SampleBatch
     score_results: ScoreResults
