@@ -20,7 +20,7 @@ class TestLibInventLikelihoodSMILES(unittest.TestCase):
         dto3 = SampledSequencesDTO(SCAFFOLD_TRIPLE_POINT, THREE_DECORATIONS, 0.3)
         dto4 = SampledSequencesDTO(SCAFFOLD_QUADRUPLE_POINT, FOUR_DECORATIONS, 0.5)
         self.sampled_sequence_list = [dto1, dto2, dto3, dto4]
-        save_dict = torch.load(self.json_config["LIBINVENT_PRIOR_PATH"], map_location=self.device)
+        save_dict = torch.load(self.json_config["LIBINVENT_PRIOR_PATH"], map_location=self.device, weights_only=False)
         model = LibinventModel.create_from_dict(save_dict, "inference", torch.device(self.device))
         set_torch_device(self.device)
 

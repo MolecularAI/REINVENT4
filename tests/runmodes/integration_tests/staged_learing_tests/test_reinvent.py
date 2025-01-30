@@ -116,7 +116,7 @@ def test_staged_learning(setup, tmp_path, pytestconfig):
 
     assert checkpoint_file.exists()
 
-    model = torch.load(checkpoint_file)
+    model = torch.load(checkpoint_file, weights_only=False)
     keys = list(model.keys())
 
     assert keys == [

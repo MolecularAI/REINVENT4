@@ -17,7 +17,7 @@ from tests.test_data import PEPINVENT_INPUT1, PEPINVENT_INPUT2, PEPINVENT_INPUT3
 class TestPepInventModel(unittest.TestCase):
     def setUp(self):
 
-        save_dict = torch.load(self.json_config["PEPINVENT_PRIOR_PATH"], map_location=self.device)
+        save_dict = torch.load(self.json_config["PEPINVENT_PRIOR_PATH"], map_location=self.device, weights_only=False)
         self._model = PepinventModel.create_from_dict(
             save_dict, "inference", torch.device(self.device)
         )

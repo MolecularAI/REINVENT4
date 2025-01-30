@@ -17,7 +17,7 @@ class TestLibInventLikelihoodSMILES(unittest.TestCase):
         dto2 = SampledSequencesDTO(HEXANE, BUTANE, 0.1)
         self.sampled_sequence_list = [dto1, dto2]
 
-        save_dict = torch.load(self.json_config["LIBINVENT_CHEMBL_PRIOR_PATH"], map_location=self.device)
+        save_dict = torch.load(self.json_config["LIBINVENT_CHEMBL_PRIOR_PATH"], map_location=self.device, weights_only=False)
         model = DecoratorModel.create_from_dict(save_dict, "inference", torch.device(self.device))
         set_torch_device(self.device)
 
