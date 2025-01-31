@@ -16,7 +16,7 @@ class TestLinkInventLikelihoodSMILES(unittest.TestCase):
         dto1 = SampledSequencesDTO(ETHANE, PROPANE, 0.9)
         dto2 = SampledSequencesDTO(HEXANE, BUTANE, 0.1)
         self.sampled_sequence_list = [dto1, dto2]
-        save_dict = torch.load(self.json_config["LINKINVENT_PRIOR_PATH"], map_location=self.device)
+        save_dict = torch.load(self.json_config["LINKINVENT_PRIOR_PATH"], map_location=self.device, weights_only=False)
         model = LinkinventModel.create_from_dict(save_dict, "inference", torch.device(self.device))
         set_torch_device(self.device)
 

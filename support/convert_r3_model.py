@@ -79,7 +79,7 @@ def convert_model(in_filename: str, out_filename: str) -> None:
         else:
             sys.modules[module] = path
 
-    model = torch.load(in_filename)
+    model = torch.load(in_filename, weights_only=False)
 
     if "network_parameter" in model and isinstance(
         model["network_parameter"], MolformerNetworkParameters

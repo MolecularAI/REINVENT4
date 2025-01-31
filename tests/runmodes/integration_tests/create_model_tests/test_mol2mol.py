@@ -34,7 +34,7 @@ class TestCreateModel(unittest.TestCase):
             output_model_path=self.output_file,
         )
 
-        model = torch.load(self.output_file)
+        model = torch.load(self.output_file, weights_only=False)
         keys = list(model.keys())
 
         self.assertEqual(

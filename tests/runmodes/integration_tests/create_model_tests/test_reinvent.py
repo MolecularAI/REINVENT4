@@ -37,7 +37,7 @@ class TestCreateModel(unittest.TestCase):
             metadata={"data_source": "pytest", "comment": "pytest"},
         )
 
-        model = torch.load(self.output_file)
+        model = torch.load(self.output_file, weights_only=False)
         keys = list(model.keys())
 
         self.assertEqual(

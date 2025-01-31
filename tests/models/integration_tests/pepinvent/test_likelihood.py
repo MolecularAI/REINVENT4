@@ -16,7 +16,7 @@ class TestPepInventLikelihoodSMILES(unittest.TestCase):
         dto1 = SampledSequencesDTO(PEPINVENT_INPUT1, PEPINVENT_OUTPUT1, 0.9)
         dto2 = SampledSequencesDTO(PEPINVENT_INPUT2, PEPINVENT_OUTPUT2, 0.1)
         self.sampled_sequence_list = [dto1, dto2]
-        save_dict = torch.load(self.json_config["PEPINVENT_PRIOR_PATH"], map_location=self.device)
+        save_dict = torch.load(self.json_config["PEPINVENT_PRIOR_PATH"], map_location=self.device, weights_only=False)
         model = PepinventModel.create_from_dict(save_dict, "inference", torch.device(self.device))
         set_torch_device(self.device)
 

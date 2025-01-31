@@ -102,7 +102,7 @@ def main():
     device = torch.device("cpu")
 
     logger.info(f"Reading {args.input_model_file}")
-    model = torch.load(args.input_model_file, map_location=device)
+    model = torch.load(args.input_model_file, map_location=device, weights_only=False)
 
     if "metadata" not in model:
         model["metadata"] = meta_data.ModelMetaData(
@@ -118,7 +118,7 @@ def main():
     logger.info(f"Writing {args.output_model_file}")
     torch.save(new_model, args.output_model_file)
 
-    model = torch.load(args.output_model_file, map_location=device)
+    model = torch.load(args.output_model_file, map_location=device, weights_only=False)
     valid = check_valid_hash(model)
 
     if not valid:

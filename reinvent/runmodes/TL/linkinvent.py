@@ -15,7 +15,7 @@ this means that the warheads/input are in column 1 and the linker/target in
 column 2.  See (the model is read from the torch pickle file)
 
 >>> import torch
->>> model = torch.load('link_invent_prior.model')
+>>> model = torch.load('link_invent_prior.model', weights_only=False)
 >>> model['vocabulary'].input.vocabulary.tokens()
 >>> model['vocabulary'].target.vocabulary.tokens()
 """
