@@ -50,7 +50,7 @@ def test_transfer_learning(setup, tmp_path, pytestconfig):
 
     assert len(checkpoint_files) == config["parameters"]["num_epochs"]
 
-    model = torch.load(checkpoint_files[-1])
+    model = torch.load(checkpoint_files[-1], weights_only=False)
     keys = list(model.keys())
 
     assert keys == [

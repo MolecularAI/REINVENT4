@@ -54,7 +54,7 @@ class LinkInventModel:
         :return: An instance of the network
         """
 
-        save_dict = torch.load(file_path, map_location=device)
+        save_dict = torch.load(file_path, map_location=device, weights_only=False)
         return cls.create_from_dict(save_dict, mode, device)
 
     @classmethod

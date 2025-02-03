@@ -28,7 +28,7 @@ def create_adapter(dict_filename: str, mode: str, device: torch.device) -> tuple
     """
 
     dict_filename = resolve_model_filename(dict_filename)
-    save_dict = torch.load(dict_filename, map_location="cpu")
+    save_dict = torch.load(dict_filename, map_location="cpu", weights_only=False)
     check_metadata(dict_filename, save_dict)
 
     if "model_type" in save_dict:

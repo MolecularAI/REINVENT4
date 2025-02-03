@@ -42,7 +42,7 @@ def test_transfer_learning(setup, tmp_path, pytestconfig):
 
     assert len(checkpoint_files) == 1
 
-    model = torch.load(config["parameters"]["output_model_file"])
+    model = torch.load(config["parameters"]["output_model_file"], weights_only=False)
     keys = list(model.keys())
 
     assert keys == [
