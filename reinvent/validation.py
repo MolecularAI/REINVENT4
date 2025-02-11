@@ -15,6 +15,7 @@ class ReinventConfig(GlobalConfig):
     use_cuda: Optional[bool] = Field(True, deprecated="use 'device' instead")
     tb_logdir: Optional[str] = None
     json_out_config: Optional[str] = None
+    seed: Optional[int] = None
     parameters: dict
 
     # run mode dependent
