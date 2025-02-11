@@ -219,7 +219,7 @@ def run_staged_learning(
     )
 
     parameters = config.parameters
-
+    
     # NOTE: The model files are a dictionary with model attributes from
     #       Reinvent and a set of tensors, each with an attribute for the
     #       device (CPU or GPU) and if gradients are required
@@ -301,7 +301,7 @@ def run_staged_learning(
     distance_threshold = parameters.distance_threshold
 
     model_learning = getattr(RL, f"{model_type}Learning")
-
+    
     if callable(write_config):
         write_config(config.model_dump())
 
@@ -329,7 +329,7 @@ def run_staged_learning(
             else:
                 state = ModelState(agent, package.diversity_filter)
                 logger.debug(f"Using stage DF")
-
+            
             optimize = model_learning(
                 max_steps=package.max_steps,
                 stage_no=stage_no,
@@ -344,6 +344,7 @@ def run_staged_learning(
                 inception=inception,
                 responder_config=responder_config,
                 tb_logdir=logdir,
+                tb_isim=parameters.tb_isim,
             )
 
             if device.type == "cuda" and torch.cuda.is_available():
