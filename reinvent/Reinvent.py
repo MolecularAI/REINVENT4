@@ -134,9 +134,12 @@ def main(args: Any):
 
     seed = input_config.get("seed", None)
 
-    if args.seed is not None:
+    if args.seed is None:
         set_seed(seed)
         logger.info(f"Set seed for all random generators to {seed}")
+    else:
+        set_seed(args.seed)
+        logger.info(f"Set seed for all random generators to {args.seed}")
 
     tb_logdir = input_config.get("tb_logdir", None)
 
