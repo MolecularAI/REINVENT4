@@ -56,6 +56,7 @@ class Learning(ABC):
         inception: Inception = None,
         responder_config: dict = None,
         tb_logdir: str = None,
+        tb_isim: bool = False,
     ):
         """Setup of the common framework"""
 
@@ -98,13 +99,14 @@ class Learning(ABC):
         self.reporters = []
         self.tb_reporter = None
         self._setup_reporters(tb_logdir)
+        self.tb_isim = tb_isim
 
         self.start_time = 0
 
     def optimize(self, converged: terminator_callable) -> bool:
         """Run the multistep optimization loop
 
-        Sample from the agent, score the SNILES, update the agent parameters.
+        Sample from the agent, score the SMILES, update the agent parameters.
         Log some key characteristics of the current step.
 
         :param converged: a callable that determines convergence
@@ -314,9 +316,11 @@ class Learning(ABC):
         fract_duplicate_smiles = num_duplicate_smiles / len(mask_duplicates)
 
         smilies = np.array(self.sampled.smilies)[mask_valid]
-        #Lines to compute iSIM
-        fingerprints = binary_fps(smilies, fp_type='RDKIT', n_bits=None) #Use isim utilities to compute RDKIT binary fingerprints
-        isim = calculate_isim(fingerprints, n_ary ='JT') #Use isim calculator for average Tanimoto similarity
+        
+        isim = None
+        if self.tb_isim:
+            fingerprints = binary_fps(smilies, fp_type='RDKIT', n_bits=None) #Use isim utilities to compute RDKIT binary fingerprints
+            isim = calculate_isim(fingerprints, n_ary ='JT') #Use isim calculator for average Tanimoto similarity
 
         if self.prior.model_type == "Libinvent":
             smilies = normalize(smilies, keep_all=True)
