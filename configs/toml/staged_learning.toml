@@ -12,7 +12,6 @@ run_type = "staged_learning"
 device = "cuda:0"  # set torch device e.g. "cpu"
 tb_logdir = "tb_logs"  # name of the TensorBoard logging directory
 json_out_config = "_staged_learning.json"  # write this TOML to JSON
-#seed = 42  # set the random seeds for reproducibility
 
 [parameters]
 
