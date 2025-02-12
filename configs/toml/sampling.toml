@@ -5,7 +5,6 @@
 run_type = "sampling"
 device = "cuda:0"  # set torch device e.g. "cpu"
 json_out_config = "_sampling.json"  # write this TOML to JSON
-#seed = 42  # set the random seeds for reproducibility
 
 [parameters]
 
