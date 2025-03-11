@@ -65,6 +65,7 @@ dependencies = [
   "tqdm >=4.64,<5",
   "typing_extensions >=4.0,<5",
   "xxhash >=3,<4",
+  "iSIM @ git+ssh://git@ssh.github.com/mqcomplab/iSIM.git",
 ]
 
 [project.scripts]
