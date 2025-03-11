@@ -198,12 +198,14 @@ def read_config(filename: Optional[Path], fmt: str) -> dict:
     """
 
     pkg = FMT_CONVERT[fmt]
+    
     if isinstance(filename, (str, Path)):
         with open(filename, "rb") as tf:
             config = pkg.load(tf)
     else:
         config_str = "\n".join(sys.stdin.readlines())
         config = pkg.loads(config_str)
+    
     return config
 
 
