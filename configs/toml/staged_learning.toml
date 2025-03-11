@@ -24,9 +24,13 @@ summary_csv_prefix = "staged_learning"  # prefix for the CSV file
 use_checkpoint = false  # if true read diversity filter from agent_file
 purge_memories = false  # if true purge all diversity filter memories after each stage
 
+
 ## Reinvent
 prior_file = "priors/reinvent.prior"
 agent_file = "priors/reinvent.prior"
+
+##ISIM
+tb_isim = false # if true track isim value of smilies across training epochs in tensorboard 
 
 ## LibInvent
 #prior_file = "priors/libinvent.prior"
@@ -176,7 +180,7 @@ max_steps = 100
 
 [stage.scoring]  # the scoring components can be read from a score file
 type = "geometric_mean"  # aggregation function
-filename = "stage2_scoring.toml"  # file with scoring setup for this stage
+filename = "configs/toml/stage2_scoring.toml"  # file with scoring setup for this stage
 filetype = "toml"  # file format: TOML or JSON, no default, must be present
 
 
