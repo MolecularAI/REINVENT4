@@ -132,9 +132,9 @@ def main(args: Any):
     else:
         logger.info(f"Using CPU {platform.processor()}")
 
-    seed = input_config.get("seed", None)
+    seed = args.seed or input_config.get("seed", None)
 
-    if args.seed is not None:
+    if seed is not None:
         set_seed(seed)
         logger.info(f"Set seed for all random generators to {seed}")
 

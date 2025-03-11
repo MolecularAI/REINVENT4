@@ -9,7 +9,6 @@ device = "cuda:0"  # set torch device e.g. "cpu"
 tb_logdir = "tb_TL"  # name of the TensorBoard logging directory
 json_out_config = "json_transfer_learning.json"  # write this TOML to JSON
 
-
 [parameters]
 
 num_epochs = 3  # number of steps to run
