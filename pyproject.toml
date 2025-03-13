@@ -61,11 +61,11 @@ dependencies = [
   "tenacity >=8.2,<9",
   "tensorboard >=2,<3",
   "tomli >=2.0,<3",
-  "torch==2.5.1+cu124", # Requires --extra-index-url https://download.pytorch.org/whl/cu121
+  "torch==2.5.1+cu124", # Requires --extra-index-url https://download.pytorch.org/whl/cu124
   "tqdm >=4.64,<5",
   "typing_extensions >=4.0,<5",
   "xxhash >=3,<4",
-  "iSIM @ git+ssh://git@ssh.github.com/mqcomplab/iSIM.git",
+  "iSIM @ git+https://github.com/mqcomplab/iSIM.git",
 ]
 
 [project.scripts]
