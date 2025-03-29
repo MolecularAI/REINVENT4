@@ -43,9 +43,7 @@ class RLTBReporter:
             for transformed_scores in transformed_result.transformed_scores:
                 scores.append(transformed_scores)
 
-            for original_scores in np.array(
-                transformed_result.component_result.fetch_scores(results.smilies, transpose=True)
-            ):
+            for original_scores in transformed_result.component_result.scores:
                 raw_scores.append(original_scores)
 
         for name, _scores in zip(names, scores):
