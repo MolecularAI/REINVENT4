@@ -43,7 +43,9 @@ class RLTBReporter:
             for transformed_scores in transformed_result.transformed_scores:
                 scores.append(transformed_scores)
 
-            for original_scores in transformed_result.component_result.scores:
+            for original_scores in np.array(
+                transformed_result.component_result.fetch_scores(results.smilies, transpose=True)
+            ):
                 raw_scores.append(original_scores)
 
         for name, _scores in zip(names, scores):
@@ -56,9 +58,6 @@ class RLTBReporter:
             self.reporter.add_scalar(f"{name} (raw)", np.nanmean(_scores[mask_idx]), step)
 
         self.reporter.add_scalar(f"Loss", data.loss, step)
-        #Add iSIM to board as scalar per step 
-        if data.isim:
-            self.reporter.add_scalar(f"iSIM: Average similarity", data.isim, step)
 
         # NOTE: for some reason this breaks on Windows because the necessary
         #       subdirectory cannot be created
@@ -95,3 +94,6 @@ class RLTBReporter:
             self.reporter.add_image(
                 f"First {sample_size} Structures", image_tensor, step, dataformats="CHW"
             )  # channel, height, width
+
+        if data.isim:
+            self.reporter.add_scalar(f"iSIM: Average similarity", data.isim, step)

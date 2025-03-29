@@ -20,7 +20,7 @@ class SectionParameters(GlobalConfig):
     randomize_smiles: bool = True
     unique_sequences: bool = False
     temperature: float = 1.0
-    tb_isim: Optional[bool] = False  #Add iSIM tracking as optional parameter
+    tb_isim: Optional[bool] = False  # Add iSIM tracking as optional parameter
 
 
 class SectionLearningStrategy(GlobalConfig):
