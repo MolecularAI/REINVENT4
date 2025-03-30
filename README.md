@@ -46,24 +46,17 @@ Installation
 ------------
 
 1. Clone this Git repository.
-1. Install a compatible version of Python, for example with [Conda](https://conda.io/projects/conda/en/latest/index.html) (other virtual environments like Docker, pyenv, or the system package manager work too).
+1. Create a Python environment and install a compatible version of Python, for example with [Conda](https://conda.io/projects/conda/en/latest/index.html) (other virtual environments like Docker, pyenv, or the system package manager work too).
     ```shell
     conda create --name reinvent4 python=3.10
     conda activate reinvent4
     ```
-1. Change directory to the repository and install the dependencies from the lockfile:
+1. Change directory to the repository and install all dependencies.  You will need to set the right processor type, see [PyTorch versions](https://pytorch.org/get-started/locally/). Linux supports CUDA (e.g. "cu124"), ROCm (e.g. "rocm6.2.4")  and CPU. Windows supports CUDA and CPU.  MacOSX only supports CPU (use "mac" as processor type!).
     ```shell
-    pip install -r requirements-linux-64.lock
+    python install.py --help
+    python install.py cu124  # or rocm6.2.4, cpu, mac, etc.
     ```
-   1. _Optional_: if you want to use **AMD GPUs** on Linux you would need to install the [ROCm PyTorch version](https://pytorch.org/get-started/locally/) manually _after_ installation of the dependencies in point 3, e.g.
-        ```shell
-        pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/rocm5.7
-        ```
-   1. _Optional_: use requirements file `requirements-macOS.lock` for MacOSX. 
-1. Install the tool. The dependencies were already installed in the previous step, so there is no need to install them again (flag `--no-deps).  If you want to install in editable mode (changes to the code are automatically available), add -e before the dot.
-    ```shell
-    pip install --no-deps .
-    ```
+Optionally, you can select dependencies "openeye" (for ROCS; you need to obtain your own license), "isim" for similarity tracking in TensorBoard or "none" to skip all.  The default is installation of "all" dependencies.  See the help text from the install script for details.
 1. Test the tool. The installer has added a script `reinvent` to your PATH.
     ```shell
     reinvent --help
