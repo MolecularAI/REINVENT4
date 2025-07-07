@@ -15,6 +15,9 @@ logger = logging.getLogger("reinvent")
 
 def normalize_smiles(func: Callable):
     def wrapper(self, smilies: List[str]):
+        if getattr(self, "skip_normalize", False):
+            return func(self, smilies)
+
         normalizer = getattr(normalizers, self.smiles_type)
 
         cleaned_smilies = normalizer.normalize(smilies)

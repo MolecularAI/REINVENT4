@@ -1,4 +1,4 @@
-"""Dataclass for reporting """
+"""Dataclass for reporting"""
 
 __all__ = ["TLReportData"]
 from dataclasses import dataclass
@@ -18,3 +18,4 @@ class TLReportData:
     fraction_duplicates: float
     internal_diversity: float
     mean_nll_validation: float = None
+    zero_epoch: bool = False

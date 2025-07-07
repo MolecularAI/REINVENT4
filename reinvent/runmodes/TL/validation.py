@@ -15,6 +15,7 @@ class SectionParameters(GlobalConfig):
     smiles_file: str
     sample_batch_size: int = Field(100, ge=100)
     save_every_n_epochs: int = Field(1, ge=1)
+    training_zero_epoch_start: bool = False
     starting_epoch: int = Field(1, ge=1)
     shuffle_each_epoch: bool = True
     num_refs: int = Field(0, ge=0)

@@ -5,10 +5,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, TYPE_CHECKING
 
-from torch import Tensor
-
-if TYPE_CHECKING:
-    import numpy as np
+import torch
+import numpy as np
 
 
 class SmilesState(Enum):
@@ -38,7 +36,7 @@ class SampleBatch:
 
     items1: List[str] | None  # SMILES, None for Reinvent
     items2: List[str]  # SMILES
-    nlls: Tensor  # negative log likelihoods from the model
+    nlls: torch.Tensor  # negative log likelihoods from the model
     smilies: List[str] = None  # processed SMILES
     states: np.ndarray[SmilesState] = None  # states for items2
 
@@ -123,6 +121,6 @@ class SampleBatch:
         assert len(transpose) == 5
 
         sample_batch = cls(*transpose)
-        sample_batch.nlls = Tensor(sample_batch.nlls)
+        sample_batch.nlls = torch.Tensor(sample_batch.nlls)
 
         return sample_batch

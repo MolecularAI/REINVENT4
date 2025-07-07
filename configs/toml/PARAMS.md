@@ -12,7 +12,6 @@ Sample a number of SMILES with associated NLLs.
 | run\_type          | set to "sampling"                                                                                    |
 | device             | set the torch device e.g "cuda:0" or "cpu"                                                           |
 | use\_cuda          | (deprecated) "true" to use GPU, "false" to use CPU                                                   |
-| seed               | sets the random seeds for reproducibility               |
 | json\_out\_config    | filename of the TOML file in JSON format                                                             |
 | [parameters]       | starts the parameter section                                                                         |
 | model\_file        | filename to model file from which to sample                                                          |
@@ -36,7 +35,6 @@ Interface to the scoring component.  Does not use any models.
 | run\_type           | set to "scoring"                                                                                        |
 | device              | set the torch device e.g "cuda:0" or "cpu"                                                              |
 | use\_cuda           | (deprecated) "true" to use GPU, "false" to use CPU                                                      |
-| seed               | sets the random seeds for reproducibility (no effect in scoring mode)               |
 | json\_out\_config   | filename of the TOML file in JSON format                                                                |
 | [parameters]        | starts the parameter section                                                                            |
 | smiles\_file        | SMILES filename, SMILES are expected in the first column                                                |
@@ -58,7 +56,6 @@ Run transfer learning on a set of input SMILES.
 | run\_type              | set to "transfer\_learning"                                    |
 | device             | set the torch device e.g "cuda:0" or "cpu"                                                             |
 | use\_cuda          | (deprecated) "true" to use GPU, "false" to use CPU                                                     |
-| seed               | sets the random seeds for reproducibility               |
 | json\_out\_config        | filename of the TOML file in JSON format                      |
 | tb\_logdir             | if not empty string name of the TensorBoard logging directory |
 | number\_of\_cpus       | optional parameter to control number of cpus for pair  generation. If not provided, only one CPU will be used. |
@@ -87,7 +84,6 @@ Run reinforcement learning (RL) and/or curriculum learning (CL).  CL is simply a
 | run\_type            | set to "staged\_learning"                                                                                                    |
 | device               | set the torch device e.g "cuda:0" or "cpu"                                                                                     |
 | use\_cuda            | (deprecated) "true" to use GPU, "false" to use CPU                                                                             |
-| seed                 | sets the random seeds for reproducibility               |
 | json\_out\_config    | filename of the TOML file in JSON format                                                                                       |
 | tb\_logdir           | if not empty string name of the TensorBoard logging directory                                                                  |
 | [parameters]         | starts the parameter section                                                                                                   |
@@ -99,6 +95,7 @@ Run reinforcement learning (RL) and/or curriculum learning (CL).  CL is simply a
 | batch\_size          | batch size, note: affects SGD                                                                                                  |
 | unique\_sequences    | if "true" only return unique raw sequence (sampling)                                                                           |
 | randomize\_smiles    | if "true" shuffle atoms in input SMILES randomly (sampling)                                                                    |
+| tb\_isim              | if "true" report iSIM similarity of generated SMILES vs all previous generated SMILES to TensorBoard                           |
 | [learning\_strategy] | start section for RL learning strategy                                                                                         |
 | type                 | use "dap"                                                                                                                      |
 | sigma                | sigma in the reward function                                                                                                   |

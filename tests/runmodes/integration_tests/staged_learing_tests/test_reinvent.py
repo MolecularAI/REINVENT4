@@ -39,7 +39,7 @@ def setup(tmp_path, json_config, pytestconfig):
                 "max_steps": 5,
                 "scoring": {
                     "type": "custom_product",
-                    "parallel": False,
+                    "parallel": 1,
                     "component": [
                         {
                             "custom_alerts": {

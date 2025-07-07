@@ -9,6 +9,7 @@ import numpy as np
 from reinvent.scoring.compute_scores import compute_component_scores, compute_transform
 from reinvent.runmodes.samplers.sampler import validate_smiles
 from reinvent.models.model_factory.sample_batch import SmilesState
+from reinvent_plugins.components.component_results import ComponentResults,SmilesAssociatedComponentResults, SmilesResult
 
 
 SMILIES = [
@@ -66,17 +67,6 @@ STATES = np.array(
 )
 
 
-@dataclass
-class ComponentResults:
-    scores: List[np.ndarray]
-    scores_properties: Optional[List[Dict]] = None
-    uncertainty: Optional[List[np.ndarray]] = None
-    uncertainty_type: Optional[str] = None
-    uncertainty_properties: Optional[List[Dict]] = None
-    failures_properties: Optional[List[Dict]] = None
-    metadata: Optional[Dict] = None
-
-
 def scoring_function(smilies):
     scores = []
 
@@ -114,9 +104,8 @@ def test_compute_scores():
     component_results = compute_component_scores(
         validated_smilies, scoring_function, cache, invalid_mask & duplicate_mask
     )
-
     np.testing.assert_almost_equal(
-        component_results.scores[0],
+        list(zip(*component_results.fetch_scores(validated_smilies)))[0],
         np.array(
             [
                 180.159,
@@ -144,10 +133,32 @@ def test_compute_scores_duplicates_in_cache():
         "Cn1c(=O)c2c(ncn2C)n(C)c1=O",
         "CC(C)Cc1ccc(C(C)C(=O)O)cc1",
     ]
-    cache = {smiles: (100.0,) for smiles in DUPLICATES}
+    cache = {smiles: SmilesResult(score=(100.0,)) for smiles in DUPLICATES}
     mask = np.array([True, True, True])
 
     # the scoring function should never be called
     component_results = compute_component_scores(DUPLICATES, None, cache, mask)
 
-    np.testing.assert_almost_equal(component_results.scores[0], np.array([100.0, 100.0, 100.0]))
+    np.testing.assert_almost_equal(
+        list(zip(*component_results.fetch_scores(DUPLICATES)))[0], np.array([100.0, 100.0, 100.0])
+    )
+
+
+def test_compute_scores_duplicates_not_in_cache():
+    DUPLICATES = ["CC(=O)Oc1ccccc1C(=O)O", "CC(=O)Oc1ccccc1C(=O)O", "CC(=O)Oc1ccccc1C(=O)O"]
+    cache = {}
+    mask = np.array([True, False, False])
+
+    # the scoring function should eval fist component only
+    component_results = compute_component_scores(DUPLICATES, scoring_function, cache, mask)
+
+    np.testing.assert_almost_equal(
+        list(zip(*component_results.fetch_scores(DUPLICATES)))[0],
+        np.array(
+            [
+                180.159,
+                180.159,
+                180.159,
+            ]
+        ),
+    )

@@ -21,7 +21,6 @@ from torch.utils.data import DataLoader
 from torch.nn.utils import clip_grad_norm_
 from rdkit import Chem, DataStructs
 import tqdm
-from tqdm.contrib.logging import tqdm_logging_redirect
 
 from reinvent.runmodes.TL.reports import TLTBReporter, TLRemoteReporter, TLReportData
 from reinvent.utils.logmon import get_reporter
@@ -51,6 +50,7 @@ class Learning(ABC):
         optimizer: torch.optim.Optimizer,
         lr_scheduler: torch.optim.lr_scheduler.LRScheduler,
         lr_config,
+        zero_epoch,
     ):
         """Setup
 
@@ -62,12 +62,14 @@ class Learning(ABC):
         :param optimizer: optimizer
         :param lr_scheduler: learning rate scheduler
         :param lr_config: learning rate configuration
+        :param zero_epoch: offset training graph by -1
         """
 
         self.model = model
         self._optimizer = optimizer
         self._lr_scheduler = lr_scheduler
         self._lr_config = lr_config
+        self.zero_epoch = zero_epoch
 
         self._config = configuration
         self.device = model.device
@@ -165,32 +167,39 @@ class Learning(ABC):
 
         self.prepare_dataloader()
 
-        with tqdm_logging_redirect(loggers=[logger]):
-            validation_losses = {}
+        validation_losses = {}
 
-            for epoch in pbar:
-                self.model.set_mode("training")
+        for epoch in pbar:
+            self.model.set_mode("training")
 
-                epoch_no = epoch + 1
-                pbar.set_description(f"Epoch {epoch_no}")
+            epoch_no = epoch + 1
+            pbar.set_description(f"Epoch {epoch_no}")
 
-                mean_nll = self.train_epoch()
+            mean_nll = self.train_epoch()
 
-                if epoch_no % self.save_freq == 0 or epoch_no == end_epoch:
-                    mean_nll_valid = None
+            if self.device == "cuda":
+                free_memory, total_memory = torch.cuda.mem_get_info()
+                used_memory = total_memory - free_memory
+                logger.info(
+                    f"{used_memory // 1024 ** 2} MiB GPU memory used "
+                    f"in epoch {epoch_no}"
+                )
 
-                    if self.validation_dataloader:
-                        self.model.set_mode("inference")
-                        stats = self.compute_stats(self.validation_dataloader)
-                        mean_nll_valid = stats["nll"]
-                        validation_losses[epoch_no] = mean_nll_valid
+            if epoch_no % self.save_freq == 0 or epoch_no == end_epoch:
+                mean_nll_valid = None
 
-                    saved_model_path = self._save_model(epoch_no)
+                if self.validation_dataloader:
+                    self.model.set_mode("inference")
+                    stats = self.compute_stats(self.validation_dataloader)
+                    mean_nll_valid = stats["nll"]
+                    validation_losses[epoch_no] = mean_nll_valid
 
-                    self.report(mean_nll, mean_nll_valid, epoch_no, saved_model_path)
+                saved_model_path = self._save_model(epoch_no)
 
-                if self._terminate():
-                    break
+                self.report(mean_nll, mean_nll_valid, epoch_no, saved_model_path)
+
+            if self._terminate():
+                break
 
             self._save_model()
 
@@ -210,12 +219,10 @@ class Learning(ABC):
     __call__ = optimize
 
     @abstractmethod
-    def train_epoch(self):
-        ...
+    def train_epoch(self): ...
 
     @abstractmethod
-    def compute_nll(self, batch):
-        ...
+    def compute_nll(self, batch): ...
 
     def _train_epoch_common(self) -> float:
         """Run one epoch of training
@@ -376,6 +383,7 @@ class Learning(ABC):
             fraction_valid=len(sampled_smilies) / len(samples.smilies),
             fraction_duplicates=len(duplicate_smiles) / len(samples.smilies),
             internal_diversity=intdiv,
+            zero_epoch=self.zero_epoch,
         )
 
         for reporter in self.reporters:

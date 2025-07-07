@@ -15,6 +15,7 @@ from reinvent.chemistry import conversions
 from reinvent.chemistry.standardization.rdkit_standardizer import (
     RDKitStandardizer,
 )
+from reinvent.utils import get_tokens_from_vocabulary
 from .validation import TLConfig
 
 logger = logging.getLogger(__name__)
@@ -72,7 +73,10 @@ def run_transfer_learning(
         cols = slice(0, 2, None)
 
     # NOTE: we expect here that all data will fit into memory
-    smilies = read_smiles_csv_file(smiles_filename, cols, actions=actions, remove_duplicates=True)
+    allowed_tokens = get_tokens_from_vocabulary(adapter.vocabulary)
+    smilies = read_smiles_csv_file(
+        smiles_filename, cols, allowed_tokens, actions=actions, remove_duplicates=True
+    )
     logger.info(f"Read {len(smilies)} input SMILES from {smiles_filename}")
 
     if not smilies:
@@ -88,6 +92,7 @@ def run_transfer_learning(
         validation_smilies = read_smiles_csv_file(
             validation_smiles_filename,
             cols,
+            allowed_tokens,
             actions=actions,
             remove_duplicates=True,
         )
@@ -139,6 +144,7 @@ def run_transfer_learning(
         optimizer,
         lr_scheduler,
         lr_config,
+        zero_epoch=parameters.training_zero_epoch_start,
     )
 
     if "responder" in config:

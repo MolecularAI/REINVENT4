@@ -56,6 +56,11 @@ def num_sp3(mol: Chem.Mol) -> int:
 def graph_length(mol: Chem.Mol) -> int:
     return int(np.max(Chem.GetDistanceMatrix(mol)))
 
+def largest_ring_size(mol: Chem.Mol) -> int:
+    ring_info = mol.GetRingInfo()
+    ring_size = [len(ring) for ring in ring_info.AtomRings()]
+    max_ring_size = max(ring_size) if ring_size else 0
+    return int(max_ring_size)
 
 cls_func_map = {
     "Qed": Descriptors.qed,
@@ -75,6 +80,7 @@ cls_func_map = {
     "NumAromaticRings": Lipinski.NumAromaticRings,
     "NumAliphaticRings": Lipinski.NumAliphaticRings,
     "SlogP": Crippen.MolLogP,
+    "LargestRingSize": largest_ring_size,
 }
 
 for cls_name, func in cls_func_map.items():

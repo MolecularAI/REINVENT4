@@ -1,15 +1,24 @@
 from __future__ import annotations
 
+__all__ = [
+    "get_cuda_driver_version",
+    "set_seed",
+    "extract_sections",
+    "write_json_config",
+    "get_tokens_from_vocabulary",
+]
 import os
 import random
-
 import subprocess as sp
 from typing import Optional
+import logging
 
 import numpy as np
 import torch
 
 from reinvent.utils import config_parse
+
+logger = logging.getLogger(__name__)
 
 
 def get_cuda_driver_version() -> Optional[str]:
@@ -35,6 +44,7 @@ def get_cuda_driver_version() -> Optional[str]:
 
         if str_line.startswith("version:"):
             cuda_driver_version = str_line.split()[1]
+
             return cuda_driver_version
 
 
@@ -75,3 +85,30 @@ def write_json_config(global_dict, json_out_config):
         config_parse.write_json(global_dict, json_out_config)
 
     return dummy
+
+
+def get_tokens_from_vocabulary(vocabulary) -> tuple(set):
+    """Get the tokens supported by a model's vocabulary.
+
+    :param vocabulary: model's vocabylary object
+    :returns: 2-tuple of tokens
+    """
+
+    logger.debug(f"{__name__}: {type(vocabulary)=}")
+
+    if hasattr(vocabulary, "tokens"):  # Reinvent
+        tokens1 = set(vocabulary.tokens())
+        tokens2 = set()
+    elif hasattr(vocabulary, "decoration_vocabulary"):  # Libinvent
+        tokens1 = set(vocabulary.decoration_vocabulary.tokens())
+        tokens2 = set(vocabulary.scaffold_vocabulary.tokens())
+    elif hasattr(vocabulary, "input"):  # Linkinvent
+        tokens1 = set(vocabulary.input.vocabulary.tokens())
+        tokens2 = set(vocabulary.target.vocabulary.tokens())
+    elif "tokens" in vocabulary:  # Transformer models
+        tokens1 = set(vocabulary["tokens"])
+        tokens2 = set()
+    else:
+        raise RuntimeError(f"Unknown vocabulary type: {type(vocabulary)=}")
+
+    return (tokens1, tokens2)

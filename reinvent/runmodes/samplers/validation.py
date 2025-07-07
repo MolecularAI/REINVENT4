@@ -18,6 +18,10 @@ class SectionParameters(GlobalConfig):
     temperature: float = 1.0
 
 
+class SectionFilter(GlobalConfig):
+    smarts: list[str]
+
+
 class SectionResponder(GlobalConfig):
     endpoint: str
     frequency: Optional[int] = Field(1, ge=1)
@@ -25,4 +29,5 @@ class SectionResponder(GlobalConfig):
 
 class SamplingConfig(GlobalConfig):
     parameters: SectionParameters
+    filter: Optional[SectionFilter] = None
     responder: Optional[SectionResponder] = None

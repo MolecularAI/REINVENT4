@@ -76,10 +76,10 @@ def main(args: Any):
     if args.enable_rdkit_log_levels:
         enable_rdkit_log(args.enable_rdkit_log_levels)
 
-    run_type = input_config["run_type"]
+    run_type = val_config.run_type
     runner = getattr(runmodes, f"run_{run_type}")
 
-    have_version = input_config.get("version", version.__config_version__)
+    have_version = getattr(val_config, "version", version.__config_version__)
 
     if have_version < version.__config_version__:
         msg = f"Need at least version 4.  Input file is for version {have_version}."
@@ -106,13 +106,13 @@ def main(args: Any):
 
     logger.info(f"Number of PyTorch CUDA devices {torch.cuda.device_count()}")
 
-    if "use_cuda" in input_config:
+    if hasattr(val_config, "use_cuda"):
         logger.warning("'use_cuda' is deprecated, use 'device' instead")
 
-    device = input_config.get("device", None)
+    device = getattr(val_config, "device", None)
 
     if not device:
-        use_cuda = input_config.get("use_cuda", True)
+        use_cuda = getattr(val_config, "use_cuda", True)
 
         if use_cuda:
             device = "cuda:0"
@@ -132,32 +132,31 @@ def main(args: Any):
     else:
         logger.info(f"Using CPU {platform.processor()}")
 
-    seed = args.seed or input_config.get("seed", None)
+    seed = args.seed or getattr(val_config, "seed", None)
 
     if seed is not None:
         set_seed(seed)
         logger.info(f"Set seed for all random generators to {seed}")
 
-    tb_logdir = input_config.get("tb_logdir", None)
-
+    tb_logdir = getattr(val_config, "tb_logdir", None)
     if tb_logdir:
         tb_logdir = os.path.abspath(tb_logdir)
         logger.info(f"Writing TensorBoard summary to {tb_logdir}")
 
     write_config = None
 
-    if "json_out_config" in input_config:
-        json_out_config = os.path.abspath(input_config["json_out_config"])
+    if hasattr(val_config, "json_out_config") and val_config.json_out_config:
+        json_out_config = os.path.abspath(val_config.json_out_config)
         logger.info(f"Writing JSON config file to {json_out_config}")
         write_config = write_json_config(val_config.model_dump(), json_out_config)
 
-    responder_config = input_config.get("responder", None)
+    responder_config = getattr(val_config, "responder", None)
 
     if responder_config:
         setup_responder(responder_config)
         logger.info(
-            f"Using remote monitor endpoint {input_config['responder']['endpoint']} "
-            f"with frequency {input_config['responder']['frequency']}"
+            f"Using remote monitor endpoint {val_config.responder['endpoint']} "
+            f"with frequency {val_config.responder['frequency']}"
         )
 
     try:

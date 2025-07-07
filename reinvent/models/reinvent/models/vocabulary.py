@@ -1,5 +1,4 @@
-"""Vocabulary and token handling
-"""
+"""Vocabulary and token handling"""
 
 import re
 import logging

@@ -20,6 +20,8 @@ from .component_results import ComponentResults
 from .run_program import run_command
 from .add_tag import add_tag
 
+SKIP_EXEC = "/dev/null"
+
 
 @add_tag("__parameters")
 @dataclass
@@ -34,6 +36,7 @@ class Parameters:
 
     executable: List[str]
     args: List[str]
+    property: List[str]
 
 
 @add_tag("__component")
@@ -60,29 +63,35 @@ class ExternalProcess:
         model = pickle.load(pf)
 
     scores = model.predict_from_smiles(smilies)
+    data = {"version": 1, "payload": {"predictions": list(scores)}}
 
     print(json.dumps(list(scores)))
     """
 
     def __init__(self, params: Parameters):
-        # FIXME: multiple endpoints
         self.executables = params.executable
+
+        if self.executables[0] == SKIP_EXEC:
+            raise ValueError(f"{__name__}: first endpoint executable must not be {SKIP_EXEC}")
+
         self.args = params.args
+        self.properties = params.property
         self.number_of_endpoints = len(params.executable)
 
     def __call__(self, smilies: List[str]) -> np.array:
         scores = []
 
-        for executable, args in zip(self.executables, self.args):
-            _executable = os.path.abspath(executable)
-            _args = shlex.split(args)
-            smiles_input = "\n".join(smilies)
+        for executable, args, property in zip(self.executables, self.args, self.properties):
+            if executable != SKIP_EXEC:
+                _executable = os.path.abspath(executable)
+                _args = shlex.split(args)
+                smiles_input = "\n".join(smilies)
 
-            result = run_command([_executable] + _args, input=smiles_input)
+                result = run_command([_executable] + _args, input=smiles_input)
 
-            data = json.loads(result.stdout)
+                data = json.loads(result.stdout)
 
             # '{"version": 1, "payload": {"predictions": [1, 2, 3, 4, 5]}}'
-            scores.append(np.array(data["payload"]["predictions"]))
+            scores.append(np.array(data["payload"][property]))
 
         return ComponentResults(scores)

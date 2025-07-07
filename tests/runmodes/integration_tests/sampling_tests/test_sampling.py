@@ -34,7 +34,7 @@ def param(request, json_config):
             "smiles_multiplier": 1,
             "smiles_file": None,
             "sample_strategy": None,
-            "num_cols": 2,
+            "num_cols": 3,
         },
         "libinvent": {
             "model_file": ".libinvent",
@@ -42,7 +42,7 @@ def param(request, json_config):
             "smiles_multiplier": 2,
             "smiles_file": json_config["LIBINVENT_SMILES_SCAFFOLDS"],
             "sample_strategy": None,
-            "num_cols": 4,
+            "num_cols": 5,
         },
         "linkinvent": {
             "model_file": ".linkinvent",
@@ -50,7 +50,7 @@ def param(request, json_config):
             "smiles_multiplier": 1,
             "smiles_file": json_config["LINKINVENT_SMILES_WARHEADS"],
             "sample_strategy": "multinomial",
-            "num_cols": 4,
+            "num_cols": 5,
         },
         "mol2mol-multi": {
             "model_file": ".m2m_high",
@@ -58,7 +58,7 @@ def param(request, json_config):
             "smiles_multiplier": 3,
             "smiles_file": json_config["MOLFORMER_SMILES_SET_PATH"],
             "sample_strategy": "multinomial",
-            "num_cols": 4,
+            "num_cols": 5,
             "temperature": 1,
         },
         "mol2mol-beam": {
@@ -67,7 +67,7 @@ def param(request, json_config):
             "smiles_multiplier": 3,
             "smiles_file": json_config["MOLFORMER_SMILES_SET_PATH"],
             "sample_strategy": "beamsearch",
-            "num_cols": 4,
+            "num_cols": 5,
         },
     }
 
@@ -115,3 +115,4 @@ def test_run_sampling_with_likelihood(param, setup, pytestconfig):
     num_smiles = param["smiles_multiplier"] * param["num_smiles"]
 
     assert num_lines == num_smiles
+

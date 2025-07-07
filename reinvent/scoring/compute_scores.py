@@ -7,7 +7,10 @@ import logging
 
 import numpy as np
 
-from reinvent_plugins.components.component_results import ComponentResults
+from reinvent_plugins.components.component_results import (
+    ComponentResults,
+    SmilesAssociatedComponentResults,
+)
 from .results import TransformResults
 
 
@@ -20,61 +23,98 @@ def compute_component_scores(
     scoring_function: SCORE_FUNC,
     cache,
     filter_mask: Optional[np.ndarray[bool]],
-) -> ComponentResults:
+    index_smiles: Optional[List[str]] = None,
+) -> SmilesAssociatedComponentResults:
     """Compute a single component's scores and cache the results
 
     The mask filters out all SMILES unwanted for score computation: SMILES not
-    passing a previous filter, invalid SMILES, duplicate SMILES.  Scores are NaN
+    passing a previous filter, invalid SMILES.  Scores are NaN
     when their values are unknown.
+    Note: duplicates need to be handled above this level since ComponentResults is SMILES based
+
+    The logic is as follows:
+     1 get the smiles that need to be scored in this call
+       this is all inputs except for masked smiles or those in cache
+     2 compute the score for the new smiles and add to cache, or create a blank ComponentResults object
+     3 update the scores of cached smiles to the SmilesResult object (scores + metadata) for cache hits
+     4 add zeros-scores for any unique masked SMILES, e.g. invalid but non-duplicated
+
+     In the case of fragments, we get SMILES from the fragment not the full molecule, but for consistency
+     in output writing, caching scores etc
 
     :param smilies: list of SMILES
     :param scoring_function: the component callable
     :param cache: the cache for the component (will be modified)
-    :param filter_mask: array mask to filter out invalid and duplicate SMILES
+    :param filter_mask: array mask to filter out invalid SMILES
+    :param index_smiles: list of SMILES to index scores, used when the scored SMILES are fragments
     :returns: the scores
     """
+    smilies_to_score, smiles_with_masked_scores, cache_hits = [], [], []
 
-    # NOTE: if a component has multiple endpoints it needs to declare this!
-    number_of_endpoints = getattr(scoring_function, "number_of_endpoints", 1)
+    for filter_flag, smiles in zip(filter_mask, smilies):
+        if filter_flag:
+            if smiles in cache.keys():
+                cache_hits.append(smiles)
+            else:
+                smilies_to_score.append(smiles)
+        else:
+            smiles_with_masked_scores.append(smiles)
 
-    masked_scores = [(np.nan,)] * len(smilies)
+    # we need different behaviour for duplicates and invalids - duplicates should not overwrite the scores
+    # in ComponentResults. Therefore, we should always keep the scored version of smilies if it occurs with & wihtout filters
+    smiles_with_masked_scores = [
+        smiles
+        for smiles in smiles_with_masked_scores
+        if not smiles in smilies_to_score + cache_hits
+    ]
 
-    for i, value in enumerate(filter_mask):
-        if not value:  # the SMILES will not be passed to scoring_function
-            masked_scores[i] = (0.0,) * number_of_endpoints
+    # handle the case of fragement SMILES, here we will use the full SMILES to keep the score asscociated with the record
+    # while the fragement only for score computation
+    if index_smiles is not None:
+        index_smiles_to_score = [index_smiles[smilies.index(s)] for s in smilies_to_score]
+        index_smiles_with_masked_scores = [
+            index_smiles[smilies.index(s)] for s in smiles_with_masked_scores
+        ]
+        cache_hits = [index_smiles[smilies.index(s)] for s in cache_hits]
+        logger.debug(
+            f"Using index smilies for fragement component {type(scoring_function).__name__}"
+        )
+    else:
+        index_smiles_to_score = smilies_to_score
+        index_smiles_with_masked_scores = smiles_with_masked_scores
 
-    scores = {}  # keep track of scores for each SMILES as there may be duplicates
+    # debug statement here as invalids are passed in as "None" instead of smiles.
+    logger.debug(
+        f"Masked smilies for {type(scoring_function).__name__} are {smiles_with_masked_scores}"
+    )
 
-    for smiles, score in zip(smilies, masked_scores):
-        if smiles not in scores:  # do not overwrite duplicates with zeroes
-            scores[smiles] = score
+    if len(smilies_to_score) > 0:
+        component_results = SmilesAssociatedComponentResults(
+            component_results=scoring_function(smilies_to_score), smiles=index_smiles_to_score
+        )
 
-    smilies_non_cached = []
+        # update cache
+        cache.update((smiles, component_results[smiles]) for smiles in index_smiles_to_score)
 
-    for smiles, score in scores.items():
-        if smiles in cache:
-            scores[smiles] = cache[smiles]
-        elif any(score):  # filter out SMILES already scored zero, will catch np.nan
-            smilies_non_cached.append(smiles)
-        # If score is zero we do not need to compute the score
+    else:
+        # in this case, there are no compounds to score. Create blank ComponentResults
+        component_results = SmilesAssociatedComponentResults.create_from_scores(
+            smiles=[], scores=[[]]
+        )
 
-    if smilies_non_cached:
-        component_results = scoring_function(smilies_non_cached)
-    else:  # only duplicates or masked: need to set noe "empty" ComponentResults
-        _scores = [[] for _ in range(number_of_endpoints)]
-        component_results = ComponentResults(_scores)
+    if len(cache_hits) > 0:  # update the results
+        for smiles in cache_hits:
+            component_results.data[smiles] = cache[smiles]
 
-    for data in zip(smilies_non_cached, *component_results.scores):
-        smiles = data[0]
-        component_scores = data[1:]
+    if len(smiles_with_masked_scores) > 0:
+        # one score per endpoint
+        masked_scores = [(0.0,) * len(smiles_with_masked_scores)] * getattr(
+            scoring_function, "number_of_endpoints", 1
+        )
 
-        scores[smiles] = component_scores
-
-    cache.update(((k, v) for k, v in scores.items()))
-
-    # add cached scores to ComponentResults
-    scores_values = [scores[smiles] for smiles in smilies]  # expand scores
-    component_results.scores = [np.array(arr) for arr in zip(*scores_values)]
+        component_results.update_scores(
+            smiles=index_smiles_with_masked_scores, scores=masked_scores
+        )
 
     return component_results
 
@@ -85,6 +125,7 @@ def compute_transform(
     smilies: List[str],
     caches: dict,
     valid_mask: np.ndarray[bool],
+    index_smiles: Optional[List[str]] = None,
 ) -> TransformResults:
     """Compute the component score and transform of it
 
@@ -93,18 +134,24 @@ def compute_transform(
     :param smilies: list of SMILES
     :param caches: the component's cache
     :param valid_mask: mask for valid SMILES, i.e. false for invalid
+    :param index_smiles: list of SMILES to index scores, used when the scored SMILES are fragments
     :returns: dataclass with transformed results
     """
 
     names, scoring_function, transforms, weights = params
 
     component_results = compute_component_scores(
-        smilies, scoring_function, caches[component_type], valid_mask
+        smilies, scoring_function, caches[component_type], valid_mask, index_smiles
     )
 
     transformed_scores = []
-
-    for scores, transform in zip(component_results.scores, transforms):
+    # this loop is over multiple scores per component
+    for scores, transform in zip(
+        component_results.fetch_scores(
+            smiles=index_smiles if index_smiles is not None else smilies, transpose=True
+        ),
+        transforms,
+    ):
         transformed = transform(scores) if transform else scores
         transformed_scores.append(transformed * valid_mask)
 

@@ -21,6 +21,7 @@ Basic molecular physical properties:
 * NumRings: number of total rings (RDKit)
 * NumAromaticRings: number of aromatic rings (RDKit)
 * NumAliphaticRings: number of aliphatic rings (RDKit)
+* LargestRingSize: number of atoms in the largest ring (RDKit)
 * PMI: principal moment of inertia to assess dimensionality (RDKit)
   * _property_: "npr1" or "npr2" to choose index 
 * MolVolume: Molecular volume (RDKIT)
@@ -43,6 +44,9 @@ Similiarity and cheminformatics components:
   * _num\_of\_cuts_: number of bonds to cut in fragmentation (default 1)
   * _max\_variable\_heavies_: max heavy atom change in MMPs (default 40)
   * _max\_variable\_ratio_:  max ratio of heavy atoms in MMPs (default 0.33)
+* RingPrecedence: Precedence of ring systems in generated molecules compared to a database file
+  * _database\_file: json ring database to search (prepare with support/compute\_database\_precedence.py)
+  * _nll\_method: either "total" (sum of ring NLLs) or "max" (highest ring NLL = least likely ring)
 
 Physics/structure/ligand based components:
 * ROCSSimilarity: OpenEye ROCS

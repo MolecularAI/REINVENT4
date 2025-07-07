@@ -9,7 +9,7 @@ def setup(json_config):
         "parameters": {"smiles_file": json_config["REINVENT_INCEPTION_SMI"]},
         "scoring": {
             "type": "custom_sum",
-            "parallel": False,
+            "parallel": 1,
             "component": [
                 {
                     "custom_alerts": {

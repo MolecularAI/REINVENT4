@@ -104,15 +104,25 @@ def get_result_table(results) -> Tuple[List, List[List]]:
     names = []
     scores = []
     raw_scores = []
+    metadata_names = []
+    metadata_values = []
 
     for transformed_result in results.completed_components:
         names.extend(transformed_result.component_names)
 
         for transformed_scores in transformed_result.transformed_scores:
             scores.append(transformed_scores)
-
-        for original_scores in transformed_result.component_result.scores:
+        # convert back to previous format for csv writing
+        for original_scores in transformed_result.component_result.fetch_scores(
+            results.smilies, transpose=True
+        ):
             raw_scores.append(original_scores)
+
+    for _metadata_name, _metadata_value in transformed_result.component_result.fetch_metadata(
+        results.smilies).items():
+
+        metadata_values.append([str(val) for val in _metadata_value])  # convert to str
+        metadata_names.append(f"{_metadata_name} ({transformed_result.component_names[0]})")
 
     scores = zip(*scores)
     raw_scores = zip(*raw_scores)
@@ -129,6 +139,12 @@ def get_result_table(results) -> Tuple[List, List[List]]:
         row.extend(_raw_scores)
 
         rows.append(row)
+
+    if len(metadata_names) > 0:
+        header.extend(metadata_names)
+        for _metadata_value in metadata_values:
+            for row, _metadata in zip(rows, _metadata_value):
+                row.append(_metadata)
 
     return header, rows
 

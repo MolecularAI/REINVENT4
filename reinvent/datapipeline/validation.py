@@ -24,6 +24,7 @@ class FilterSection(GlobalConfig):
     kekulize: bool = False
     randomize_smiles: bool = False
     report_errors: bool = False
+    inchi_key_deduplicate: bool = False
 
 
 class DPLConfig(GlobalConfig):

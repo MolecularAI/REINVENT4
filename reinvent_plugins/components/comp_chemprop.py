@@ -6,7 +6,8 @@ weight = 0.7
 
 # component specific parameters
 param.checkpoint_dir = "ChemProp/3CLPro_6w63"
-param.rdkit_2d_normalized = true
+param.rdkit_2d_normalized = false
+param.features = "morgan"
 param.target_column = "dG"
 
 # transform
@@ -48,7 +49,8 @@ class Parameters:
     """
 
     checkpoint_dir: List[str]
-    rdkit_2d_normalized: List[bool]
+    rdkit_2d_normalized: List[bool]  # obsolete: use features = "rdkit_2d_normalized"
+    features: List[str]
     target_column: List[str]
 
 
@@ -70,8 +72,11 @@ class ChemProp:
             "/dev/null",
         ]
 
-        if params.rdkit_2d_normalized[0]:
+        if params.features[0] == "rdkit_2d_normalized" or params.rdkit_2d_normalized[0]:
             args.extend(["--features_generator", "rdkit_2d_normalized", "--no_features_scaling"])
+
+        if params.features[0] != "":
+            args.extend(["--features_generator", params.features[0]])
 
         with suppress_output():
             chemprop_args = chemprop.args.PredictArgs().parse_args(args)

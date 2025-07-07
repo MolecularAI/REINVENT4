@@ -18,8 +18,8 @@ def test_scorer_cache():
     results = compute_component_scores(smilies, scoring_fct, cache, mask)
 
     assert len(cache) == len(smilies)
-    assert len(results.scores) == 1  # 1 results
-    assert len(results.scores[0]) == len(smilies)  # with N SMILES
+    assert len(list(zip(*results.fetch_scores(smilies)))) == 1  # 1 results
+    assert len(results.fetch_scores(smilies)) == len(smilies)  # with N SMILES
 
     # 3 new SMILES
     smilies = [
@@ -31,7 +31,7 @@ def test_scorer_cache():
     results = compute_component_scores(smilies, scoring_fct, cache, mask)
 
     assert len(cache) == 8
-    assert len(results.scores[0]) == len(smilies)
+    assert len(results.fetch_scores(smilies)) == len(smilies)
 
     smilies = [
         "C1CN(CCN1)C2=NC3=CC=CC=C3OC4=C2C=C(C=C4)Cl",  # new
@@ -44,4 +44,4 @@ def test_scorer_cache():
     results = compute_component_scores(smilies, scoring_fct, cache, mask)
 
     assert len(cache) == 10
-    assert len(results.scores[0]) == len(smilies)
+    assert len(results.fetch_scores(smilies)) == len(smilies)

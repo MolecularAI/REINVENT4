@@ -191,6 +191,16 @@ transform.low = 0
 transform.k = 0.5
 
 [[scoring.component]]
+[scoring.component.LargestRingSize]
+[[scoring.component.LargestRingSize.endpoint]]
+name = "Number of atoms in the largest ring"
+weight = 1
+transform.type = "reverse_sigmoid"
+transform.high = 7
+transform.low = 6
+transform.k = 0.5
+
+[[scoring.component]]
 [scoring.component.pmi]
 [[scoring.component.pmi.endpoint]]
 name = "PMI 3D-likeness npr1"
@@ -276,6 +286,13 @@ transform.type = "value_mapping"
 MMP = 0.5
 "No MMP" = 0
 
+[[scoring.component]]
+[scoring.component.RingPrecedence]
+[[scoring.component.RingPrecedence.endpoint]]
+name = "Precedence of ring systems in database "  # user chosen name for output
+params.database_file =  "PATH_TO_DATABASE.json"
+params.nll_method = "total" # or max
+
 # Physics/structure/ligand based components:
 [[scoring.component]]
 [scoring.component.rocssimilarity]
@@ -320,6 +337,22 @@ transform.type = "reverse_sigmoid"
 transform.high = -6
 transform.low = -13.5
 transform.k = 0.2
+
+[[scoring.component]]
+[scoring.component.Maize]
+[[scoring.component.Maize.endpoint]]
+name = "CamSol Solubility"
+weight = 1
+params.executable = "PATH_TO_MAIZE_ENV/bin/maize"
+params.workflow = "PATH_TO_MAIZE_CAMSOL_WORKFLOW"
+params.config = "PATH_TO_MAIZE_CONFIG"
+params.log = "maize_camsol.log"
+params.skip_normalize = true
+params.pass_fragments = true
+transform.type = "sigmoid"
+transform.high = 2
+transform.low = 0
+transform.k = 0.5
 
 # Scoring components about drug-likeness, synthesizability & reactions:
 [[scoring.component]]

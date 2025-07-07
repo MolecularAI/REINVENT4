@@ -1,4 +1,4 @@
-"""Dataclass for reporting """
+"""Dataclass for reporting"""
 
 from __future__ import annotations
 

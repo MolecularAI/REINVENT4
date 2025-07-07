@@ -15,6 +15,7 @@ from reinvent_plugins.components.RDKit.comp_physchem import NumRings
 from reinvent_plugins.components.RDKit.comp_physchem import NumAromaticRings
 from reinvent_plugins.components.RDKit.comp_physchem import NumAliphaticRings
 from reinvent_plugins.components.RDKit.comp_physchem import SlogP
+from reinvent_plugins.components.RDKit.comp_physchem import LargestRingSize
 
 
 def test_comp_physchem():
@@ -37,6 +38,7 @@ def test_comp_physchem():
         NumAromaticRings: np.array([1.0, 0.0]),
         NumAliphaticRings: np.array([0.0, 0.0]),
         SlogP: np.array([1.6866, 1.8098]),
+        LargestRingSize: np.array([6, 0]),
     }
 
     for component in expected_results:

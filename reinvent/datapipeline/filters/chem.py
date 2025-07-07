@@ -8,7 +8,6 @@ from typing import Optional, TYPE_CHECKING
 
 from rdkit.Chem import AllChem as Chem
 from rdkit.Chem.MolStandardize import rdMolStandardize as Standardizer
-from .regex import SMILES_TOKENS_REGEX
 from ..logger import setup_mp_logger
 
 if TYPE_CHECKING:
@@ -31,8 +30,9 @@ class RDKitFilter:
         self.normalizer = None
         self.uncharger = None
         self.disconnector = None
+        self.mol = None
 
-    def __call__(self, smiles: str) -> Optional[str]:
+    def __call__(self, smiles: str) -> Optional[tuple]:
         """Filter and preprocess SMILES
 
         :param smiles: input SMILES
@@ -60,14 +60,13 @@ class RDKitFilter:
 
         try:
             new_smiles = self.clean_smiles(smiles, self.config)
-        except (Chem.KekulizeException, Chem.AtomValenceException) as e:
+        except (Chem.KekulizeException, Chem.AtomKekulizeException, Chem.AtomValenceException) as e:
             logger.error(f'"{smiles}": {e}')
-
             new_smiles = None
 
-        return new_smiles
+        return new_smiles, self.mol
 
-    def clean_smiles(self, smiles, config: FilterSection):
+    def clean_smiles(self, smiles, config: FilterSection) -> tuple:
         mol = Chem.MolFromSmiles(smiles, sanitize=False)  # alternative sanitation flags
 
         if config.report_errors:
@@ -104,19 +103,18 @@ class RDKitFilter:
         if self.config.uncharge:
             self.uncharger.unchargeInPlace(mol)
 
-        mol = Chem.RemoveHs(mol)
-        self.disconnector.DisconnectInPlace(mol)
+        self.mol = Chem.RemoveHs(mol)
 
         if self.config.uncharge:
-            Standardizer.ReionizeInPlace(mol)
+            Standardizer.ReionizeInPlace(self.mol)
 
         # NOTE: this can be vary slow, easily by a factor of 10 or more
         if config.canonical_tautomer:
-            mol = self.tautomer_enumerator.Canonicalize(mol)
+            mol = self.tautomer_enumerator.Canonicalize(self.mol)
 
         try:
             new_smiles = Chem.MolToSmiles(
-                mol,
+                self.mol,
                 canonical=True,
                 isomericSmiles=config.keep_stereo,
                 kekuleSmiles=self.config.kekulize,
@@ -127,34 +125,5 @@ class RDKitFilter:
                 return None
             else:
                 raise
-
-        # FIXME: an atom may have 3 ring numbers or more e.g.
-        #        C%108%11 which is %10 8 %11 and should become 8%11 %10
-        #        for the tokenizer or be caught in a single regex maybe like
-        #        "\d*(?:%\d+){1,}"
-        #        clean up unwanted halogens here!
-        if "%" in new_smiles:
-            smiles_patterns = SMILES_TOKENS_REGEX.findall(new_smiles)
-            patterns = []
-
-            for pattern in smiles_patterns:
-                # This needs to be done here because RDKit may change
-                # ring numbering
-                # Handles labels in the form %NNN or %NNNN
-                if pattern[0] == "%":
-                    # FIXME: safeguard against multi ring labels for now
-                    if int(pattern[1:]) > config.max_num_rings:
-                        return None
-
-                    elem_len = len(pattern[1:])
-
-                    if elem_len == 3:
-                        pattern = f"{pattern[3:]}%{pattern[1:3]}"
-                    elif elem_len == 4:
-                        pattern = f"%{pattern[1:3]}%{pattern[3:]}"
-
-                patterns.append(pattern)
-
-            new_smiles = "".join(patterns)
 
         return new_smiles

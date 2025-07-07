@@ -13,6 +13,7 @@ from __future__ import annotations
 __all__ = ["Scorer"]
 
 from pathlib import Path
+import multiprocessing as mp
 from typing import List, Optional
 import logging
 
@@ -26,6 +27,7 @@ from .results import ScoreResults
 from .validation import ScorerConfig
 
 
+MAX_CPU_COUNT = 8
 logger = logging.getLogger(__name__)
 
 
@@ -62,6 +64,27 @@ def setup_scoring(config: dict) -> dict:
     return config
 
 
+def compute_component_score(component, fragments, smilies, valid_mask):
+    fragments_component = component.component_type.startswith("fragment") or (
+        component.component_type == "maize" and component.params[1].pass_fragments
+    )
+    if fragments and fragments_component:
+        pass_smilies = fragments
+    else:
+        pass_smilies = smilies
+
+    transform_result = compute_transform(
+        component.component_type,
+        component.params,
+        pass_smilies,
+        component.cache,
+        valid_mask,
+        index_smiles=smilies if fragments_component else None,
+    )
+
+    return transform_result
+
+
 class Scorer:
     """The main handler for a request to a scoring function"""
 
@@ -85,6 +108,7 @@ class Scorer:
         invalid_mask: np.ndarray,
         duplicate_mask: np.ndarray,
         fragments: Optional[List[str]] = None,
+        connectivity_annotated_smiles: Optional[List[str]] = None,
     ) -> ScoreResults:
         """Compute the score from a list of SMILES
 
@@ -92,62 +116,44 @@ class Scorer:
         :param invalid_mask: mask for invalid SMILES
         :param duplicate_mask: mask for duplicate SMILES
         :param fragments: optional fragment SMILES
+        :param connectivity_annotated_smiles: optional SMILES with added bonds annotated (LibInvent)
         :return: all results for the SMILES
         """
 
         # needs to be list for duplicate comps, name change for clearity
         completed_components = []
-        filters_to_report = []
-        # ntasks = len(self.components.scorers)
+
+        ntasks = self.parallel
 
         valid_mask = np.logical_and(invalid_mask, duplicate_mask)
+        filters_to_report, valid_mask = self.compute_filter_mask(
+            smilies, valid_mask, connectivity_annotated_smiles
+        )
 
-        # if self.parallel and ntasks > 1:
-        if False:
-            cpu_count = 2
-            nodes = min(cpu_count, ntasks)
-            pool = ParallelPool(nodes=nodes)
+        if ntasks > 1:
+            nodes = min(MAX_CPU_COUNT, ntasks)
 
-            pool_params = tuple(
-                (smilies, params[0], self.caches[component_type])
-                for component_type, params in self.components.scorers.items()
+            ctx = mp.get_context("spawn")
+            pool = ctx.Pool(nodes)
+
+            number_components = (
+                len(self.components.scorers)
+                + len(self.components.filters)
+                + len(self.components.penalties)
             )
+            fragment_args = [fragments] * number_components
+            smilies_args = [smilies] * number_components
+            valid_mask_args = [valid_mask] * number_components
 
-            pool_results = pool.map(compute_component_scores, *zip(*pool_params))
-
-            # TODO: implement
+            completed_components = pool.starmap(
+                compute_component_score,
+                list(zip(self.components.scorers, fragment_args, smilies_args, valid_mask_args)),
+            )
         else:
-            # Compute the filter mask to prevent computation of scores in the
-            # second loop over the non-filter components below
-            for component in self.components.filters:
-                transform_result = compute_transform(
-                    component.component_type,
-                    component.params,
-                    smilies,
-                    component.cache,
-                    valid_mask,
-                )
-
-                for scores in transform_result.transformed_scores:
-                    valid_mask = np.logical_and(scores, valid_mask)
-                # NOTE: filters are NOT also used as components as in REINVENT3
-
-                filters_to_report.append(transform_result)
-
             for component in self.components.scorers:
-                if fragments and component.component_type.startswith("fragment"):
-                    pass_smilies = fragments
-                else:
-                    pass_smilies = smilies
-
-                transform_result = compute_transform(
-                    component.component_type,
-                    component.params,
-                    pass_smilies,
-                    component.cache,
-                    valid_mask,
+                transform_result = compute_component_score(
+                    component, fragments, smilies, valid_mask
                 )
-
                 completed_components.append(transform_result)
 
         scores_and_weights = []
@@ -161,6 +167,14 @@ class Scorer:
         else:
             total_scores = valid_mask.astype(float)  # apply filters if needed
 
+        penalties = self.compute_penalties(completed_components, smilies, valid_mask)
+
+        for filter_to_report in filters_to_report:
+            completed_components.append(filter_to_report)
+
+        return ScoreResults(smilies, total_scores * penalties, completed_components)
+
+    def compute_penalties(self, completed_components, smilies, valid_mask):
         penalties = np.full(len(smilies), 1.0, dtype=float)
 
         for component in self.components.penalties:
@@ -177,9 +191,31 @@ class Scorer:
 
             completed_components.append(transform_result)
 
-        for filter_to_report in filters_to_report:
-            completed_components.append(filter_to_report)
+        return penalties
 
-        return ScoreResults(smilies, total_scores * penalties, completed_components)
+    def compute_filter_mask(self, smilies, valid_mask, connectivity_annotated_smiles):
+        filters_to_report = []
+        for component in self.components.filters:
+            if connectivity_annotated_smiles and component.component_type == "reactionfilter":
+                pass_smilies = connectivity_annotated_smiles
+            else:
+                pass_smilies = smilies
+
+            transform_result = compute_transform(
+                component.component_type,
+                component.params,
+                pass_smilies,
+                component.cache,
+                valid_mask,
+                index_smiles=smilies if component.component_type == "reactionfilter" else None,
+            )
+
+            for scores in transform_result.transformed_scores:
+                valid_mask = np.logical_and(scores, valid_mask)
+            # NOTE: filters are NOT also used as components as in REINVENT3
+
+            filters_to_report.append(transform_result)
+
+        return filters_to_report, valid_mask
 
     __call__ = compute_results
