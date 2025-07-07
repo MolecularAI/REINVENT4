@@ -3,13 +3,6 @@
 This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 
 
-## [Unreleased]
-
-### Changed
-
-- CAZP scoring component
-
-
 ## [4.6.22] 2025-07-01
 
 ### Fixed

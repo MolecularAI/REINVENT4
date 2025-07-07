@@ -1,3 +1,9 @@
+New in REINVENT 4.6
+===================
+
+* CAZP scoring component: interface to AiZynthFinder
+
+
 New in REINVENT 4.5
 ===================
 
