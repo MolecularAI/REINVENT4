@@ -1,13 +1,13 @@
 {
-  "base_aizynthfinder_config": "/lustre/orion/chm155/proj-shared/halx/reinvent/CAZP/config_enamine.yml",
-  "custom_aizynth_command": "/lustre/orion/chm155/proj-shared/halx/reinvent/CAZP/run_cazp_multi-node.sh",
+  "base_aizynthfinder_config": "/home/me/CAZP/config.yml",
+  "custom_aizynth_command": "/home/me/CAZP/run_cazp_local.sh",
   "stock_profiles": {
     "Enamine_BB": {
       "name": "Enamine building blocks",
       "description": "Enamine Building Blocks (to approximate Enamine REAL in two steps)",
       "config": {
         "stock": {
-          "Enamine_BB": "/lustre/orion/chm155/proj-shared/halx/reinvent/CAZP/enamine_bb_20241108.hdf5"
+          "Enamine_BB": "/home/me/models/enamine_bb.hdf5"
         },
         "scorer": {
           "StockAvailabilityScorer": {
@@ -27,12 +27,12 @@
       "description": "Reactions that Rank 5-6 with NMC, using USPTO-based model",
       "config": {
         "filter": {
-          "standard": "/lustre/orion/chm155/proj-shared/halx/reinvent/CAZP/uspto_filter_model.onnx"
+          "standard": "/home/me/models/uspto_filter_model.onnx"
         },
         "expansion": {
           "standard": [
-            "/lustre/orion/chm155/proj-shared/halx/reinvent/CAZP/uspto_model.onnx",
-            "/lustre/orion/chm155/proj-shared/halx/reinvent/CAZP/uspto_templates.csv.gz"
+            "/home/me/models/uspto_model.onnx",
+            "/home/me/models/uspto_templates.csv.gz"
           ]
         },
         "scorer": {
