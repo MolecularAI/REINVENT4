@@ -33,12 +33,12 @@ Similiarity and cheminformatics components:
   * _smarts_: SMARTS pattern 
 * MatchingSubstructure: preserve the final score when the SMARTS pattern is found, otherwise penalize it (multiply by 0.5)
   * _smarts_: SMARTS pattern
-  * _use_chirality_: check for chirality
+  * _use\_chirality_: check for chirality
 * TanimotoSimilarity: Tanimoto similarity using the Morgan fingerprint (RDKit)
   * _smiles_: list of SMILES to match against
   * _radius_: Morgan fingerprint radius
-  * _use_counts_: Morgan fingerprint, whether to use counts
-  * _use_features_: Morgan fingerprint, whether to use features
+  * _use\_counts_: Morgan fingerprint, whether to use counts
+  * _use\_features_: Morgan fingerprint, whether to use features
 * MMP: Matched Molecular Pair Similarity. Use with _value\_mapping_ score transform, returns "MMP" or "No MMP"
   * _reference\_smiles_: list of reference SMILES to be similar to
   * _num\_of\_cuts_: number of bonds to cut in fragmentation (default 1)
@@ -60,13 +60,13 @@ Physics/structure/ligand based components:
   * _similarity\_measure_: how to compare shapes. Must be Tanimoto, RefTversky or FitTversky
 * DockStream: generic docking interface for AutoDock Vina, rDock,
   OpenEye's Hybrid, Schrodinger's Glide and CCDC's GOLD (https://github.com/MolecularAI/DockStream). Superseded by MAIZE.
-  * _configuration_path_: path for the Dockstream config json
-  * _docker_script_path_: location of Dockstream "AZdock/docker.py" file
-  * _docker_python_path_: python interpreter with Dockstream install, e.g. conda/envs/envname/bin/python
+  * _configuration\_path_: path for the Dockstream config json
+  * _docker\_script\_path_: location of Dockstream "AZdock/docker.py" file
+  * _docker\_python\_path_: python interpreter with Dockstream install, e.g. conda/envs/envname/bin/python
 * Icolos: generic interface to Icolos (https://github.com/MolecularAI/Icolos), Superseded by MAIZE
   * _name_: label of the score to extract
   * _executable_: Icolos executable
-  * _config_file_: JSON config file for Icolos
+  * _config\_file_: JSON config file for Icolos
 * MAIZE: generic interface to MAIZE (https://github.com/MolecularAI/maize)
   * _executable_: MAIZE executable
   * _workflow_: workflow file for MAIZE
@@ -78,8 +78,8 @@ Physics/structure/ligand based components:
 
 QSAR/QSPR model-related components:
 * ChemProp: ChemProp D-MPNN models
-  * _checkpoint_dir_: checkpoint directory with the models
-  * _rdkit_2d_normalized_: whether to use RDKit 2D normalization
+  * _checkpoint\_dir_: checkpoint directory with the models
+  * _rdkit\_2d\_normalized_: whether to use RDKit 2D normalization
 * CustomAlerts: SMARTS substructure filter applied to the total score
   * _smarts_: list of SMARTS
 * Qptuna: QSAR models with Qptuna
@@ -87,9 +87,10 @@ QSAR/QSPR model-related components:
 
 Scoring components about drug-likeness, synthesizability & reactions:
 * Qed: QED drug-likeness score (RDKit)
+* CAZP: interface to (AiZynthFinder)[https://github.com/MolecularAI/aizynthfinder], see support files for setup
 * SAScore:  Ertl's synthesizability score (higher is more difficult). based on https://doi.org/10.1186/1758-2946-1-8.
 * ReactionFilter: reaction filter for Libinvent, applied to total score
-  * _tyoe_: filter type
+  * _type_: filter type
   * _reaction\_smarts_: RDKit reaction SMARTS
   
 Generic scoring components:
@@ -97,11 +98,11 @@ Generic scoring components:
   * _executable_: name of the executable to run
   * _args_: command line arguments for the executable
 * REST: generic REST interface (contributed by Syngenta)
-  * _server_url_: URL
-  * _server_port_: ports
-  * _server_endpoint_: endpoint
-  * _predictor_id_: request paramter
-  * _predictor_version_: request paramter
+  * _server\_url_: URL
+  * _server\_port_: ports
+  * _server\_endpoint_: endpoint
+  * _predictor\_id_: request paramter
+  * _predictor\_version_: request paramter
   * _header_: request header
 
 LinkInvent linker-specific physchem properties:
