@@ -1,6 +1,5 @@
 [project]
 name = "reinvent"  # Normalized according to https://packaging.python.org/en/latest/specifications/name-normalization/
-#version = "4.0.0"  # Dynamic.
 description = "Reinvent 4"
 authors = [{name = "AstraZeneca"}]
 maintainers = [{name = "Hannes Löffler", email = "hannes.loeffler@gmail.com"}]
@@ -66,7 +65,6 @@ dependencies = [
   "apted >=1.0.3, <2",
   "typing_extensions >=4.0,<5",
   "xxhash >=3,<4",
-# "iSIM @ git+ssh://git@ssh.github.com/mqcomplab/iSIM.git",
 ]
 
 [project.scripts]
@@ -74,11 +72,10 @@ reinvent = "reinvent.Reinvent:main_script"
 reinvent_datapre = "reinvent.datapipeline.preprocess:main_script"
 
 
-# FIXME: change urls for public release.
 [project.urls]
 homepage = "https://github.com/MolecularAI"
-repository = "https://github.com/MolecularAI/Reinvent.git"
-public-reposibory = "https://github.com/MolecularAI/Reinvent.git"  # Switch to a new repo?
+repository = "https://github.com/MolecularAI/REINVENT4,git"
+public-reposibory = "https://github.com/MolecularAI/REINVENT4,git"
 
 
 [tool.setuptools]
