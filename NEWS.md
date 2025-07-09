@@ -1,6 +1,7 @@
 New in REINVENT 4.6
 ===================
 
+* All priors now on [Zenodo](https://doi.org/10.5281/zenodo.15641296)
 * CAZP scoring component: interface to AiZynthFinder
 * Optional SMARTS filter for sampling to remove unwanted patterns e.g. elements
 * Output SMILES state for sampling
