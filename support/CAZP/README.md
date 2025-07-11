@@ -27,5 +27,4 @@ variable `CAZP_PROFILES`.  This file must contain two fields.
   1. `base_aizynthfinder_config`: the AiZynthFinder configuration in YAML format
   2. `custom_aizynth_command`: a script to run AiZynthFinder
 
-Additional fields can be added to extend/overwrite the AiZynthFinder
-configuration.
+Additional fields can be added to extend the AiZynthFinder configuration.
