@@ -1,0 +1,7 @@
+### Stage 2 scoring components
+[[component]]
+[component.QED]
+
+[[component.QED.endpoint]]
+weight = 0.5  # user chosen name for output
+name = "QED Score"  # weight to fine-tune the relevance of this component

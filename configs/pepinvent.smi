@@ -1,0 +1,6 @@
+# Example peptide file for REINVENT4 PepInvent
+#
+# One masked peptide with CHUCKLES representation per line
+# ? for mask
+
+?|N[C@@H](CO)C(=O)|?|N[C@@H](Cc1ccc(O)cc1)C(=O)|N(C)[C@@H]([C@@H](C)O)C(=O)|N[C@H](Cc1c[nH]cn1)C(=O)|N[C@@H](CC(=O)N)C2(=O)

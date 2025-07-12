@@ -1,0 +1,24 @@
+# Input example for the REINVENT4 data pipeline
+
+input_csv_file = "test.csv"
+smiles_column = "SMILES"
+separator = "\t"
+output_smiles_file = "processed.smi"
+num_procs = 1
+chunk_size = 500
+
+[filter]
+elements = ["I", "O", "Cl", "N", "C", "F", "S", "Br"]
+transforms = ["standard"]
+min_heavy_atoms = 2
+max_heavy_atoms = 90
+max_mol_weight = 1200.0
+min_carbons = 2
+max_num_rings = 12
+max_ring_size = 7
+keep_stereo = true
+keep_isotope_molecules = true
+uncharge = true
+kekulize = false
+randomize_smiles = false
+report_errors = false
