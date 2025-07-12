@@ -7,7 +7,7 @@ New in REINVENT 4.6
 * Output SMILES state for sampling
 * iSIM similarty support for RL in TensorBoard
 * Parallel scoring
-* Ring system precedence based scoring component
+* Ring system precedence based scoring component (from Pat Walters)
 * Multiple endpoints for ExternalProcess scoring component
 * Write out metadata to CSV e.g. custom alert matching pattern
 * GPU memory reporting for TL
