@@ -16,8 +16,8 @@
 # # _De novo_ Reinforcement Learning with the Reinvent prior
 #
 # This is a short demo to
-# - Set up a reinforcment learning run
-# - Carry out a reinforcment learning run
+# - Set up a reinforcement  learning run
+# - Carry out a reinforcement  learning run
 # - Visualize the results with TensorBoard
 # - Extract the raw data from TensorBoard and how to work with it
 
@@ -37,13 +37,13 @@ from reinvent.notebooks import load_tb_data, plot_scalars, get_image, create_mol
 
 # ## Set up the REINVENT run
 #
-# A work directory is defined and created anew (all previous data deleted if the directory already exsists).  The prior file is taken from the REINVENT repository and the agent is initially the same as the prior.  A TOML configuration is written out to file in the work directory.
+# A work directory is defined and created anew (all previous data deleted if the directory already exists).  The prior file is taken from the REINVENT repository and the agent is initially the same as the prior.  A TOML configuration is written out to file in the work directory.
 
 wd = "/tmp/R4_notebooks_output"
 
 # ### Delete existing working directory (!)
 #
-# Skip this step if you have already carried out the RL run but wish to analyis the results further.
+# Skip this step if you have already carried out the RL run but wish to analyse the results further.
 
 shutil.rmtree(wd, ignore_errors=True)
 os.mkdir(wd)
@@ -66,7 +66,7 @@ json_out_config = "_stage1.json"
 
 # ### Parameters
 #
-# Here we specify the model files, the prefix for the output CSV summary file and the batch size for sampling and stochastic gradient descent (SGD).  The batch size is often given in 2^N but there is in now way required.  Typically batch sizes are betwen 50 and 150.  Batch size effects on SGD and so also the learning rate.  Some experimentation may be required to adjust this but keep in mind that, say, raising the total score as fast as possible is not necessarily the best choice as this may hamper exploration.
+# Here we specify the model files, the prefix for the output CSV summary file and the batch size for sampling and stochastic gradient descent (SGD).  The batch size is often given in 2^N but there is in now way required.  Typically batch sizes are between 50 and 150.  Batch size effects on SGD and so also the learning rate.  Some experimentation may be required to adjust this but keep in mind that, say, raising the total score as fast as possible is not necessarily the best choice as this may hamper exploration.
 
 # +
 prior_filename = os.path.join(reinvent.__path__[0], "..", "priors", "reinvent.prior")
@@ -101,7 +101,7 @@ rate = 0.0001
 #
 # The stage will terminate when a maximum number of 300 steps is reached.  Termination could occur earlier when the maximum score of 1.0 is exceeded but this is very unlikely to occur.  A checkpoint file is written out which can be used as the agent in a subsequent stage.
 #
-# The scoring function is a weighted product of all the scoring components: QED and number of sterecentres.  The latter is used here to avoid stereocentres as they are not support by the Reinvent prior.  Zero stereocentres aids in downstream 3D task to avoid having to carry out stereocentre enumeration.  Custom alerts is a filter which filters out (scores as zero) all generated compounds which match one of the SMARTS patterns.  Number of sterecentres uses a transformation function to ensure the component score is between 0 and 1.
+# The scoring function is a weighted product of all the scoring components: QED and number of sterecentres.  The latter is used here to avoid stereocentres as they are not supported by the Reinvent prior.  Zero stereocentres aids in downstream 3D task to avoid having to carry out stereocentre enumeration.  Custom alerts is a filter which filters out (scores as zero) all generated compounds which match one of the SMARTS patterns.  Number of sterecentres uses a transformation function to ensure the component score is between 0 and 1.
 
 stages = """
 [[stage]]
@@ -185,13 +185,13 @@ with open(toml_config_filename, "w") as tf:
 #
 # TensorBoard needs to be started after REINVENT has finished.  Scatter plots of all scoring components are shown (raw and transformed) in the _SCALARS_ tab as well as loss and fractions of valid and duplicate (per batch) SMILES.  The _IMAGES_ tab shows the first sampled molecules for each recorded RL step labelled with the total score for the molecule.
 #
-# The loss likehoods (negative log likelihoods, NLL) for the agent is expected to move away from the prior NLL and also have smaller NLLs than the prior.  This shows that the agent is increasingly producing molecules different from the prior, closer to the signal from the scoring function as requested.  For sample efficiency it is desirable to observed few duplicates and a high number of valid molecules.  Note that results are stochastic and will not be different in every run of RL, even with exactly the same configuration.
+# The loss likelihoods (negative log likelihoods, NLL) for the agent is expected to move away from the prior NLL and also have smaller NLLs than the prior.  This shows that the agent is increasingly producing molecules different from the prior, closer to the signal from the scoring function as requested.  For sample efficiency it is desirable to observed few duplicates and a high number of valid molecules.  Note that results are stochastic and will not be different in every run of RL, even with exactly the same configuration.
 
 # %tensorboard --bind_all --logdir $wd/tb_stage1_0
 
 # ## Extract data from TensorBoard
 #
-# TensorBoard data can be directy extracted as shown in this section.
+# TensorBoard data can be directly extracted as shown in this section.
 
 # ### Load the TB data
 
@@ -222,7 +222,7 @@ df
 
 # ### Sample efficiency
 #
-# Count the number of total invalid and duplcate SMILES and compare to the total number of generated SMILES.
+# Count the number of total invalid and duplicate SMILES and compare to the total number of generated SMILES.
 
 # +
 total_smilies = len(df)
@@ -239,7 +239,7 @@ total_duplicate_smilies = len(all_duplicates)
 print(
     f"Total number of SMILES generated: {total_smilies}\n"
     f"Total number of invalid SMILES generated: {total_invalid_smilies}\n"
-    f"Total number of batcg duplicate SMILES generated: {total_batch_duplicate_smilies}\n"
+    f"Total number of batch duplicate SMILES generated: {total_batch_duplicate_smilies}\n"
     f"Total number of duplicate SMILES generated: {total_duplicate_smilies}"
 )
 # -
