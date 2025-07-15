@@ -78,15 +78,13 @@ reinvent -l sampling.log sampling.toml
 This writes logging information to the file `sampling.log`.  If you wish to write
 this to the screen, leave out the `-l sampling.log` part. `sampling.toml` is the
 configuration file.  The main user format is [TOML](https://toml.io/en/) as it tends to be more
-use friendly.  JSON can be used too, add `-f json`, but a specialised editor is
-recommended as the format is very sensitive to minor changes.
+use friendly.  JSON and YAML aare possible too add `-f json`.
 
 Sample configuration files for all run modes are
-located in `configs/toml` in the repository and file paths in these files would need to be
-adjusted to your local installation.  In particular, ready made prior models are
-located in `priors` and you would choose a model and the
+located in `configs` in the repository and file paths in these files would need to be
+adjusted to your local installation.  You will need to choose a model and the
 appropriate run mode depending on the research problem you are trying to address.
-There is additional information in `configs/toml` in several `*.md` files with
+There is additional documentation in `configs` in several `*.md` files with
 instructions on how to configure the TOML file.  Internal priors can be referenced with a
 dot notation (see `reinvent/prior_registry.py`).
 
