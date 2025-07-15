@@ -1,0 +1,8 @@
+# Example warhead file for REINVENT4 LinkInvent
+#
+# One warhead pair per line
+# Each warhead must be annotated with '*' to locate the attachment points
+# The two warheads must be separated by the pipe symbol
+
+Oc1cncc(*)c1|*c1ccoc1
+

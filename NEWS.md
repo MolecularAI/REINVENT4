@@ -1,9 +1,29 @@
+New in REINVENT 4.6
+===================
+
+* All priors now on [Zenodo](https://doi.org/10.5281/zenodo.15641296)
+* CAZP scoring component: interface to AiZynthFinder
+* Optional SMARTS filter for sampling to remove unwanted patterns e.g. elements
+* Output SMILES state for sampling
+* iSIM similarty support for RL in TensorBoard
+* Parallel scoring
+* Ring system precedence based scoring component (from Pat Walters)
+* Multiple endpoints for ExternalProcess scoring component
+* ChemProp is still 1.x: rdkit\_2d\_normalized is obsolete (but needed and ignored) use features="rdkit\_2d\_normalized"
+* Write out metadata to CSV e.g. custom alert matching pattern
+* GPU memory reporting for TL
+* Terminate if invalid tokens are found in the input
+* Additions and fixes to PepInvent e.g CamSol scoring component
+* Updates to the data pipeline e.g. optional InchiKey deduplication
+* Various code improvements and fixes
+
+
 New in REINVENT 4.5
 ===================
 
 For details see CHANGELOG.md.
 
-* PepINVENT: transformer (SMILES) based peptide generator and prior model
+* PepInvent: transformer (SMILES) based peptide generator and prior model
 * Temperature factor parameter (transformer generators) for sampling and RL
 * Support script run-qsartuna.py to play QSARtuna models in external environment
 * Component-level parameters for scoring components

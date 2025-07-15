@@ -132,6 +132,7 @@ from __future__ import annotations
 
 __all__ = ["Maize"]
 
+import logging
 import os
 import shlex
 import json
@@ -147,6 +148,9 @@ from .component_results import ComponentResults
 from .run_program import run_command
 from .add_tag import add_tag
 from reinvent_plugins.normalize import normalize_smiles
+
+
+logger = logging.getLogger("reinvent")
 
 
 @add_tag("__parameters")
@@ -166,16 +170,20 @@ class Parameters:
     :param log: Path to Maize logfile (optional)
     :param config: Path to Maize system configuration (optional)
     :param parameters: Dictionary containing workflow parameters to override (optional)
-
+    :param skip_normalize: skip normalize_smiles (optional)
+    :param pass_fragments: take fragmented smiles as input instead of complete smiles (optional)
     """
 
     executable: List[str]
     workflow: List[str]
+    skip_on_failure: List[bool] = Field(default_factory=lambda: [True])
     debug: List[bool] = Field(default_factory=lambda: [False])
     keep: List[bool] = Field(default_factory=lambda: [False])
     log: List[str | None] = Field(default_factory=lambda: [None])
     config: List[str | None] = Field(default_factory=lambda: [None])
     parameters: List[dict[str, Any]] = Field(default_factory=lambda: [{}])
+    skip_normalize: List[bool] = Field(default_factory=lambda: [False])
+    pass_fragments: List[bool] = Field(default_factory=lambda: [False])
 
 
 CMD = "{exe} {config} --inp {inp} --out {out} --parameters {params}"
@@ -193,7 +201,10 @@ class Maize:
         self.log = params.log[0]
         self.config = params.config[0]
         self.parameters = params.parameters[0]
+        self.skip_on_failure = params.skip_on_failure[0]
         self.smiles_type = "rdkit_smiles"
+        self.skip_normalize = params.skip_normalize[0]
+        self.pass_fragments = params.pass_fragments[0]
 
         if len(params.workflow) > 1:
             raise ValueError("The Maize component currently only supports a single endpoint")
@@ -228,7 +239,17 @@ class Maize:
             if self.config:
                 command.extend(["--config", self.config])
 
-            _ = run_command(command)
+            try:
+                run_command(command)
+            except ValueError as err:
+                if self.skip_on_failure:
+                    logger.warning(
+                        "Maize failed, returning NaN for all compounds, original error: %s", err
+                    )
+                    scores = [np.array([0 for _ in smilies])]
+                    return ComponentResults(scores=scores)
+                raise
+
             wait_for_output(out_json, sleep_for=3)
 
             endpoint_score = parse_output(out_json)

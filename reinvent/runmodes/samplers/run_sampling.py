@@ -17,23 +17,25 @@ from reinvent.runmodes.samplers.reports import (
     SamplingTBReporter,
     SamplingRemoteReporter,
 )
-from reinvent.utils import get_reporter, read_smiles_csv_file
+from reinvent.utils import get_reporter, read_smiles_csv_file, get_tokens_from_vocabulary
 from reinvent.runmodes.setup_sampler import setup_sampler
 from reinvent.models.model_factory.sample_batch import SampleBatch, SmilesState
 from reinvent.chemistry import conversions
+from reinvent.scoring import Scorer
+from reinvent.runmodes.samplers.pepinvent import PepinventSampler
 from reinvent_plugins.normalizers.rdkit_smiles import normalize
 from .validation import SamplingConfig
 
 logger = logging.getLogger(__name__)
 
 HEADERS = {
-    "Reinvent": ("SMILES", "NLL"),
-    "Libinvent": ("SMILES", "Scaffold", "R-groups", "NLL"),
-    "Linkinvent": ("SMILES", "Warheads", "Linker", "NLL"),
-    "LibinventTransformer": ("SMILES", "Scaffold", "R-groups", "NLL"),
-    "LinkinventTransformer": ("SMILES", "Warheads", "Linker", "NLL"),
-    "Mol2Mol": ("SMILES", "Input_SMILES", "Tanimoto", "NLL"),
-    "Pepinvent": ("SMILES", "Masked_input_peptide", "Fillers", "NLL"),
+    "Reinvent": ("SMILES", "SMILES_state", "NLL"),
+    "Libinvent": ("SMILES", "SMILES_state", "Scaffold", "R-groups", "NLL"),
+    "Linkinvent": ("SMILES", "SMILES_state", "Warheads", "Linker", "NLL"),
+    "LibinventTransformer": ("SMILES", "SMILES_state", "Scaffold", "R-groups", "NLL"),
+    "LinkinventTransformer": ("SMILES", "SMILES_state", "Warheads", "Linker", "NLL"),
+    "Mol2Mol": ("SMILES", "SMILES_state", "Input_SMILES", "Tanimoto", "NLL"),
+    "Pepinvent": ("SMILES", "SMILES_state", "Masked_input_peptide", "Fillers", "NLL"),
 }
 
 FRAGMENT_GENERATORS = [
@@ -78,7 +80,8 @@ def run_sampling(
     num_input_smilies = 1
 
     if smiles_input_filename:
-        input_smilies = read_smiles_csv_file(smiles_input_filename, columns=0)
+        allowed_tokens = get_tokens_from_vocabulary(adapter.vocabulary)
+        input_smilies = read_smiles_csv_file(smiles_input_filename, 0, allowed_tokens)
         num_input_smilies = len(input_smilies)
 
     num_total_smilies = parameters.num_smiles * num_input_smilies
@@ -120,23 +123,37 @@ def run_sampling(
         reporter.submit(sampled, **kwargs)
 
     if parameters.unique_molecules:
+        n = len(sampled.smilies)
         sampled = filter_valid(sampled)
+        logger.info(f"Removed {n - len(sampled.smilies)} invalid SMILES")
+
+    if config.filter:
+        n = len(sampled.smilies)
+        sampled = filter_by_pattern(sampled, config.filter.smarts)
+        logger.info(f"Removed {n - len(sampled.smilies)} SMILES matching a filter pattern")
 
     records = None
     nlls = [round(nll, 2) for nll in sampled.nlls.cpu().tolist()]
+    states = [state.value for state in sampled.states]
 
     if model_type == "Reinvent":
-        records = zip(sampled.smilies, nlls)
+        records = zip(sampled.smilies, states, nlls)
     elif model_type in FRAGMENT_GENERATORS:
-        records = zip(sampled.smilies, sampled.items1, sampled.items2, nlls)
+        records = zip(sampled.smilies, states, sampled.items1, sampled.items2, nlls)
+
+        if model_type == "Pepinvent":
+            filler_headers, filler_columns = PepinventSampler.split_fillers(sampled)
+            HEADERS[model_type] += tuple(filler_headers)
+            records = zip(sampled.smilies, states, sampled.items1, sampled.items2, nlls, *filler_columns)
     elif model_type == "Mol2Mol":
         if parameters.unique_molecules:
             mask_idx = np.nonzero(state == SmilesState.VALID)[0]
             scores = [scores[i] for i in mask_idx]
-        records = zip(sampled.smilies, sampled.items1, scores, nlls)
+        records = zip(sampled.smilies, states, sampled.items1, scores, nlls)
 
         if parameters.target_smiles_path:
-            target_smilies = read_smiles_csv_file(parameters.target_smiles_path, columns=0)
+            allowed_tokens = get_tokens_from_vocabulary(adapter.vocabulary)
+            target_smilies = read_smiles_csv_file(parameters.target_smiles_path, 0, allowed_tokens)
 
             if len(target_smilies) > 0:
                 input, target, tanimoto, nlls = sampler.check_nll(input_smilies, target_smilies)
@@ -151,13 +168,40 @@ def run_sampling(
 def filter_valid(sampled: SampleBatch) -> SampleBatch:
     """Filter out valid SMILES and associated data, which is unique as well
 
-    :param sampled:
-    :return:
+    :param sampled: sample batch
+    :returns: filtered sample batch
     """
 
     state = np.array(sampled.states)
     mask_idx = state == SmilesState.VALID
 
+    return filter_wanted_samples(sampled, mask_idx)
+
+
+def filter_by_pattern(sampled: SampleBatch, patterns: list) -> SampleBatch:
+    """Filter out SMILES and associated data, which is unique as well
+
+    :param sampled: sample batch
+    :return:
+    """
+
+    config = dict(
+        type="geometric_mean",
+        filename=None,
+        component=[
+            {"custom_alerts": {"endpoint": [{"name": "Alerts", "params": {"smarts": patterns}}]}}
+        ],
+    )
+
+    custom_alerts = Scorer(config)
+    size = len(sampled.smilies)
+    score_results = custom_alerts(sampled.smilies, np.ones(size), np.ones(size), None)
+    mask_idx = np.where(score_results.total_scores == 0, False, True)
+
+    return filter_wanted_samples(sampled, mask_idx)
+
+
+def filter_wanted_samples(sampled: SampleBatch, mask_idx: np.array):
     # For Reinvent, items1 is None
     items1 = list(np.array(sampled.items1)[mask_idx]) if sampled.items1 else None
     items2 = list(np.array(sampled.items2)[mask_idx])

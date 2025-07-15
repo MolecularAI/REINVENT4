@@ -44,7 +44,11 @@ class Decoder(tnn.Module):
         seq_lengths: torch.Tensor,
         encoder_padded_seqs: torch.Tensor,
         hidden_states: Tuple[torch.Tensor],
-    ) -> (torch.Tensor, Tuple[torch.Tensor], torch.Tensor,):  # pylint: disable=arguments-differ
+    ) -> (
+        torch.Tensor,
+        Tuple[torch.Tensor],
+        torch.Tensor,
+    ):  # pylint: disable=arguments-differ
         """
         Performs the forward pass.
         :param padded_seqs: A tensor with the output sequences (batch, seq_d, dim).

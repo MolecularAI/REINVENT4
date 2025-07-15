@@ -1,0 +1,13 @@
+[[component]]
+[component.Cazp]
+params.number_of_steps = 2
+params.time_limit_seconds = 60
+
+# the following extends the AiZynthFinder YAML configuration
+#params.stock_profile = "Enamine_BB"
+#params.reactions_profile = "USPTO-NMC5"
+
+[[component.Cazp.endpoint]]
+weight = 0.2
+name = "CAZP" 
+params.score_to_extract = "cazp"

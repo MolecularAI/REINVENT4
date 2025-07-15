@@ -2,7 +2,9 @@
 
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+MAX_ALLOWED_CPU = 40  # arbitrary limit
 
 
 class ScorerConfig(BaseModel):
@@ -11,4 +13,4 @@ class ScorerConfig(BaseModel):
     filename: Optional[str] = None
     filetype: Optional[str] = None
     component: List[dict[str, dict]]
-    parallel: bool = False
+    parallel: int = Field(1, ge=1, le=MAX_ALLOWED_CPU)

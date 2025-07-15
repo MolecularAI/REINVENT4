@@ -1,7 +1,7 @@
 #!/bin/env python3
 #
 # This is an example how to use the ExternalProcess scoring component using
-# ChemProp.  The scripts expects a list of SMILES from stdin and will
+# ChemProp 1.x.  The scripts expects a list of SMILES from stdin and will
 # write a JSON string to stdout.
 #
 # Setup shown for scoring file include feature: scoring.filename
@@ -12,8 +12,11 @@
 #
 # # If already in the right conda environment the script could be run directly
 # # The --no-capture-output is necessary to pass through stdout from REINVENT4
+# # In multi endpoint scenarios replace executable with "/dev/null" in all
+# # endpoints except the first
 # params.executable = "/home/user/miniconda3/condabin/conda"
 # params.args = "run --no-capture-output -n dev /home/user/projects/reinvent/run-chemprop.py"
+# params.property = "dG"
 #
 # transform.type = "reverse_sigmoid"
 # transform.high = -0.0
@@ -84,6 +87,8 @@ scores = [val[0] if "Invalid SMILES" not in val else np.nan for val in preds]
 
 
 # Format the JSON string for REINVENT4 and write it to stdout
+# Replace "predictions" if wanted and set params.property accordingly
+# Multiple endpoints possible
 data = {"version": 1, "payload": {"predictions": scores}}
 
 print(json.dumps(data))

@@ -12,8 +12,11 @@
 #
 # # Run Qptuna in its own environment
 # # The --no-capture-output is necessary to pass through stdout from REINVENT4
+# # In multi endpoint scenarios replace executable with "/dev/null" in all
+# # endpoints except the first
 # params.executable = "/home/user/miniconda3/condabin/mamba"
 # params.args = "run --no-capture-output -n qsartuna /path/to/run-qsartuna.py model_filename
+# params.property = "clint"
 #
 # # Don't forget the transform if needed!
 #
@@ -37,6 +40,8 @@ scores = model.predict_from_smiles(smilies, uncert=False)
 
 
 # Format the JSON string for REINVENT4 and write it to stdout
+# Replace "predictions" if wanted and set params.property accordingly
+# Multiple endpoints possible
 data = {"version": 1, "payload": {"predictions": list(scores)}}
 
 print(json.dumps(data))

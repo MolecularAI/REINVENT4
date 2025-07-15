@@ -91,7 +91,7 @@ def remove_duplicate_sequences(
 
 
 def validate_smiles(
-    mols: List[Chem.Mol], smilies, isomeric: bool = False
+    mols: List[Chem.Mol], smilies, isomeric: bool = False, return_original_smiles: bool = False
 ) -> Tuple[List, np.ndarray]:
     """Basic validation of sampled or joined SMILES
 
@@ -100,6 +100,8 @@ def validate_smiles(
 
     :mols: molecules
     :smilies: SMILES of molecules including invalid ones
+    :isomeric: whether to use isomeric SMILES
+    :return_original_smiles: whether to return the original SMILES instead of canonical_smiles
     :returns: validated SMILES and their states
     """
 
@@ -119,7 +121,10 @@ def validate_smiles(
                 else:
                     smilies_states.append(SmilesState.VALID)
 
-                validated_smilies.append(canonical_smiles)
+                if return_original_smiles:
+                    validated_smilies.append(sampled_smiles)
+                else:
+                    validated_smilies.append(canonical_smiles)
                 seen_before.add(canonical_smiles)
             else:
                 validated_smilies.append(sampled_smiles)

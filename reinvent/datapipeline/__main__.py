@@ -1,3 +1,3 @@
-from .preprocess import main
+from .preprocess import main_script
 
-main()
+main_script()

@@ -15,8 +15,11 @@
 #
 # # The software requires a specific virtual environment based on Python 3.7/8
 # # The --no-capture-output is necessary to pass through stdout from REINVENT4
+# # In multi endpoint scenarious replace executable with "/dev/null" in all
+# # endpoints except the first
 # params.executable = "/home/user/miniconda3/condabin/mamba"
 # params.args = "run --no-capture-output -n rascore /home/user/projects/RAScore/run-rascore.py
+# params.property = "RAScore"
 # # No transform needed as score is already between 0 and 1
 #
 
@@ -50,6 +53,6 @@ for smiles in smilies:
 
 
 # Format the JSON string for REINVENT4 and write it to stdout
-data = {"version": 1, "payload": {"predictions": scores}}
+data = {"version": 1, "payload": {"RAScore": scores}}
 
 print(json.dumps(data))

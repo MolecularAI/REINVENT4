@@ -3,11 +3,278 @@
 This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 
 
-## [Unreleased]
+## [4.6.22] 2025-07-01
+
+### Fixed
+
+- Do not skip categorical values in raw scores for remote monitoring
+
+
+## [4.6.21] 2025-06-12
+
+### Fixed
+
+- Metadata is now printed in evaluate scoring jobs as well 
+
+
+## [4.6.20] 2025-06-11
+
+### Added
+
+- CamSol scoring component for peptide solubility prediction
+
+
+## [4.6.19] 2025-06-03
+
+### Fixed
+
+- skip warning message if RL terminates normally
+
+
+## [4.6.18] 2025-05-21
+
+### Fixed
+
+- beamsearch had an unsafe integer division
+
+## [4.6.17] 2025-05-13
+
+### Added
+
+- metadata write out to output csv
+- add custom alert matching pattern metadata
+
+
+## [4.6.16] 2025-05-12
+
+### Added
+
+- optional InchiKey deduplication for data pipeline
+
+
+## [4.6.15] 2025-05-06
+
+### Added
+
+- batched sampling for classical Reinvent
+
+
+## [4.6.14] 2025-04-30
+
+### Added
+
+- output SMILES state in sampling runmode
+
+
+## [4.6.13] 2025-04-28
+
+### Added
+
+- token check: leads to termination if invalid token is found, for all models
+
+
+## [4.6.12] 2025-04-28
+
+### Added
+
+- GPU memory reporting for TL
+
+
+## [4.6.11] 2025-04-12
+
+### Fixed
+
+- json\_config\_path is None if not explicitly set in the config file
+
+
+## [4.6.10] 2025-04-12
+
+### Added
+
+- Feature parameter for ChemProp scoring component
+
+
+## [4.6.9] 2025-04-03
 
 ### Changed
 
-- CAZP scoring component
+- Check against validated config rather than original input config dict
+
+
+## [4.6.8] 2025-04-02
+
+### Changed
+
+- Multiple endpoints for ExternalProcess scoring component
+
+
+## [4.6.7] 2025-04-01
+
+### Fixed
+
+- Enable ROCS in multiprocessing environment
+
+
+## [4.6.6] 2025-04-01
+
+### Added
+
+- Ring system precedence based scoring component 
+
+
+## [4.6.5] 2025-04-01
+
+### Fixed
+
+- Fragment & annotated smiles fixes reimplemented
+- Libinvent tensorboard logging cleaned SMILES instead of labeled SMILES
+
+
+## [4.6.4] 2025-04-01
+
+### Fixed
+
+- Fragment & annotated smiles fixes reimplemented
+
+
+## [4.6.3] 2025-03-31
+
+### Fixed
+
+- Parallel scoring enabled
+
+
+## [4.6.2] 2025-03-31
+
+### Fixed
+
+- Sampling SMARTS filters indexing 
+
+
+## [4.6.1] 2025-03-28
+
+### Fixed
+
+- LibInvent handling of annotated SMILES in score caching
+
+
+## [4.6.0] 2025-03-25
+
+### Added
+
+- iSIM similarity support for RL
+
+
+## [4.5.27] 2025-03-25
+
+### Fixed
+
+- Data pipeline regex filter checks for carbons correctly
+
+
+## [4.5.26] 2025-03-21
+
+### Fixed
+
+- Fragment scores are now correctly associated the full smiles in RL
+
+
+## [4.5.25] 2025-03-20
+
+### Added
+
+- Split fillers for PepInvent in log and CSV files
+
+
+## [4.5.24] 2025-03-20
+
+### Added
+
+- Optional -1 offset for training loss plot in TB
+
+
+## [4.5.23] 2025-02-21
+
+### Fixed
+
+- Properly set seed: command line precedes config setting
+
+
+## [4.5.22] 2025-02-14
+
+### Fixed
+
+- Ignore extra fillers when PepInvent got stuck in generating more fillers than needed
+
+
+## [4.5.21] 2025-02-11
+
+### Fixed
+
+- Various typos and clarification in documentation
+
+
+## [4.5.20] 2025-02-11
+
+### Added
+
+- Optional SMARTS filter for sampling
+
+
+## [4.5.19] 2025-02-11
+
+### Changed
+
+- Clean-up in datapipeline regex
+
+
+## [4.5.18] 2025-01-31
+
+### Changed
+
+- Added `weights_only=False` to all torch.load calls
+
+
+## [4.5.17] 2025-01-23
+
+### Changed
+
+- Do no disconnect organic metal compounds in data pipeline
+
+
+## [4.5.16] 2025-01-23
+
+### Added
+
+- Skip scoring if failure is encountered anywhere in Maize
+
+
+## [4.5.15] 2024-12-18
+
+### Added
+
+- SMILES dictionary datastructure for component results
+
+
+## [4.5.14] 2024-12-04
+
+### Added
+
+- Guard again atom kekulization exception in data pipeline
+
+
+## [4.5.13] 2024-11-28
+
+### Fixed
+
+- Set Mol to be None when the number of generated fillers does not match the input masked slots in Pepinvent.
+
+
+## [4.5.12] 2024-11-27
+
+### Added
+
+- Add a scoring function for calculating the number of atoms in the largest ring
 
 
 ## [4.5.11] 2024-11-18

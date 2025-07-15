@@ -133,8 +133,6 @@ class Learning(ABC):
             )
 
             results = self.score()
-            if self.prior.model_type == "Libinvent":
-                results.smilies = normalize(results.smilies, keep_all=True)
 
             if self._state.diversity_filter:
                 df_mask = np.where(self.invalid_mask, True, False)
@@ -330,9 +328,6 @@ class Learning(ABC):
         if self.tb_isim:
             fingerprints = binary_fps(smilies, fp_type="RDKIT", n_bits=None)
             isim = calculate_isim(fingerprints, n_ary="JT")
-
-        if self.prior.model_type == "Libinvent":
-            smilies = normalize(smilies, keep_all=True)
 
         mask_idx = (np.argwhere(mask_valid).flatten(),)
 

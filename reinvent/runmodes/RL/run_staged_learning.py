@@ -7,7 +7,7 @@ from typing import List, TYPE_CHECKING
 
 import torch
 
-from reinvent.utils import setup_logger, CsvFormatter, config_parse
+from reinvent.utils import setup_logger, CsvFormatter, config_parse, get_tokens_from_vocabulary
 from reinvent.runmodes import Handler, RL, create_adapter
 from reinvent.runmodes.setup_sampler import setup_sampler
 from reinvent.runmodes.RL import terminators, memories
@@ -106,7 +106,8 @@ def setup_inception(config: SectionInception, prior: ModelAdapter):
     smilies_filename = config.smiles_file
 
     if smilies_filename and os.path.exists(smilies_filename):
-        smilies = config_parse.read_smiles_csv_file(smilies_filename, columns=0)
+        allowed_tokens = get_tokens_from_vocabulary(prior.vocabulary)
+        smilies = config_parse.read_smiles_csv_file(smilies_filename, 0, allowed_tokens)
 
         if not smilies:
             msg = f"Inception SMILES could not be read from {smilies_filename}"
@@ -219,7 +220,7 @@ def run_staged_learning(
     )
 
     parameters = config.parameters
-    
+
     # NOTE: The model files are a dictionary with model attributes from
     #       Reinvent and a set of tensors, each with an attribute for the
     #       device (CPU or GPU) and if gradients are required
@@ -264,7 +265,8 @@ def run_staged_learning(
     smilies = None
 
     if parameters.smiles_file:
-        smilies = config_parse.read_smiles_csv_file(parameters.smiles_file, columns=0)
+        allowed_tokens = get_tokens_from_vocabulary(agent.vocabulary)
+        smilies = config_parse.read_smiles_csv_file(parameters.smiles_file, 0, allowed_tokens)
         logger.info(f"Input molecules/fragments read from file {parameters.smiles_file}")
 
     sampler, _ = setup_sampler(model_type, parameters.dict(), agent)
@@ -301,7 +303,7 @@ def run_staged_learning(
     distance_threshold = parameters.distance_threshold
 
     model_learning = getattr(RL, f"{model_type}Learning")
-    
+
     if callable(write_config):
         write_config(config.model_dump())
 
@@ -329,7 +331,7 @@ def run_staged_learning(
             else:
                 state = ModelState(agent, package.diversity_filter)
                 logger.debug(f"Using stage DF")
-            
+
             optimize = model_learning(
                 max_steps=package.max_steps,
                 stage_no=stage_no,

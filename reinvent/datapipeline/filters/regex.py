@@ -16,10 +16,20 @@ from . import elements
 if TYPE_CHECKING:
     from ..validation import FilterSection
 
-# adapted from SmilesPE-0.0.3
+# SMILES tokenizer
+# NOTE: this does not validate the SMILES
+#       non-matching SMILES tokens will be dropped!
+BRACKETS = r"\[[^]]+]"  # should be: isotope? symbol chiral? hcount? charge? class?
+ALIPHATIC = r"Br?|Cl?|N|O|S|P|F|I"
+AROMATIC = r"b|c|n|o|s|p"
+BONDS = r"-|=|#|\$|:|\\|/"
+BRANCH = r"\(|\)"
+LABELS = r"%\d{2}|\d"
+MISC = r"\.|\*"  # these should not be needed
 SMILES_TOKENS_REGEX = re.compile(
-    r"(\[[^]]+]|Br?|Cl?|N|O|S|P|F|I|b|c|n|o|s|p|\(|\)|\.|=|#|-|\+|\\|/|:|~|@|\?|>>?|\*|\$|%\d+|\d)"
+    rf"({BRACKETS}|{ALIPHATIC}|{AROMATIC}|{BONDS}|{BRANCH}|{LABELS}|{MISC})"
 )
+
 ELEMENT = re.compile(r"[A-Za-z]+")
 ISOTOPE = re.compile(r"\[\d+")
 ISOTOPE_EXTRACT = re.compile("[A-Za-z@+-]+\d*")
@@ -97,8 +107,7 @@ class RegexFilter:
                     self.discarded_tokens.update([token])
                     return None
 
-                # FIXME: this may not capture all possibilities
-                if elem.startswith("C") or elem.startswith("c") or elem.startswith("#6"):
+                if elem == "C" or elem == "c":
                     carbon_count += 1
 
                 if elem != "H":

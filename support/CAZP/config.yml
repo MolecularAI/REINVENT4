@@ -1,0 +1,23 @@
+search:
+  algorithm: mcts
+expansion:
+  uspto:
+    - /home/me/models/uspto_model.onnx
+    - /home/me/models/uspto_templates.csv.gz
+  ringbreaker:
+    - /home/me/models/uspto_ringbreaker_model.onnx
+    - /home/me/models/uspto_ringbreaker_templates.csv.gz
+filter:
+  uspto: /home/me/models/uspto_filter_model.onnx
+stock:
+  zinc: /home/me/models/zinc_stock.hdf5
+scorer:
+    ReactionClassMembershipScorer:
+        in_set_score: 1.0
+        not_in_set_score: 0.5
+        reaction_class_set: []
+    StockAvailabilityScorer:
+        source_score:
+            zinc: 1.0
+        default_score: 0.1  # Not in any stock
+        other_source_score: 0.8  # In some stock, but not in any of the ones in source_score

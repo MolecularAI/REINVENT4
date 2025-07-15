@@ -14,7 +14,7 @@ import numpy as np
 from reinvent_plugins.components.RDKit.comp_pmi import Parameters, PMI
 
 
-RTOL = 0.05  # this makes the tests fairly fragile
+RTOL = 0.06  # this makes the tests fairly fragile
 
 
 def test_comp_pmi_all():

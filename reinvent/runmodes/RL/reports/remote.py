@@ -92,15 +92,19 @@ def score_summary(results: ScoreResults, mask_idx: np.ndarray) -> dict:
         for transformed_scores in transformed_result.transformed_scores:
             scores.append(transformed_scores)
 
-        for original_scores in transformed_result.component_result.scores:
-            if original_scores.dtype.char != "U":  # exclude categorical values
-                raw_scores.append(original_scores)
+        for original_scores in np.array(
+            transformed_result.component_result.fetch_scores(results.smilies, transpose=True)
+        ):
+            raw_scores.append(original_scores)
 
     for name, _scores in zip(names, scores):
         score_components[name] = np.nanmean(_scores[mask_idx]).astype(float)
 
     for name, _scores in zip(names, raw_scores):
-        score_components[name + " (raw)"] = np.nanmean(_scores[mask_idx]).astype(float)
+        if type(_scores[0]) == np.str_:
+            score_components[name + " (raw)"] = "value_mapped"
+        else:
+            score_components[name + " (raw)"] = np.nanmean(_scores[mask_idx]).astype(float)
 
     return score_components
 

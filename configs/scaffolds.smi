@@ -1,0 +1,8 @@
+# Example scaffold file for REINVENT4 LibInvent
+#
+# One scaffold per line
+# Each scaffold must be annotated by 2 '*'s to locate the attachment points
+
+[*:1]Cc2ccc1cncc(C[*:2])c1c2
+[*:1]Cc2cnc1cncc(C[*:2])c1c2
+

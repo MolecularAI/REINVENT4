@@ -28,15 +28,29 @@ class TLTBReporter:
 
         smiles_counts = Counter(data.sampled_smilies)
 
+        ### A_Mean NLL loss - START
+        label = "A_Mean NLL loss"
+
         mean_nll_stats = {
             "Training Loss": data.mean_nll,
+        }
+
+        epoch = data.epoch
+
+        if data.zero_epoch:
+            epoch -= 1
+
+        self.reporter.add_scalars(label, mean_nll_stats, epoch)
+
+        mean_nll_stats = {
             "Sample Loss": data.sampled_nlls.mean(),
         }
 
         if data.mean_nll_validation is not None:
             mean_nll_stats["Validation Loss"] = data.mean_nll_validation
 
-        self.reporter.add_scalars("A_Mean NLL loss", mean_nll_stats, data.epoch)
+        self.reporter.add_scalars(label, mean_nll_stats, data.epoch)
+        ### A_Mean NLL loss - END
 
         self.reporter.add_scalar("B_Fraction valid SMILES", data.fraction_valid, data.epoch)
         self.reporter.add_scalar(

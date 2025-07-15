@@ -1,0 +1,103 @@
+# REINVENT4 TOML input example for scoring
+#
+
+run_type = "scoring"
+json_out_config = "_scoring.json"  # write this TOML to JSON
+
+[parameters]
+
+smiles_file = "compounds.smi"  # SMILES file with 1 molecule per line
+output_csv = "scoring.csv"  # name of output CSV to write, optional
+
+
+[scoring]
+
+type = "geometric_mean"  # or arithmetic_mean
+parallel = false  # do not run scoring components in parallel
+
+[[scoring.component]]
+# Custom alerts if a filter of unwanted groups
+[scoring.component.custom_alerts]
+
+[[scoring.component.custom_alerts.endpoint]]
+name = "Alerts"  # user chosen name for output
+# no weight because as a filter it will be applied globally
+
+params.smarts = [
+    "[*;r8]",
+    "[*;r9]",
+    "[*;r10]",
+    "[*;r11]",
+    "[*;r12]",
+    "[*;r13]",
+    "[*;r14]",
+    "[*;r15]",
+    "[*;r16]",
+    "[*;r17]",
+    "[#8][#8]",
+    "[#6;+]",
+    "[#16][#16]",
+    "[#7;!n][S;!$(S(=O)=O)]",
+    "[#7;!n][#7;!n]",
+    "C#C",
+    "C(=[O,S])[O,S]",
+    "[#7;!n][C;!$(C(=[O,N])[N,O])][#16;!s]",
+    "[#7;!n][C;!$(C(=[O,N])[N,O])][#7;!n]",
+    "[#7;!n][C;!$(C(=[O,N])[N,O])][#8;!o]",
+    "[#8;!o][C;!$(C(=[O,N])[N,O])][#16;!s]",
+    "[#8;!o][C;!$(C(=[O,N])[N,O])][#8;!o]",
+    "[#16;!s][C;!$(C(=[O,N])[N,O])][#16;!s]"
+]
+
+[[scoring.component]]
+[scoring.component.QED]
+
+[[scoring.component.QED.endpoint]]
+name = "QED"
+weight = 0.25  # weight to fine-tune the importance of this component
+
+[[scoring.component]]
+[scoring.component.MolecularWeight]
+
+[[scoring.component.MolecularWeight.endpoint]]
+name = "MW"
+weight = 0.25
+
+# transforms can be used for any component if desired
+transform.type = "double_sigmoid"
+transform.high = 500.0
+transform.low = 200.0
+transform.coef_div = 500.0
+transform.coef_si = 20.0
+transform.coef_se = 20.0
+
+[[scoring.component]]
+[scoring.component.TanimotoDistance]
+
+[[scoring.component.TanimotoDistance.endpoint]]
+name = "Tanimoto similarity ECF6"
+weight = 0.1
+
+# component specific parameters
+params.smiles = [
+    "n1(nc(c(c1C)-c2n[nH]c(c2)[C@@]3([C@@H](CN(CC3)Cc4nc5c(c(n4)C)cccc5)O)OC)C)C"
+]
+params.radius = 3
+params.use_counts = true
+params.use_features = true
+
+
+# Multiple end-points for many scoring components: each is a separate component
+# with its own weight
+[[scoring.component]]
+[scoring.component.pmi]
+name = "PMI 3D-likeness"
+
+[[scoring.component.pmi.endpoint]]
+weight = 0.79
+params.property = 'npr1'  # component specific parameters
+
+[[scoring.component.pmi.endpoint]]
+weight = 0.21
+params.property = 'npr2'  # component specific parameters
+

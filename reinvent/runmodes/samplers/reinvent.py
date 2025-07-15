@@ -6,6 +6,7 @@ import logging
 from rdkit import Chem
 
 from .sampler import Sampler, remove_duplicate_sequences, validate_smiles
+from .params import SAMPLE_BATCH_SIZE
 from ...models.model_factory.sample_batch import SampleBatch
 
 logger = logging.getLogger(__name__)
@@ -21,8 +22,19 @@ class ReinventSampler(Sampler):
         :returns: SampleBatch
         """
 
-        sampled = self.model.sample(self.batch_size)
-        sampled.items1 = None  # expected in sampling runmode
+        batch_sizes = [SAMPLE_BATCH_SIZE for _ in range(self.batch_size // SAMPLE_BATCH_SIZE)]
+
+        if remainder := self.batch_size % SAMPLE_BATCH_SIZE:
+            batch_sizes += [remainder]
+
+        sequences = []
+
+        for batch_size in batch_sizes:
+            for batch_row in self.model.sample(batch_size):
+                sequences.append(batch_row)
+
+        sampled = SampleBatch.from_list(sequences)
+        sampled.items1 = None
 
         if self.unique_sequences:
             sampled = remove_duplicate_sequences(sampled, is_reinvent=True)
@@ -33,4 +45,5 @@ class ReinventSampler(Sampler):
         ]
 
         sampled.smilies, sampled.states = validate_smiles(mols, sampled.output)
+
         return sampled

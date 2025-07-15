@@ -47,17 +47,6 @@ class LinkInventModel:
             raise ValueError(f"Invalid model mode '{mode}")
 
     @classmethod
-    def load_from_file(cls, file_path: str, mode: str, device: torch.device):
-        """
-        Loads a model from a single file
-        :param file_path: Path to the saved model
-        :return: An instance of the network
-        """
-
-        save_dict = torch.load(file_path, map_location=device, weights_only=False)
-        return cls.create_from_dict(save_dict, mode, device)
-
-    @classmethod
     def create_from_dict(cls, save_dict: dict, mode: str, device: torch.device):
         model_type = save_dict.get("model_type")
 

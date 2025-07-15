@@ -19,7 +19,13 @@ from rdkit import rdBase
 import polars as pl
 from tqdm import tqdm
 
-from reinvent.datapipeline.filters import RegexFilter, SMILES_TOKENS_REGEX, RDKitFilter, elements
+from reinvent.datapipeline.filters import (
+    RegexFilter,
+    SMILES_TOKENS_REGEX,
+    RDKitFilter,
+    elements,
+    inchi_key_deduplicator,
+)
 from reinvent.datapipeline.logger import setup_sp_logger, setup_mp_logger, logging_listener
 from reinvent.datapipeline.validation import DPLConfig
 from reinvent.datapipeline import normalizer
@@ -138,7 +144,7 @@ def main(args):
                 str(infile),
                 separator=sep,
                 has_header=False,
-                new_columns=["index", config.smiles_column],
+                new_columns=[config.smiles_column],
             )
         else:
             df = pl.read_csv(
@@ -197,11 +203,14 @@ def main(args):
 
     pbar.update(bar_format="Chem:{desc}|{bar}|{elapsed}")
 
+    rdkit_smilies = []
+    mols = []
+
     if num_procs > 1:
         rdkit_filter = RDKitFilter(config.filter, all_transforms, level, queue)
 
         with mp.Pool(num_procs) as pool:
-            rdkit_smilies = set(
+            result = set(
                 tqdm(
                     pool.imap(rdkit_filter, regex_smilies, chunksize=chunk_size),
                     total=len(regex_smilies),
@@ -209,14 +218,25 @@ def main(args):
                 )
             )
 
-        rdkit_smilies.discard(None)
+        for smiles, mol in result:
+            if smiles:
+                rdkit_smilies.append(smiles)
+                mols.append(mol)
     else:
         rdkit_filter = RDKitFilter(config.filter, all_transforms)
-        rdkit_smilies = set()
 
         for smiles in tqdm(regex_smilies, **pbar):
-            if rdkit_smiles := rdkit_filter(smiles):
-                rdkit_smilies.add(rdkit_smiles)
+            rdkit_smiles, mol = rdkit_filter(smiles)
+
+            if rdkit_smiles:
+                rdkit_smilies.append(rdkit_smiles)
+                mols.append(mol)
+
+    if config.filter.inchi_key_deduplicate:
+        rdkit_smilies = inchi_key_deduplicator(mols, rdkit_smilies)
+    else:
+        rdkit_smilies = set(rdkit_smilies)
+        rdkit_smilies.discard(None)
 
     logger.info(f"{len(rdkit_smilies)} SMILES after chemistry filtering")
     logger.info(f"Writing filtered SMILES to {outfile}")

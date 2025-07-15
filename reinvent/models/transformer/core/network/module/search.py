@@ -163,7 +163,7 @@ class Node:
 
             # tricky indexing
             next_chars = torch.remainder(idx, vocabulary_size).flatten().unsqueeze(-1)
-            best_candidates = (idx / vocabulary_size).long()
+            best_candidates = idx // vocabulary_size
             if best_candidates.device != self.device:
                 best_candidates = best_candidates.to(self.device)
             # done

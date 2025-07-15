@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from reinvent.runmodes.samplers import PepinventSampler
+
 if TYPE_CHECKING:
     from reinvent.runmodes.RL.reports import RLReportData
 
@@ -92,6 +94,10 @@ def write_summary(data, write_header):
 
         if data.model_type in FRAGMENT_GENERATORS:
             columns.append(data.sampled.items2)
+            if data.model_type == "Pepinvent":
+                filler_headers, filler_records = PepinventSampler.split_fillers(data.sampled)
+                header.extend(filler_headers)
+                columns.extend(filler_records)
 
     if data.scaffolds:
         header.append("Scaffold")
@@ -100,6 +106,8 @@ def write_summary(data, write_header):
     names = []
     scores = []
     raw_scores = []
+    metadata_names = []
+    metadata_values = []
 
     for transformed_result in results.completed_components:
         names.extend(transformed_result.component_names)
@@ -115,7 +123,9 @@ def write_summary(data, write_header):
 
             scores.append(_scores)
 
-        for original_scores in transformed_result.component_result.scores:
+        for original_scores in transformed_result.component_result.fetch_scores(
+            results.smilies, transpose=True
+        ):
             _scores = []
 
             for score in original_scores:
@@ -126,14 +136,23 @@ def write_summary(data, write_header):
 
             raw_scores.append(_scores)
 
+        for _metadata_name, _metadata_value in transformed_result.component_result.fetch_metadata(
+            results.smilies
+        ).items():
+            metadata_values.append([str(val) for val in _metadata_value])  # convert to str
+            metadata_names.append(f"{_metadata_name} ({transformed_result.component_names[0]})")
+
     for name, score, raw_score in zip(names, scores, raw_scores):
         header.extend((name, f"{name} (raw)"))
         columns.extend((score, raw_score))
+
+    if len(metadata_names) > 0:
+        header.extend(metadata_names)
+        columns.extend(metadata_values)
 
     if write_header:
         csv_logger.info(header + ["step"])
 
     for row in zip(*columns):
         csv_logger.info(row + (data.step,))
-
     return header, columns

@@ -79,7 +79,7 @@ def parse_command_line():
         metavar="N",
         type=int,
         default=None,
-        help=f"Sets the random seeds for reproducibility. {OVERWRITE_STR}.",
+        help="Sets the random seeds for reproducibility",
     )
 
     parser.add_argument(

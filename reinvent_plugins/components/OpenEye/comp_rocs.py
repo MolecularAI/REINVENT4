@@ -64,22 +64,28 @@ class ROCSSimilarity:
         self.maxconfs = params.maxconfs[0]
         self.similarity_measure = params.similarity_measure[0]
         self.custom_cff = params.custom_cff[0]
-        self.rocs = rocs = ROCSOverlay(
-            rocs_input=self.rocs_input,
-            color_weight=self.color_weight,
-            shape_weight=self.shape_weight,
-            max_stereocenters=self.max_stereocenters,
-            ewindow=self.ewindow,
-            maxconfs=self.maxconfs,
-            similarity_measure=self.similarity_measure,
-            custom_cff=self.custom_cff,
-        )
+
+        self.first = True
 
         self.number_of_endpoints = len(params.rocs_input)
         self.smiles_type = "rdkit_smiles"
 
     @normalize_smiles
     def __call__(self, smilies: List[str]) -> np.ndarray:
+        if self.first:  # for multiprocessing
+            self.rocs = ROCSOverlay(
+                rocs_input=self.rocs_input,
+                color_weight=self.color_weight,
+                shape_weight=self.shape_weight,
+                max_stereocenters=self.max_stereocenters,
+                ewindow=self.ewindow,
+                maxconfs=self.maxconfs,
+                similarity_measure=self.similarity_measure,
+                custom_cff=self.custom_cff,
+            )
+
+            self.first = False
+
         scores = []
         results = self.rocs.calculate_rocs_score(smilies)
         scores.append(results)

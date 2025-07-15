@@ -13,8 +13,10 @@ import yaml
 from typing import List, Tuple, Union, Optional, Callable
 
 import tomli
-
 from rdkit import Chem
+
+from reinvent.datapipeline.filters.regex import SMILES_TOKENS_REGEX
+
 
 smiles_func = Callable[[str], str]
 FMT_CONVERT = {"toml": tomli, "json": json, "yaml": yaml}
@@ -92,6 +94,7 @@ def has_multiple_attachment_points_to_same_atom(smiles) -> bool:
 def read_smiles_csv_file(
     filename: str,
     columns: Union[int, slice],
+    allowed_tokens: tuple[set],
     delimiter: str = "\t",
     header: bool = False,
     actions: List[smiles_func] = None,
@@ -102,7 +105,8 @@ def read_smiles_csv_file(
     FIXME: needs to be made more robust
 
     :param filename: name of the CSV file
-    :param columns: what number of the column to extract
+    :param columns: what number of the column to extract (TL reads 2, RL/sampling 1)
+    :param allowed_tokens: allowed tokens for the model
     :param delimiter: column delimiter, must be a single character
     :param header: whether a header is present
     :param actions: a list of callables that act on each SMILES (only Reinvent
@@ -126,7 +130,7 @@ def read_smiles_csv_file(
             if not stripped_row or stripped_row.startswith("#"):
                 continue
 
-            if isinstance(columns, int):
+            if isinstance(columns, int):  # RL, sampling, TL (Reinvent, Mol2Mol)
                 smiles = row[columns].strip()
                 orig_smiles = smiles
 
@@ -138,55 +142,99 @@ def read_smiles_csv_file(
                 if not smiles:
                     continue
 
-                # lib/linkinvent
-                if "." in smiles:  # assume this is the standard SMILES fragment separator
-                    smiles = smiles.replace(".", "|")
-
-            else:
-                smiles = tuple(smiles.strip() for smiles in row[columns])
-                tmp_smiles = smiles
+                # Linkinvent "warheads" (R-groups)
+                smiles = smiles.replace(".", "|")
+                validate_tokens(smiles, allowed_tokens)
+            else:  # TL (Lib/Linkinvent)
+                smiles_pair = [smiles.strip() for smiles in row[columns]]
 
                 # FIXME: hard input check for libinvent / linkinvent
                 #        for unsupported scaffolds containing multiple
                 #        attachment points to the same atoms.
-                # libinvent
-                new_smiles = smiles[1]
 
-                if "." in new_smiles:  # assume this is the standard SMILES fragment separator
-                    new_smiles = new_smiles.replace(".", "|")
+                # Libinvent: scaffold/linker, R-groups
+                check_separator(smiles_pair, 1, 0)
 
-                if "|" in new_smiles:
-                    if has_multiple_attachment_points_to_same_atom(smiles[0]):
-                        raise ValueError(
-                            f"Not supported: Smiles {new_smiles} contains multiple attachment points for the same atom"
-                        )
+                # Linkinvent: R-groups, linker/scaffold
+                check_separator(smiles_pair, 0, 1)
 
-                    tmp_smiles = (smiles[0], new_smiles)
+                smiles = smiles_pair
+                validate_tokens(smiles, allowed_tokens, True)
 
-                # linkinvent
-                new_smiles = smiles[0]
+            if smiles:  # SMILES transformation may fail
+                if isinstance(smiles, list):
+                    smiles = tuple(smiles)
 
-                if "." in new_smiles:  # assume this is the standard SMILES fragment separator
-                    new_smiles = new_smiles.replace(".", "|")
-
-                if "|" in new_smiles:
-                    if has_multiple_attachment_points_to_same_atom(smiles[1]):
-                        raise ValueError(
-                            f"Not supported: Smiles {new_smiles} contains multiple attachment points for the same atom"
-                        )
-
-                    tmp_smiles = (new_smiles, smiles[1])
-
-                smiles = tmp_smiles
-
-            # SMILES transformation may fail
-            # FIXME: needs sensible way to report this back to the user
-            if smiles:
                 if (not remove_duplicates) or (not smiles in frontier):
                     smilies.append(smiles)
                     frontier.add(smiles)
 
     return smilies
+
+
+def validate_tokens(
+    smiles: str | list, allowed_tokens: tuple[set], TL_special: bool = False
+) -> set:
+    """Validate the SMILES against supported tokens
+
+    FIXME: may have to check standardized SMILES e.g. if input
+           contains "[F]", RDkit would remove the brackets
+
+    :param allowed_tokens: allowed tokens for the model
+    :param columns: what number of the column to extract (TL reads 2, RL/sampling)
+    :param smiles: the SMILES string
+    :returns: invalid tokens
+    """
+
+    if allowed_tokens[1] or TL_special:  # Lib/Linkinvent
+        invalid_tokens0 = find_invalid_tokens(smiles[0], allowed_tokens[0])
+        invalid_tokens_collected = set()
+        invalid_tokens1 = set()
+
+        if allowed_tokens[1]:  # Transformer models
+            invalid_tokens1 = find_invalid_tokens(smiles[1], allowed_tokens[1])
+
+        for invalid_tokens in invalid_tokens0, invalid_tokens1:
+            invalid_tokens_collected.update(invalid_tokens)
+    else:
+        invalid_tokens_collected = find_invalid_tokens(smiles, allowed_tokens[0])
+
+    if invalid_tokens_collected:
+        raise ValueError(
+            f"Tokens {invalid_tokens} in {smiles} are not supported by the model\n"
+            f"Allowed tokens are: {allowed_tokens}"
+        )
+
+
+def find_invalid_tokens(smiles: str, allowed_tokens: set) -> set:
+    """Collect invalid tokens
+
+    :param smiles: the SMILES string
+    """
+
+    tokens = set(SMILES_TOKENS_REGEX.findall(smiles))
+    tokens = {s for s in tokens if "*" not in s}  # Lib/Linkinvent input
+    return tokens - allowed_tokens
+
+
+def check_separator(smiles_pair: list[str], col: int, other_col: int) -> None:
+    """Check if column for separator and if it has multiple attachment points
+
+    This function modifies the smiles_pair if the fragment separator is "."
+
+    :param smiles_pair: SMILES pair
+    :param col: column with fragments
+    :param other_col: column to check
+    """
+
+    smiles_pair[col] = smiles_pair[col].replace(".", "|")
+
+    if "|" in smiles_pair[col]:
+        if has_multiple_attachment_points_to_same_atom(smiles_pair[other_col]):
+            raise ValueError(
+                f"Not supported: Smiles {smiles_pair[col]} contains multiple attachment "
+                "points for the same atom"
+            )
 
 
 def read_config(filename: Optional[Path], fmt: str) -> dict:
@@ -198,14 +246,14 @@ def read_config(filename: Optional[Path], fmt: str) -> dict:
     """
 
     pkg = FMT_CONVERT[fmt]
-    
+
     if isinstance(filename, (str, Path)):
         with open(filename, "rb") as tf:
             config = pkg.load(tf)
     else:
         config_str = "\n".join(sys.stdin.readlines())
         config = pkg.loads(config_str)
-    
+
     return config
 
 

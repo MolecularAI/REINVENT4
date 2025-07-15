@@ -73,7 +73,8 @@ class Handler:
         if exc_val and exc_val.args:
             msg = exc_val.args[0]
 
-        logger.critical(f"Received exception ('{msg}'): saving checkpoint and then terminate")
+        if msg:
+            logger.critical(f"Received exception ('{msg}'): saving checkpoint and then terminate")
 
         if mp.current_process().name == "MainProcess":
             self.save()

@@ -43,7 +43,9 @@ class RLTBReporter:
             for transformed_scores in transformed_result.transformed_scores:
                 scores.append(transformed_scores)
 
-            for original_scores in transformed_result.component_result.scores:
+            for original_scores in np.array(
+                transformed_result.component_result.fetch_scores(results.smilies, transpose=True)
+            ):
                 raw_scores.append(original_scores)
 
         for name, _scores in zip(names, scores):
@@ -86,7 +88,7 @@ class RLTBReporter:
         labels = [f"score={score:.2f}" for score in results.total_scores]
         sample_size = ROWS * COLUMNS
 
-        image_tensor = make_grid_image(data.smilies, labels, sample_size, ROWS)
+        image_tensor = make_grid_image(results.smilies, labels, sample_size, ROWS)
 
         if image_tensor is not None:
             self.reporter.add_image(

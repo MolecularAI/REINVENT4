@@ -7,7 +7,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from .learning import Learning
-from .distance_penalty import score as _score
+from ...chemistry.amino_acids.amino_acids import construct_amino_acids_fragments
 
 if TYPE_CHECKING:
     from reinvent.scoring import ScoreResults
@@ -19,7 +19,13 @@ class PepinventLearning(Learning):
     """Pepinvent optimization"""
 
     def score(self):
-        return _score(self)
+        fragmented_amino_acids = construct_amino_acids_fragments(self.sampled.smilies, self.sampled.items1,
+                                                                 add_O=True, remove_cyclization_numbers=True)
+        results = self.scoring_function(
+            self.sampled.smilies, self.invalid_mask, self.duplicate_mask, fragmented_amino_acids
+        )
+
+        return results
 
     def update(self, results: ScoreResults):
         return self._update_common_transformer(results)

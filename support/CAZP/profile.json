@@ -1,0 +1,99 @@
+{
+  "base_aizynthfinder_config": "/home/me/CAZP/config.yml",
+  "custom_aizynth_command": "/home/me/CAZP/run_cazp_local.sh",
+  "stock_profiles": {
+    "Enamine_BB": {
+      "name": "Enamine building blocks",
+      "description": "Enamine Building Blocks (to approximate Enamine REAL in two steps)",
+      "config": {
+        "stock": {
+          "Enamine_BB": "/home/me/models/enamine_bb.hdf5"
+        },
+        "scorer": {
+          "StockAvailabilityScorer": {
+            "source_score": {
+              "Enamine_BB": 1.0
+            },
+            "other_source_score": 0.2,
+            "default_score": 0.1
+          }
+        }
+      }
+    }
+  },
+  "reactions_profiles": {
+    "USPTO-NMC5": {
+      "name": "USPTO model, with high score to reactions that Ranks NMC 5+",
+      "description": "Reactions that Rank 5-6 with NMC, using USPTO-based model",
+      "config": {
+        "filter": {
+          "standard": "/home/me/models/uspto_filter_model.onnx"
+        },
+        "expansion": {
+          "standard": [
+            "/home/me/models/uspto_model.onnx",
+            "/home/me/models/uspto_templates.csv.gz"
+          ]
+        },
+        "scorer": {
+          "ReactionClassMembershipScorer": {
+            "in_set_score": 1.0,
+            "not_in_set_score": 0.1,
+            "reaction_class_set": [
+              "1.2.1",
+              "1.2.4",
+              "1.2.5",
+              "1.3.6",
+              "1.3.7",
+              "1.3.8",
+              "1.6.2",
+              "1.6.4",
+              "1.6.8",
+              "1.7.4",
+              "1.7.6",
+              "1.7.7",
+              "1.7.9",
+              "1.8.5",
+              "10.1.1",
+              "10.1.2",
+              "10.1.5",
+              "10.2.1",
+              "10.4.2",
+              "2.1.1",
+              "2.1.2",
+              "2.1.7",
+              "2.2.3",
+              "2.3.1",
+              "2.6.1",
+              "2.6.3",
+              "2.7.2",
+              "3.1.1",
+              "3.1.5",
+              "3.1.6",
+              "3.3.1",
+              "3.4.1",
+              "5.1.1",
+              "6.1.1",
+              "6.1.3",
+              "6.1.5",
+              "6.2.1",
+              "6.2.2",
+              "6.2.3",
+              "6.3.1",
+              "6.3.7",
+              "7.1.1",
+              "7.2.1",
+              "7.3.1",
+              "7.9.2",
+              "8.1.4",
+              "8.1.5",
+              "8.2.1",
+              "9.1.6",
+              "9.3.1"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,186 @@
+# REINVENT4 TOML input example for reinforcement/curriculum learning
+#
+#
+# Curriculum learning in REINVENT4 is a multi-stage reinforcement learning
+# run.  One or more stages (auto CL) can be defined.  But it is also
+# possible to continue a run from any checkpoint file that is generated
+# during the run (manual CL).  Currently checkpoints are written at the end
+# of a run also when the run is forcefully terminated with Ctrl-C.
+
+
+run_type = "staged_learning"
+device = "cuda:0"  # set torch device e.g. "cpu"
+tb_logdir = "tb_logs"  # name of the TensorBoard logging directory
+json_out_config = "_staged_learning.json"  # write this TOML to JSON
+
+[parameters]
+
+# Uncomment one of the comment blocks below.  Each generator needs a model
+# file and possibly a SMILES file with seed structures.  If the run is to
+# be continued after termination, the agent_file would have to be replaced
+# with the checkpoint file.
+
+summary_csv_prefix = "staged_learning"  # prefix for the CSV file
+use_checkpoint = false  # if true read diversity filter from agent_file
+purge_memories = false  # if true purge all diversity filter memories after each stage
+
+## Reinvent
+prior_file = "priors/reinvent.prior"
+agent_file = "priors/reinvent.prior"
+
+## LibInvent
+#prior_file = "priors/libinvent.prior"
+#agent_file = "priors/libinvent.prior"
+#smiles_file = "scaffolds.smi"  # 1 scaffold per line with attachment points
+
+## LinkInvent
+#prior_file = "priors/linkinvent.prior"
+#agent_file = "priors/linkinvent.prior"
+#smiles_file = "warheads.smi"  # 2 warheads per line separated with '|'
+
+## Mol2Mol
+#prior_file = "priors/mol2mol_scaffold_generic.prior"
+#agent_file = "priors/mol2mol_scaffold_generic.prior"
+#smiles_file = "mol2mol.smi"  # 1 compound per line
+#sample_strategy = "multinomial"  # multinomial or beamsearch (deterministic)
+#distance_threshold = 100
+
+## Pepinvent
+#prior_file = "priors/pepinvent.prior"
+#agent_file = "priors/pepinvent.prior"
+#smiles_file = "pepinvent.smi"
+#sample_strategy = "multinomial"  # multinomial or beamsearch (deterministic)
+#distance_threshold = 100
+
+batch_size = 64          # network
+
+unique_sequences = true  # if true remove all duplicates raw sequences in each step
+                         # only here for backward compatibility
+randomize_smiles = true  # if true shuffle atoms in SMILES randomly
+
+tb_isim = false  # track iSIM similarity in TensorBoard
+
+
+[learning_strategy]
+
+type = "dap"      # dap: only one supported
+sigma = 128       # sigma of the RL reward function
+rate = 0.0001     # for torch.optim
+
+
+[diversity_filter]  # optional, comment section out or remove if unneeded
+                    # NOTE: also memorizes all seen SMILES
+
+type = "IdenticalMurckoScaffold" # IdenticalTopologicalScaffold,
+                                 # ScaffoldSimilarity, PenalizeSameSmiles
+bucket_size = 25                 # memory size in number of compounds
+minscore = 0.4                   # only memorize if this threshold is exceeded
+minsimilarity = 0.4              # minimum similarity for ScaffoldSimilarity
+penalty_multiplier = 0.5         # penalty factor for PenalizeSameSmiles
+
+
+# Reinvent only: guide RL in the initial phase
+#[inception]  # optional, comment sectionout or remove if unneeded
+
+#smiles_file = "sampled.smi"  # "good" SMILES for guidance
+#memory_size = 100  # number of total SMILES held in memory
+#sample_size = 10  # number of SMILES randomly chosen each epoch
+
+
+### Stage 1
+### Note that stages must always be a list i.e. double brackets
+[[stage]]
+
+chkpt_file = 'test1.chkpt'  # name of the checkpoint file, can be reused as agent
+
+termination = "simple"  # termination criterion fot this stage
+max_score = 0.6  # terminate if this total score is exceeded
+min_steps = 25  # run for at least this number of steps
+max_steps = 100  # terminate entire run when exceeded
+
+# Optionally, a DF can be set for each stage but note that the global DF
+# section above will always overwrite the stage section and you need to
+# delete [diversity_filter] to avoid this
+#
+#[stage.diversity_filter]
+#type = "IdenticalMurckoScaffold"
+# etc.
+
+[stage.scoring]
+type = "geometric_mean"  # aggregation function
+
+[[stage.scoring.component]]
+# Custom alerts if used in a custom_product filter out unwanted groups
+[stage.scoring.component.custom_alerts]
+
+[[stage.scoring.component.custom_alerts.endpoint]]
+name = "Unwanted SMARTS"  # user chosen name for output
+weight = 0.79  # weight to fine-tune the relevance of this component
+
+# parameters for the component:
+# a list of unwanted SMARTS(!) to be scored as zero
+params.smarts = [
+    "[*;r8]",
+    "[*;r9]",
+    "[*;r10]",
+    "[*;r11]",
+    "[*;r12]",
+    "[*;r13]",
+    "[*;r14]",
+    "[*;r15]",
+    "[*;r16]",
+    "[*;r17]",
+    "[#8][#8]",
+    "[#6;+]",
+    "[#16][#16]",
+    "[#7;!n][S;!$(S(=O)=O)]",
+    "[#7;!n][#7;!n]",
+    "C#C",
+    "C(=[O,S])[O,S]",
+    "[#7;!n][C;!$(C(=[O,N])[N,O])][#16;!s]",
+    "[#7;!n][C;!$(C(=[O,N])[N,O])][#7;!n]",
+    "[#7;!n][C;!$(C(=[O,N])[N,O])][#8;!o]",
+    "[#8;!o][C;!$(C(=[O,N])[N,O])][#16;!s]",
+    "[#8;!o][C;!$(C(=[O,N])[N,O])][#8;!o]",
+    "[#16;!s][C;!$(C(=[O,N])[N,O])][#16;!s]"
+]
+
+[[stage.scoring.component]]
+[stage.scoring.component.MolecularWeight]
+
+[[stage.scoring.component.MolecularWeight.endpoint]]
+name = "Molecular weight"  # user chosen name for output
+weight = 0.342  # weight to fine-tune the relevance of this component
+
+# A transform ensures that the output from the scoring component ranges
+# from 0 to 1 to serve as a proper score.  Here we use a double sigmoid
+# to transform weights into the range 200-500 a.u.
+transform.type = "double_sigmoid"
+transform.high = 500.0
+transform.low = 200.0
+transform.coef_div = 500.0
+transform.coef_si = 20.0
+transform.coef_se = 20.0
+
+
+### Stage 2
+# Alternatively only the first stage above can be run and the new input file
+# sets agent_file = 'test1.chkpt'.
+
+[[stage]]
+
+chkpt_file = 'test2.chkpt'
+
+termination = "simple"
+max_score = 0.7
+min_steps = 10
+max_steps = 100
+
+[stage.scoring]  # the scoring components can be read from a score file
+type = "geometric_mean"  # aggregation function
+filename = "stage2_scoring.toml"  # file with scoring setup for this stage
+filetype = "toml"  # file format: TOML or JSON, no default, must be present
+
+
+### Stage 3
+# just as above
