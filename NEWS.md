@@ -9,7 +9,7 @@ New in REINVENT 4.6
 * Parallel scoring
 * Ring system precedence based scoring component (from Pat Walters)
 * Multiple endpoints for ExternalProcess scoring component
-* ChemProp is still 1.x: rdkit\_2d\_normalized is obsolete use features="rdkit\_2d\_normalized"
+* ChemProp is still 1.x: rdkit\_2d\_normalized is obsolete (but needed and ignored) use features="rdkit\_2d\_normalized"
 * Write out metadata to CSV e.g. custom alert matching pattern
 * GPU memory reporting for TL
 * Terminate if invalid tokens are found in the input
