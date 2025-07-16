@@ -88,12 +88,6 @@ instructions on how to configure the TOML file.  Internal priors can be referenc
 dot notation (see `reinvent/prior_registry.py`).
 
 
-Prior models
-------------
-
-All public prior models can be found on [Zenodo](https://doi.org/10.5281/zenodo.15641296).
-
-
 Tutorials / `Jupyter` notebooks
 -------------------------------
 
