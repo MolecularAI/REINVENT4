@@ -126,6 +126,7 @@ def compute_transform(
     caches: dict,
     valid_mask: np.ndarray[bool],
     index_smiles: Optional[List[str]] = None,
+    pumas: bool = False,
 ) -> TransformResults:
     """Compute the component score and transform of it
 
@@ -152,10 +153,18 @@ def compute_transform(
         ),
         transforms,
     ):
-        transformed = transform(scores) if transform else scores
-        transformed_scores.append(transformed * valid_mask)
+        if pumas:
+            vectorise_transform = np.vectorize(transform)
+            transformed = vectorise_transform(scores) if transform else scores
+            transformed_scores.append(transformed * valid_mask)
+        else:
+            transformed = transform(scores) if transform else scores
+            transformed_scores.append(transformed * valid_mask)
 
-    transform_types = [transform.params.type if transform else None for transform in transforms]
+    if pumas:
+        transform_types= [ None for transform in transforms] #TODO This needs fixing on the pumas end. There is no way to fetch the type from the transfom object
+    else:
+        transform_types = [transform.params.type if transform else None for transform in transforms]
 
     transform_result = TransformResults(
         component_type,

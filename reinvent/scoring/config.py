@@ -9,6 +9,8 @@ import logging
 from .importer import get_registry
 from .transforms.transform import get_transform
 
+import pumas
+from pumas.desirability import desirability_catalogue
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ class ComponentData:
     cache: Dict
 
 
-def get_components(components: list[dict[str, dict]]) -> ComponentType:
+def get_components(components: list[dict[str, dict]], pumas: bool = False) -> ComponentType:
     """Get all the components from the configuration
 
     Stores the component function, transform and results objects.
@@ -77,14 +79,24 @@ def get_components(components: list[dict[str, dict]]) -> ComponentType:
             transform = None
 
             if transform_params:
-                transform_type = transform_params["type"].lower().replace("-", "").replace("_", "")
+                if pumas:
+                    transform_type = transform_params['type'].lower()
+                else:
+                    transform_type = transform_params["type"].lower().replace("-", "").replace("_", "")
 
                 try:
-                    Transform, TransformParams = get_transform(transform_type)
+                    if pumas:
+                        Transform = desirability_catalogue.get(transform_type)
+                    else:
+                        Transform, TransformParams = get_transform(transform_type)
                 except AttributeError:
                     raise RuntimeError(f"Unknown transform type: {transform_params['type']}")
 
-                transform = Transform(TransformParams(**transform_params))
+                if pumas:
+                    params = {key: value for key, value in transform_params.items() if key != 'type'}
+                    transform = Transform(params=params)
+                else:
+                    transform = Transform(TransformParams(**transform_params))
 
             transforms.append(transform)
             weights.append(weight)

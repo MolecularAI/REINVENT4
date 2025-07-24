@@ -26,6 +26,8 @@ from .compute_scores import compute_transform
 from .results import ScoreResults
 from .validation import ScorerConfig
 
+from pumas.aggregation import aggregation_catalogue
+
 
 MAX_CPU_COUNT = 8
 logger = logging.getLogger(__name__)
@@ -64,7 +66,7 @@ def setup_scoring(config: dict) -> dict:
     return config
 
 
-def compute_component_score(component, fragments, smilies, valid_mask):
+def compute_component_score(component, fragments, smilies, valid_mask, pumas):
     fragments_component = component.component_type.startswith("fragment") or (
         component.component_type == "maize" and component.params[1].pass_fragments
     )
@@ -80,6 +82,7 @@ def compute_component_score(component, fragments, smilies, valid_mask):
         component.cache,
         valid_mask,
         index_smiles=smilies if fragments_component else None,
+        pumas=pumas
     )
 
     return transform_result
@@ -97,10 +100,14 @@ class Scorer:
         cfg = setup_scoring(input_config)
         config = ScorerConfig(**cfg)
 
-        self.aggregate = getattr(aggregators, config.type)
+        self.pumas = config.pumas_scoring
+        if self.pumas:
+            self.aggregate = aggregation_catalogue.get(config.type)
+        else:
+            self.aggregate = getattr(aggregators, config.type)
         self.parallel = config.parallel
 
-        self.components = get_components(config.component)
+        self.components = get_components(config.component, pumas=self.pumas)
 
     def compute_results(
         self,
@@ -147,23 +154,39 @@ class Scorer:
 
             completed_components = pool.starmap(
                 compute_component_score,
-                list(zip(self.components.scorers, fragment_args, smilies_args, valid_mask_args)),
+                list(zip(self.components.scorers, fragment_args, smilies_args, valid_mask_args, self.pumas)),
             )
         else:
             for component in self.components.scorers:
                 transform_result = compute_component_score(
-                    component, fragments, smilies, valid_mask
+                    component, fragments, smilies, valid_mask, self.pumas
                 )
                 completed_components.append(transform_result)
 
         scores_and_weights = []
 
+        # PUMAS
+        tscores_list = []
+        weights_list = []
+
         for component in completed_components:
             for tscores, weight in zip(component.transformed_scores, component.weight):
                 scores_and_weights.append((tscores, weight))
 
+                if self.pumas:
+                    tscores_list.append(tscores)
+                    weights_list.append(weight)
+
         if len(scores_and_weights) > 0:  # penalty only run
-            total_scores = self.aggregate(scores_and_weights)
+            if self.pumas:
+                total_scores = np.array([])
+                for smiles in range(len(tscores_list[0])):
+                    smiles_scores = [component[smiles] for component in tscores_list]
+                    aggragate = self.aggregate()
+                    result = aggragate(values=smiles_scores, weights=weights_list)
+                    total_scores = np.append(total_scores, result)
+            else:
+                total_scores = self.aggregate(scores_and_weights)
         else:
             total_scores = valid_mask.astype(float)  # apply filters if needed
 
@@ -184,6 +207,7 @@ class Scorer:
                 smilies,
                 component.cache,
                 valid_mask,
+                self.pumas
             )
 
             for scores in transform_result.transformed_scores:
@@ -208,6 +232,7 @@ class Scorer:
                 component.cache,
                 valid_mask,
                 index_smiles=smilies if component.component_type == "reactionfilter" else None,
+                pumas = self.pumas
             )
 
             for scores in transform_result.transformed_scores:
