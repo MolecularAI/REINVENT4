@@ -125,6 +125,12 @@ repository contains a [contrib](https://github.com/MolecularAI/REINVENT4/tree/ma
 1. Set or add `/top/dir/somewhere` to the `PYTHONPATH` environment variable or use any other mechanism to extend `sys.path`.
 1. The scoring component should now automatically be picked up by REINVENT.
 
+Ensure that the component can be important. The log file will write out an error if not.  Check directly if import is possible:
+
+```Python
+from reinvent_plugins.components import comp_myscorer
+```
+
 
 Unit and Integration Tests 
 --------------------------
