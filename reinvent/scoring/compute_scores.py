@@ -154,6 +154,7 @@ def compute_transform(
         transforms,
     ):
         if pumas:
+            # PUMAS Transforms operate on float64 so the transformed result may be slightly different to reinvent base scoring.
             vectorise_transform = np.vectorize(transform)
             transformed = vectorise_transform(scores) if transform else scores
             transformed_scores.append(transformed * valid_mask)

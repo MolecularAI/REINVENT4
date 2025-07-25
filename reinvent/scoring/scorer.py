@@ -99,9 +99,17 @@ class Scorer:
 
         cfg = setup_scoring(input_config)
         config = ScorerConfig(**cfg)
+        self.config = config
 
         self.pumas = config.pumas_scoring
         if self.pumas:
+           
+            # Need to handle mapping for back compatibility
+            if config.type == 'custom_product':
+                config.type = 'geometric_mean'
+            if config.type == 'custom_sum':
+                config.type = 'arithmetic_mean'
+
             self.aggregate = aggregation_catalogue.get(config.type)
         else:
             self.aggregate = getattr(aggregators, config.type)
@@ -182,8 +190,18 @@ class Scorer:
                 total_scores = np.array([])
                 for smiles in range(len(tscores_list[0])):
                     smiles_scores = [component[smiles] for component in tscores_list]
-                    aggragate = self.aggregate()
-                    result = aggragate(values=smiles_scores, weights=weights_list)
+                    aggregate = self.aggregate()
+
+                    if self.config.type == 'geometric_mean':
+                        # Using the maxima and the float32 precision we get identical results to reinvent from the aggregation.
+                        smiles_scores = np.maximum(np.array(smiles_scores, dtype=np.float32), 1e-8)
+                        weights_list = np.maximum(np.array(weights_list, dtype=np.float32), 1e-8)
+                    else:
+                        # For other aggregation types, still use float32 as reinvent does.
+                        smiles_scores = np.array(smiles_scores, dtype=np.float32)
+                        weights_list = np.array(weights_list, dtype=np.float32) 
+
+                    result = aggregate(values=smiles_scores, weights=weights_list)
                     total_scores = np.append(total_scores, result)
             else:
                 total_scores = self.aggregate(scores_and_weights)
