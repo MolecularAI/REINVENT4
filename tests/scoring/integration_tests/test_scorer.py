@@ -4,7 +4,7 @@ from reinvent.scoring.scorer import Scorer
 from numpy.testing import assert_array_almost_equal
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 @pytest.mark.parametrize('use_pumas', [True, False])
 def test_geo_scorer(use_pumas):
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
