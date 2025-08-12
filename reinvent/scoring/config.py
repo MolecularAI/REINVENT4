@@ -29,7 +29,7 @@ class ComponentData:
     cache: Dict
 
 
-def get_components(components: list[dict[str, dict]], pumas: bool = False) -> ComponentType:
+def get_components(components: list[dict[str, dict]], use_pumas: bool = False) -> ComponentType:
     """Get all the components from the configuration
 
     Stores the component function, transform and results objects.
@@ -79,20 +79,22 @@ def get_components(components: list[dict[str, dict]], pumas: bool = False) -> Co
             transform = None
 
             if transform_params:
-                if pumas:
+                if use_pumas:
                     transform_type = transform_params['type'].lower()
                 else:
                     transform_type = transform_params["type"].lower().replace("-", "").replace("_", "")
 
                 try:
-                    if pumas:
+                    if use_pumas:
                         Transform = desirability_catalogue.get(transform_type)
                     else:
                         Transform, TransformParams = get_transform(transform_type)
                 except AttributeError:
                     raise RuntimeError(f"Unknown transform type: {transform_params['type']}")
+                except Exception as e:
+                    raise Exception(f'An unhandled exception occured: {e}')
 
-                if pumas:
+                if use_pumas:
                     params = {key: value for key, value in transform_params.items() if key != 'type'}
                     transform = Transform(params=params)
                 else:

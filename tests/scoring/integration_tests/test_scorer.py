@@ -62,6 +62,64 @@ def test_geo_scorer():
         len(geo_results.completed_components) == 4
     )  # molecularweight, qed, custom alerts, matching subs
 
+@pytest.mark.integration
+def test_geo_scorer_pumas():
+    smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
+    invalid_mask = np.array([True, True, True, True])
+    duplicate_mask = np.array([True, True, True, True])
+
+    scorer_config_geo_mean = {
+        "type": "geometric_mean",
+        "use_pumas" : True,
+        "component": [
+            {
+                "custom_alerts": {
+                    "endpoint": [
+                        {"name": "Unwanted SMARTS", "weight": 1, "params": {"smarts": ["F"]}}
+                    ]
+                }
+            },
+            {
+                "MolecularWeight": {
+                    "endpoint": [
+                        {
+                            "name": "Molecular weight",
+                            "weight": 1,
+                            "transform": {
+                                "type": "double_sigmoid",
+                                "high": 175.0,
+                                "low": 25.0,
+                                "coef_div": 500.0,
+                                "coef_si": 20.0,
+                                "coef_se": 20.0,
+                            },
+                        }
+                    ]
+                }
+            },
+            {"QED": {"endpoint": [{"name": "QED", "weight": 0.5}]}},
+            {
+                "MatchingSubstructure": {
+                    "endpoint": [
+                        {
+                            "name": "MatchingSubstructure inline C=O",
+                            "weight": 1,
+                            "params": {"smarts": "C=O", "use_chirality": False},
+                        }
+                    ]
+                }
+            },
+        ],
+    }
+
+    expected_result_geo_mean = [0.414504, 0.810673, 0.0, 0.0]
+    geo_scorer = Scorer(scorer_config_geo_mean)
+    geo_results = geo_scorer.compute_results(smiles, invalid_mask, duplicate_mask)
+
+    assert_array_almost_equal(geo_results.total_scores, expected_result_geo_mean)
+    assert (
+        len(geo_results.completed_components) == 4
+    )  # molecularweight, qed, custom alerts, matching subs
 
 def test_arth_scorer():
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
