@@ -61,6 +61,7 @@ dependencies = [
   "tensorboard >=2,<3",
   "tomli >=2.0,<3",
   "torch==2.7.1", # Requires --extra-index-url https://download.pytorch.org/whl/cu121
+  "torchvision",
   "tqdm >=4.64,<5",
   "apted >=1.0.3, <2",
   "typing_extensions >=4.0,<5",
