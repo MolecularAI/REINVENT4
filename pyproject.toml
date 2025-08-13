@@ -60,7 +60,7 @@ dependencies = [
   "tenacity >=8.2,<9",
   "tensorboard >=2,<3",
   "tomli >=2.0,<3",
-  "torch==2.7.1+cu128", # Requires --extra-index-url https://download.pytorch.org/whl/cu121
+  "torch==2.7.1", # Requires --extra-index-url https://download.pytorch.org/whl/cu121
   "tqdm >=4.64,<5",
   "apted >=1.0.3, <2",
   "typing_extensions >=4.0,<5",
