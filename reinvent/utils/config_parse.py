@@ -201,7 +201,7 @@ def validate_tokens(
 
     if invalid_tokens_collected:
         raise ValueError(
-            f"Tokens {invalid_tokens} in {smiles} are not supported by the model\n"
+            f"Tokens {invalid_tokens_collected} in {smiles} are not supported by the model\n"
             f"Allowed tokens are: {allowed_tokens}"
         )
 
