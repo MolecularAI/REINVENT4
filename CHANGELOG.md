@@ -2,6 +2,33 @@
 
 This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 
+## [4.6.26] 2025-08-07
+
+### Fixed
+
+- Fixed bug when multiple warheads generate the same fragment smiles in LinkInvent, tripping up score caching
+
+
+## [4.6.25] 2025-08-06
+
+### Fixed
+
+- typo in variable name in logging for invalid tokens
+
+
+## [4.6.24] 2025-07-19
+
+### Added
+
+- Moved in CAZP to match public release
+
+
+## [4.6.23] 2025-07-15
+
+### Fixed
+
+- Small fix for peptide camsol scoring componenet
+
 
 ## [4.6.22] 2025-07-01
 

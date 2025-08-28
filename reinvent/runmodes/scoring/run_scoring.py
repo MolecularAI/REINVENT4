@@ -118,11 +118,11 @@ def get_result_table(results) -> Tuple[List, List[List]]:
         ):
             raw_scores.append(original_scores)
 
-    for _metadata_name, _metadata_value in transformed_result.component_result.fetch_metadata(
-        results.smilies).items():
+        for _metadata_name, _metadata_value in transformed_result.component_result.fetch_metadata(
+            results.smilies).items():
 
-        metadata_values.append([str(val) for val in _metadata_value])  # convert to str
-        metadata_names.append(f"{_metadata_name} ({transformed_result.component_names[0]})")
+            metadata_values.append([str(val) for val in _metadata_value])  # convert to str
+            metadata_names.append(f"{_metadata_name} ({transformed_result.component_names[0]})")
 
     scores = zip(*scores)
     raw_scores = zip(*raw_scores)

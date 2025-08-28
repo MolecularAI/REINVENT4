@@ -50,34 +50,43 @@ def compute_component_scores(
     :returns: the scores
     """
     smilies_to_score, smiles_with_masked_scores, cache_hits = [], [], []
+    # to avoid issues with duplicates in smilies we need to explicitly track indices,
+    # this can occur for example in LinkInvent when multiple warheads generate the same linker
+    smilies_to_score_indices, masked_scores_indices, cache_hits_indices = [], [], []
 
-    for filter_flag, smiles in zip(filter_mask, smilies):
+    for idx, (filter_flag, smiles) in enumerate(zip(filter_mask, smilies)):
         if filter_flag:
             if smiles in cache.keys():
                 cache_hits.append(smiles)
+                cache_hits_indices.append(idx)
             else:
                 smilies_to_score.append(smiles)
+                smilies_to_score_indices.append(idx)
         else:
             smiles_with_masked_scores.append(smiles)
+            masked_scores_indices.append(idx)
 
     # we need different behaviour for duplicates and invalids - duplicates should not overwrite the scores
-    # in ComponentResults. Therefore, we should always keep the scored version of smilies if it occurs with & wihtout filters
+    # in ComponentResults. Therefore, we should always keep the scored version of smilies if it occurs with & without the filter variable
     smiles_with_masked_scores = [
         smiles
-        for smiles in smiles_with_masked_scores
-        if not smiles in smilies_to_score + cache_hits
+        for smiles, idx in zip(smiles_with_masked_scores, masked_scores_indices)
+        if smiles not in smilies_to_score + cache_hits
+    ]
+    masked_scores_indices = [
+        idx
+        for smiles, idx in zip(smiles_with_masked_scores, masked_scores_indices)
+        if smiles not in smilies_to_score + cache_hits
     ]
 
-    # handle the case of fragement SMILES, here we will use the full SMILES to keep the score asscociated with the record
-    # while the fragement only for score computation
+    # handle the case of fragment SMILES, here we will use the full SMILES to keep the score associated with the record
+    # while the fragment only for score computation
     if index_smiles is not None:
-        index_smiles_to_score = [index_smiles[smilies.index(s)] for s in smilies_to_score]
-        index_smiles_with_masked_scores = [
-            index_smiles[smilies.index(s)] for s in smiles_with_masked_scores
-        ]
-        cache_hits = [index_smiles[smilies.index(s)] for s in cache_hits]
+        index_smiles_to_score = [index_smiles[i] for i in smilies_to_score_indices]
+        index_smiles_with_masked_scores = [index_smiles[i] for i in masked_scores_indices]
+        cache_hits = [index_smiles[i] for i in cache_hits_indices]
         logger.debug(
-            f"Using index smilies for fragement component {type(scoring_function).__name__}"
+            f"Using index smilies for fragment component {type(scoring_function).__name__}"
         )
     else:
         index_smiles_to_score = smilies_to_score
@@ -146,6 +155,14 @@ def compute_transform(
 
     transformed_scores = []
     # this loop is over multiple scores per component
+    ## check if any index_smiles are not keys in the component_results.data object:
+    if index_smiles is not None:
+        missing_scores = [smiles for smiles in index_smiles if smiles not in component_results.data]
+    else:
+        missing_scores = [smiles for smiles in smilies if smiles not in component_results.data]
+    if missing_scores:
+        raise RuntimeError(f"Missing scores for {component_type} for {missing_scores}")
+
     for scores, transform in zip(
         component_results.fetch_scores(
             smiles=index_smiles if index_smiles is not None else smilies, transpose=True
