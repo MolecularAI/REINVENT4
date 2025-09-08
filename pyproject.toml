@@ -76,7 +76,7 @@ reinvent_datapre = "reinvent.datapipeline.preprocess:main_script"
 [project.urls]
 homepage = "https://github.com/MolecularAI"
 repository = "https://github.com/MolecularAI/REINVENT4,git"
-public-reposibory = "https://github.com/MolecularAI/REINVENT4,git"
+public-repository = "https://github.com/MolecularAI/REINVENT4,git"
 
 
 [tool.setuptools]

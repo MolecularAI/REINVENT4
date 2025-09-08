@@ -68,16 +68,14 @@ def compute_component_scores(
 
     # we need different behaviour for duplicates and invalids - duplicates should not overwrite the scores
     # in ComponentResults. Therefore, we should always keep the scored version of smilies if it occurs with & without the filter variable
-    smiles_with_masked_scores = [
-        smiles
-        for smiles, idx in zip(smiles_with_masked_scores, masked_scores_indices)
-        if smiles not in smilies_to_score + cache_hits
-    ]
-    masked_scores_indices = [
-        idx
-        for smiles, idx in zip(smiles_with_masked_scores, masked_scores_indices)
-        if smiles not in smilies_to_score + cache_hits
-    ]
+    smiles_with_masked_scores_filtered = []
+    masked_scores_indices_filtered = []
+    for smiles, idx in zip(smiles_with_masked_scores, masked_scores_indices):
+        if smiles not in smilies_to_score + cache_hits:
+            smiles_with_masked_scores_filtered.append(smiles)
+            masked_scores_indices_filtered.append(idx)
+    smiles_with_masked_scores = smiles_with_masked_scores_filtered
+    masked_scores_indices = masked_scores_indices_filtered
 
     # handle the case of fragment SMILES, here we will use the full SMILES to keep the score associated with the record
     # while the fragment only for score computation

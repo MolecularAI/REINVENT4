@@ -2,6 +2,14 @@
 
 This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 
+
+## [4.6.27] 2025-08-28
+
+### Fixed
+
+- Fixed list comprehension bug in mask smiles indexing
+
+
 ## [4.6.26] 2025-08-07
 
 ### Fixed
