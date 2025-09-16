@@ -95,7 +95,13 @@ def get_components(components: list[dict[str, dict]], use_pumas: bool = False) -
                     raise Exception(f'An unhandled exception occured: {e}')
 
                 if use_pumas:
-                    params = {key: value for key, value in transform_params.items() if key != 'type'}
+                    # Assign placeholder param numbers for left and right step functions
+                    # Pumas requires unused params in this case
+                    if transform_type.lower() in ['leftstep', 'rightstep']:
+                        params = {'low' : 0.0, 'high' : 0.0}
+                        params.update({key: float(value) for key, value in transform_params.items() if key != 'type'})
+                    else:
+                        params = {key: value for key, value in transform_params.items() if key != 'type'}
                     transform = Transform(params=params)
                 else:
                     transform = Transform(TransformParams(**transform_params))

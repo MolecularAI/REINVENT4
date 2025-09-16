@@ -205,7 +205,7 @@ def compute_transform(
             transformed_scores.append(transformed * valid_mask)
 
     if use_pumas:
-        transform_types= [get_pumas_transform_name(transform) for transform in transforms] #TODO This needs fixing on the pumas end. There is no way to fetch the type from the transfom object
+        transform_types= [get_pumas_transform_name(transform) if transform else None for transform in transforms] #TODO This needs fixing on the pumas end. There is no way to fetch the type from the transfom object
     else:
         transform_types = [transform.params.type if transform else None for transform in transforms]
 
