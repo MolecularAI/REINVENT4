@@ -19,7 +19,7 @@ class PepinventLearning(Learning):
     """Pepinvent optimization"""
 
     def score(self):
-        fragmented_amino_acids = construct_amino_acids_fragments(self.sampled.smilies, self.sampled.items1,
+        fragmented_amino_acids = construct_amino_acids_fragments(self.sampled.items2, self.sampled.items1,
                                                                  add_O=True, remove_cyclization_numbers=True)
         results = self.scoring_function(
             self.sampled.smilies, self.invalid_mask, self.duplicate_mask, fragmented_amino_acids
