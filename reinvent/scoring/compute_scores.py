@@ -126,31 +126,6 @@ def compute_component_scores(
 
     return component_results
 
-def get_pumas_transform_name(item_instance) -> str:
-    """
-    Get the registered name for a given item instance or class.
-    """
-    for name, registered_item in desirability_catalogue._items.items():
-        # Direct match (same object)
-        if registered_item is item_instance:
-            return name
-        
-        # Check if item_instance is an instance of a registered class
-        # We can check if something is a class by seeing if it has __name__ attribute
-        # and if we can call isinstance on it
-        try:
-            if hasattr(registered_item, '__name__') and isinstance(item_instance, registered_item):
-                return name
-        except TypeError:
-            # isinstance will raise TypeError if registered_item is not a class
-            pass
-            
-        # Check if they're the same class
-        if hasattr(item_instance, '__class__') and item_instance.__class__ is registered_item:
-            return name
-    
-    raise ValueError("Item not found in catalogue")
-
 def compute_transform(
     component_type,
     params: Tuple,
@@ -205,7 +180,7 @@ def compute_transform(
             transformed_scores.append(transformed * valid_mask)
 
     if use_pumas:
-        transform_types= [get_pumas_transform_name(transform) if transform else None for transform in transforms] #TODO This needs fixing on the pumas end. There is no way to fetch the type from the transfom object
+        transform_types= [transform.name if transform else None for transform in transforms]
     else:
         transform_types = [transform.params.type if transform else None for transform in transforms]
 
