@@ -85,3 +85,8 @@ class TLTBReporter:
             self.reporter.add_histogram(
                 "Tanimoto similarity on RDKitFingerprint", similarities, data.epoch
             )
+
+            # Log iSIM if it was computed (allow 0.0 values). Previously this checked
+            # the truthiness of data.isim which skipped logging when the value was 0.0.
+            if data.isim is not None:
+                self.reporter.add_scalar(f"iSIM: Average similarity", data.isim, data.epoch)

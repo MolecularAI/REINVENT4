@@ -22,6 +22,14 @@ from torch.nn.utils import clip_grad_norm_
 from rdkit import Chem, DataStructs
 import tqdm
 
+try:
+    from iSIM.comp import calculate_isim
+    from iSIM.utils import binary_fps
+
+    have_isim = True
+except ImportError:
+    have_isim = False
+
 from reinvent.runmodes.TL.reports import TLTBReporter, TLRemoteReporter, TLReportData
 from reinvent.utils.logmon import get_reporter
 from reinvent.runmodes.setup_sampler import setup_sampler
@@ -51,6 +59,7 @@ class Learning(ABC):
         lr_scheduler: torch.optim.lr_scheduler.LRScheduler,
         lr_config,
         zero_epoch,
+        tb_isim: bool = False,
     ):
         """Setup
 
@@ -125,6 +134,13 @@ class Learning(ABC):
 
         if hasattr(self._config, "clip_gradient_norm"):
             self.clip_gradient_norm = self._config.clip_gradient_norm
+        
+        self.tb_isim = None
+
+        if have_isim:
+            self.tb_isim = tb_isim
+      
+
 
     @abstractmethod
     def prepare_dataloader(self):
@@ -363,9 +379,27 @@ class Learning(ABC):
 
             if mol:
                 mols.append(mol)
-
+        
         intdiv = 0.0
         sampled_fps = [Chem.RDKFingerprint(mol) for mol in mols]
+
+        smilies = np.array(sampled_smilies)
+
+        # Ensure isim is always defined so we don't reference it before assignment
+        isim = None
+
+        if self.tb_isim:
+            fingerprints = binary_fps(smilies, fp_type="RDKIT", n_bits=None)
+            isim = calculate_isim(fingerprints, n_ary="JT")
+
+        # Debug log: report whether isim was computed and its value. This helps
+        # diagnose why iSIM might not appear in TensorBoard (e.g. missing
+        # iSIM package or tb_isim disabled).
+        try:
+            logger.info(f"iSIM computed: {isim} (tb_isim={self.tb_isim}, have_isim={have_isim})")
+        except Exception:
+            logger.info(f"iSIM not computed (tb_isim={self.tb_isim}, have_isim={have_isim})")
+
 
         if self.internal_diversity:
             similarities = mutual_similarities(sampled_fps)
@@ -374,6 +408,7 @@ class Learning(ABC):
         report_data = TLReportData(
             epoch=epoch_no,
             model_path=model_path,
+            isim=isim,  # Add isim to report_data
             mean_nll=mean_nll,
             mean_nll_validation=mean_nll_valid,
             fingerprints=sampled_fps,
