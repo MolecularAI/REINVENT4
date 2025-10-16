@@ -9,6 +9,8 @@ import logging
 from .importer import get_registry
 from .transforms.transform import get_transform
 
+import pumas
+from pumas.desirability import desirability_catalogue
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ class ComponentData:
     cache: Dict
 
 
-def get_components(components: list[dict[str, dict]]) -> ComponentType:
+def get_components(components: list[dict[str, dict]], use_pumas: bool = False) -> ComponentType:
     """Get all the components from the configuration
 
     Stores the component function, transform and results objects.
@@ -77,14 +79,40 @@ def get_components(components: list[dict[str, dict]]) -> ComponentType:
             transform = None
 
             if transform_params:
-                transform_type = transform_params["type"].lower().replace("-", "").replace("_", "")
+                if use_pumas:
+                    transform_type = transform_params['type'].lower()
+                else:
+                    transform_type = transform_params["type"].lower().replace("-", "").replace("_", "")
 
                 try:
-                    Transform, TransformParams = get_transform(transform_type)
+                    if use_pumas:
+                        Transform = desirability_catalogue.get(transform_type)
+                    else:
+                        Transform, TransformParams = get_transform(transform_type)
                 except AttributeError:
                     raise RuntimeError(f"Unknown transform type: {transform_params['type']}")
+                except Exception as e:
+                    raise Exception(f'An unhandled exception occured: {e}')
 
-                transform = Transform(TransformParams(**transform_params))
+                if use_pumas:
+                    # Gather the expected parameters for the transform and their types
+                    param_defs = Transform().parameter_manager.parameter_definitions
+                    params = {}
+
+                    # Convert the parameters to the expected types
+                    # TODO: reimplement type checking and conversion in pumas with type coercion
+                    for key, value in transform_params.items():
+                        if key == 'type':
+                            continue
+                        elif value is not None and key in param_defs and param_defs[key]['type'] == 'float':
+                            params[key] = float(value)
+                        elif value is not None and key in param_defs and param_defs[key]['type'] == 'int':
+                            params[key] = int(value)
+                        else:
+                            params[key] = value
+                    transform = Transform(params=params)
+                else:
+                    transform = Transform(TransformParams(**transform_params))
 
             transforms.append(transform)
             weights.append(weight)

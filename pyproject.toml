@@ -49,6 +49,7 @@ dependencies = [
   "openEye-toolkits >=2022",  # Requires --extra-index-url=https://pypi.anaconda.org/OpenEye/simple
   "pandas >=2,<3",
   "Pillow >=10.0,<11.0",
+  "pumas >=1.3.0", 
   "pydantic >=2,<3",
   "pytest >=8,<9",
   "pytest-mock >=3.7,<4",
