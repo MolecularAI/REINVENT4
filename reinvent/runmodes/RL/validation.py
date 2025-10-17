@@ -31,10 +31,18 @@ class SectionLearningStrategy(GlobalConfig):
 
 class SectionDiversityFilter(GlobalConfig):
     type: str
+    penalty_function: str = "Step"
     bucket_size: int = Field(25, ge=1)  # not needed for PenalizeSameSmiles
     minscore: float = Field(0.4, ge=0.0, le=1.0)  # not needed for PenalizeSameSmiles
     minsimilarity: Optional[float] = Field(0.4, ge=0.0, le=1.0)  # ScaffoldSimilarity only
     penalty_multiplier: Optional[float] = Field(0.5, ge=0.0, le=1.0)  # PenalizeSameSmiles only
+    rnd_device: str | None = (
+        None  # IdenticalScaffoldPenaltyRND only, defaults to same device in GlobalConfig
+    )
+    rnd_prior_model_file_path: str | None = (
+        None  # IdenticalScaffoldPenaltyRND only, defaults to same as prior_file in SectionParameters
+    )
+    rnd_learning_rate: float = 1e-4  # IdenticalScaffoldPenaltyRND only, defaults to 1e-4
 
 
 class SectionInception(GlobalConfig):

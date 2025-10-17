@@ -12,6 +12,7 @@ import logging
 import time
 from typing import List, TYPE_CHECKING, Optional
 from abc import ABC, abstractmethod
+from copy import deepcopy
 
 import torch
 from torch.utils.tensorboard import SummaryWriter
@@ -134,12 +135,16 @@ class Learning(ABC):
 
             results = self.score()
 
+            results.original_scores = np.copy(results.total_scores)
+
             if self._state.diversity_filter:
                 df_mask = np.where(self.invalid_mask, True, False)
 
-                scaffolds = self._state.diversity_filter.update_score(
-                    results.total_scores, results.smilies, df_mask
+                scaffolds, original_scores = self._state.diversity_filter.update_score(
+                    results.total_scores, results.smilies, df_mask, deepcopy(self.sampled)
                 )
+
+                results.original_scores = original_scores
 
             # FIXME: check for NaNs
             #        inception filter
@@ -148,8 +153,8 @@ class Learning(ABC):
             state_dict = self._state.as_dict()
             self._state_info.update(state_dict)
 
-            nan_idx = np.isnan(results.total_scores)
-            scores = results.total_scores[~nan_idx]
+            nan_idx = np.isnan(results.original_scores)
+            scores = results.original_scores[~nan_idx]
             mean_scores = scores.mean()
 
             self.report(
@@ -201,7 +206,7 @@ class Learning(ABC):
     def state(self):
         return self._state
 
-    def score(self):
+    def score(self) -> ScoreResults:
         """Compute the score for the SMILES strings."""
 
         results = self.scoring_function(
@@ -235,6 +240,7 @@ class Learning(ABC):
             agent_nlls,
             prior_nlls,
             results.total_scores,
+            results.original_scores,
             self.inception,
             results.smilies,
             self._state.agent,
@@ -257,6 +263,7 @@ class Learning(ABC):
             agent_nlls,
             prior_nlls,
             results.total_scores,
+            results.original_scores,
             self.inception,
             results.smilies,
             self._state.agent,

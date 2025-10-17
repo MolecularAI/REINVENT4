@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 
@@ -9,7 +9,9 @@ from .diversity_filter import DiversityFilter
 class PenalizeSameSmiles(DiversityFilter):
     """Penalize previously generated compounds."""
 
-    def update_score(self, scores: np.ndarray, smilies: List[str], mask: np.ndarray) -> None:
+    def update_score(
+        self, scores: np.ndarray, smilies: List[str], mask: np.ndarray, dummy
+    ) -> Tuple[None, np.ndarray]:
         """Compute the score"""
 
         for i in np.nonzero(mask)[0]:
@@ -18,4 +20,4 @@ class PenalizeSameSmiles(DiversityFilter):
 
             self.smiles_memory.add(smilies[i])
 
-        return None
+        return None, np.copy(scores)

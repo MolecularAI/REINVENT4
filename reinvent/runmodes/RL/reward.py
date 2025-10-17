@@ -181,6 +181,7 @@ class RLReward:
         agent_nlls: torch.Tensor,
         prior_nlls: torch.Tensor,
         scores: torch.Tensor,
+        original_scores: torch.Tensor,
         inception: Optional[Inception],
         smilies: List,
         agent: Optional[ModelAdapter],
@@ -214,13 +215,22 @@ class RLReward:
         )
 
         if inception:
+
+            original_scores = torch.from_numpy(original_scores).to(prior_nlls)
+
+            # FIXME: move NaN filtering before first use of scores in learning
+            # FIXME: reconsider NaN/failure handling
+            original_nan_idx = torch.isnan(original_scores)
+            original_scores_nonnan = original_scores[~original_nan_idx]
+            prior_lls = -prior_nlls[~original_nan_idx]
+
             loss = inception_filter(
                 agent,
                 loss,
                 prior_lls,
                 self._sigma,
                 inception,
-                scores_nonnan,
+                original_scores_nonnan,
                 mask_idx,
                 smilies,
                 self._strategy,

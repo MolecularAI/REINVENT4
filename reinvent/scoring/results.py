@@ -24,3 +24,4 @@ class ScoreResults:
     smilies: List[str]
     total_scores: np.ndarray
     completed_components: List[TransformResults]
+    original_scores: np.ndarray | None = None

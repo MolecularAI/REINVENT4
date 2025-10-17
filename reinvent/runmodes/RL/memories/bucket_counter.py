@@ -51,6 +51,17 @@ class BucketCounter(Counter):
 
         return True
 
+    def count_bucket(self, item: Hashable) -> int:
+        """Return number of items in bucket
+
+        :param item: selects the bucket
+        :return: number of items in bucket
+        """
+        if item not in self:
+            return 0
+
+        return self[item]
+
     def full_buckets(self) -> filter:
         """Return all buckets larger than the set maximum size"""
         return filter(lambda t: t[1] > self.max_size, self.items())

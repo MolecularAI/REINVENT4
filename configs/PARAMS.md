@@ -101,11 +101,15 @@ Run reinforcement learning (RL) and/or curriculum learning (CL).  CL is simply a
 | sigma                | sigma in the reward function                                                                                                   |
 | rate                 | learning rate for the torch optimizer                                                                                          |
 | [diversity\_filter]  | starts the section for the diversity filter, overwrites all stage DFs                                                          |
-| type                 | name of the filter type: "IdenticalMurckoScaffold", "IdenticalTopologicalScaffold", "ScaffoldSimilarity", "PenalizeSameSmiles" |
+| type                 | name of the filter type: "IdenticalMurckoScaffold", "IdenticalTopologicalScaffold", "ScaffoldSimilarity", "PenalizeSameSmiles", "IdenticalMurckoScaffoldRND" |
 | bucket\_size         | number of scaffolds to store before molecule is scored zero                                                                    |
 | minscore             | minimum score                                                                                                                  |
 | minsimilarity        | minimum similarity in "ScaffoldSimilarity"                                                                                     |
 | penalty\_multiplier  | penalty penalty for each molecule in "PenalizeSameSmiles"                                                                      |
+| penalty_function      | type of function used to penalize the original reward: "Step", "Erf", "Tanh", "Sigmoid", "Linear" |
+| rnd_device            | device used for networks in the RND intrinsic reward, defaults to **device** parameter. Only used by filter type "IdenticalMurckoScaffoldRND". |
+| rnd_prior_model_file_path     | filename of the prior RND model file used for both the target (with randomly initialized weights) and prediction network. Only used by filter type "IdenticalMurckoScaffoldRND". |
+| rnd_learning_rate | learning rate for the torch optimizer of the prediction_network in rnd. Only used by filter type "IdenticalMurckoScaffoldRND". |
 | [inception]          | starts the inception section                                                                                                   |
 | smiles\_file         | filename for the "good" SMILES                                                                                                 |
 | memory\_size         | number of SMILES to hold in inception memory                                                                                   |

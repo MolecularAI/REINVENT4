@@ -49,7 +49,7 @@ class RLRemoteReporter:
         smarts_pattern = ""  # get_matching_substructure(data.score_results)
         smiles_legend_pairs = get_smiles_legend_pairs(
             np.array(data.score_results.smilies)[mask_idx],
-            data.score_results.total_scores[mask_idx],
+            data.score_results.original_scores[mask_idx],
         )
 
         time_estimation = estimate_run_time(data.start_time, data.n_steps, step)

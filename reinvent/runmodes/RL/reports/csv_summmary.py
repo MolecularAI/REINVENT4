@@ -82,7 +82,7 @@ def write_summary(data, write_header):
         [f"{score:.4f}" for score in data.agent_nll],
         [f"{score:.4f}" for score in data.prior_nll],
         [f"{score:.4f}" for score in data.augmented_nll],
-        [f"{score:.7f}" for score in results.total_scores],
+        [f"{score:.7f}" for score in results.original_scores],
         results.smilies,
         [str(state.value) for state in data.sampled.states],
     ]

@@ -31,7 +31,12 @@ logger = logging.getLogger(__name__)
 TRANSFORMERS = ["Mol2Mol", "LinkinventTransformer", "LibinventTransformer", "Pepinvent"]
 
 
-def setup_diversity_filter(config: SectionDiversityFilter, rdkit_smiles_flags: dict):
+def setup_diversity_filter(
+    config: SectionDiversityFilter,
+    rdkit_smiles_flags: dict,
+    device: torch.device,
+    prior_model_file_path: str,
+):
     """Setup of the diversity filter
 
     Basic setup of the diversity filter memory.  The parameters are from a
@@ -45,6 +50,17 @@ def setup_diversity_filter(config: SectionDiversityFilter, rdkit_smiles_flags: d
     if config is None or not hasattr(config, "type"):
         return None
 
+    if config.rnd_device:
+        rnd_device = config.rnd_device
+    else:
+        rnd_device = device
+
+    if config.rnd_prior_model_file_path:
+        rnd_prior_model_file_path = config.rnd_prior_model_file_path
+    else:
+        rnd_prior_model_file_path = prior_model_file_path
+        
+
     diversity_filter = getattr(memories, config.type)
 
     logger.info(f"Using diversity filter {config.type}")
@@ -55,6 +71,10 @@ def setup_diversity_filter(config: SectionDiversityFilter, rdkit_smiles_flags: d
         minsimilarity=config.minsimilarity,
         penalty_multiplier=config.penalty_multiplier,
         rdkit_smiles_flags=rdkit_smiles_flags,
+        penalty_function=config.penalty_function,
+        device=rnd_device,
+        prior_model_file_path=rnd_prior_model_file_path,
+        learning_rate=config.rnd_learning_rate,
     )
 
 
@@ -137,7 +157,11 @@ def setup_inception(config: SectionInception, prior: ModelAdapter):
 
 
 def create_packages(
-    reward_strategy: RL.RLReward, stages: List[SectionStage], rdkit_smiles_flags: dict
+    reward_strategy: RL.RLReward,
+    stages: List[SectionStage],
+    rdkit_smiles_flags: dict,
+    device: torch.device,
+    prior_model_file_path: str,
 ) -> List[WorkPackage]:
     """Create work packages
 
@@ -174,7 +198,9 @@ def create_packages(
         diversity_filter = None
 
         if stage.diversity_filter:
-            diversity_filter = setup_diversity_filter(stage.diversity_filter, rdkit_smiles_flags)
+            diversity_filter = setup_diversity_filter(
+                stage.diversity_filter, rdkit_smiles_flags, device, prior_model_file_path
+            )
 
         packages.append(
             WorkPackage(
@@ -278,7 +304,9 @@ def run_staged_learning(
         logger.info(f"Using diversity filter from {agent_model_filename}")
         diversity_filter = agent_save_dict["staged_learning"]["diversity_filter"]
     elif config.diversity_filter:
-        diversity_filter = setup_diversity_filter(config.diversity_filter, rdkit_smiles_flags2)
+        diversity_filter = setup_diversity_filter(
+            config.diversity_filter, rdkit_smiles_flags2, device, prior_model_filename
+        )
         global_df_only = True
 
     if parameters.purge_memories:
@@ -295,7 +323,9 @@ def run_staged_learning(
     if not inception and model_type == "Reinvent":
         logger.warning("Inception disabled but may speed up convergence")
 
-    packages = create_packages(reward_strategy, stages, rdkit_smiles_flags2)
+    packages = create_packages(
+        reward_strategy, stages, rdkit_smiles_flags2, device, prior_model_filename
+    )
 
     summary_csv_prefix = parameters.summary_csv_prefix
 

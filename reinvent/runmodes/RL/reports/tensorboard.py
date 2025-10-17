@@ -85,7 +85,7 @@ class RLTBReporter:
             )
             self.reporter.add_scalar("Number of unique scaffolds", data.num_total_buckets, step)
 
-        labels = [f"score={score:.2f}" for score in results.total_scores]
+        labels = [f"score={score:.2f}" for score in results.original_scores]
         sample_size = ROWS * COLUMNS
 
         image_tensor = make_grid_image(results.smilies, labels, sample_size, ROWS)
