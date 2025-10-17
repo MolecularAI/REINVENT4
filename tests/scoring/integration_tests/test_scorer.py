@@ -5,13 +5,15 @@ from numpy.testing import assert_array_almost_equal
 
 
 @pytest.mark.integration
-def test_geo_scorer():
+@pytest.mark.parametrize('use_pumas', [True, False])
+def test_geo_scorer(use_pumas):
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
     invalid_mask = np.array([True, True, True, True])
     duplicate_mask = np.array([True, True, True, True])
 
     scorer_config_geo_mean = {
         "type": "geometric_mean",
+        "use_pumas" : use_pumas,
         "component": [
             {
                 "custom_alerts": {
@@ -62,14 +64,15 @@ def test_geo_scorer():
         len(geo_results.completed_components) == 4
     )  # molecularweight, qed, custom alerts, matching subs
 
-
-def test_arth_scorer():
+@pytest.mark.parametrize('use_pumas', [True, False])
+def test_arth_scorer(use_pumas):
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
     invalid_mask = np.array([True, True, True, True])
     duplicate_mask = np.array([True, True, True, True])
 
     scorer_config_arth_mean = {
         "type": "arithmetic_mean",
+        "use_pumas" : use_pumas,
         "component": [
             {
                 "custom_alerts": {
@@ -119,14 +122,15 @@ def test_arth_scorer():
         len(arth_results.completed_components) == 4
     )  # molecularweight, qed, custom alerts, matching subs
 
-
-def test_filter_and_penalty():
+@pytest.mark.parametrize('use_pumas', [True, False])
+def test_filter_and_penalty(use_pumas):
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
     invalid_mask = np.array([True, True, True, True])
     duplicate_mask = np.array([True, True, True, True])
 
     scorer_config_filter_and_penalty = {
         "type": "geometric_mean",
+        "use_pumas" : use_pumas,
         "component": [
             {
                 "custom_alerts": {
@@ -162,14 +166,15 @@ def test_filter_and_penalty():
         len(filter_and_penalty_results.completed_components) == 2
     )  # molecularweight, qed, custom alerts, matching subs
 
-
-def test_filter_scorer():
+@pytest.mark.parametrize('use_pumas', [True, False])
+def test_filter_scorer(use_pumas):
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
     invalid_mask = np.array([True, True, True, True])
     duplicate_mask = np.array([True, True, True, True])
 
     scorer_config_arth_mean = {
         "type": "arithmetic_mean",
+        "use_pumas" : use_pumas,
         "component": [
             {
                 "custom_alerts": {
@@ -197,14 +202,15 @@ def test_filter_scorer():
     arth_results = arth_scorer.compute_results(smiles, invalid_mask, duplicate_mask)
     assert_array_almost_equal(arth_results.total_scores, expected_result_arth_mean)
 
-
-def test_all_filter_scorer():
+@pytest.mark.parametrize('use_pumas', [True, False])
+def test_all_filter_scorer(use_pumas):
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
     invalid_mask = np.array([True, True, True, True])
     duplicate_mask = np.array([True, True, True, True])
 
     scorer_config_arth_mean = {
         "type": "arithmetic_mean",
+        "use_pumas" : use_pumas,
         "component": [
             {
                 "custom_alerts": {
@@ -233,7 +239,8 @@ def test_all_filter_scorer():
 
 
 @pytest.mark.integration
-def test_fragment_scoring():
+@pytest.mark.parametrize('use_pumas', [True, False])
+def test_fragment_scoring(use_pumas):
     smilies = ["CC(C)(C(=O)O)n1cnc(NC=O)c1", "O=COc1ccc2cc(-c3ccc(C(=O)O)nn3)ccc2[n+]1CC(=O)O"]
     fragments = [
         "[*]Nc1cn(C(C)(C)C(=O)[*])cn1",
@@ -246,6 +253,7 @@ def test_fragment_scoring():
     scorer = Scorer(
         input_config={
             "type": "geometric_mean",
+            "use_pumas" : use_pumas,
             "component": [
                 {
                     "MolecularWeight": {
@@ -304,7 +312,8 @@ def test_fragment_scoring():
 
 
 @pytest.mark.integration
-def test_libinvent_scoring():
+@pytest.mark.parametrize('use_pumas', [True, False])
+def test_libinvent_scoring(use_pumas):
     smilies = ["CC(Oc1ccc(C(C)C)cc1)C(=O)NCCCCc1ccc(N(C)C)cc1", "O=CNCCCCc1ccc(-c2ccc(O)cc2)cc1"]
     connectivity_annotated_smiles = [
         "CC(Oc1ccc(C(C)C)cc1)[C:0](=O)[NH:0]CCCCc1cc[c:1]([N:1](C)C)cc1",
@@ -317,6 +326,7 @@ def test_libinvent_scoring():
     scorer = Scorer(
         input_config={
             "type": "geometric_mean",
+            "use_pumas" : use_pumas,
             "component": [
                 {
                     "MolecularWeight": {
@@ -372,13 +382,15 @@ def test_libinvent_scoring():
     )
 
 @pytest.mark.integration
-def test_metadata_passing():
+@pytest.mark.parametrize('use_pumas', [True, False])
+def test_metadata_passing(use_pumas):
     smiles = ["FCc1ccccc1", "SCc1ccccc1", "OCc1ccccc1", "O=Cc1ccccc1"]
     invalid_mask = np.array([True, True, True, True])
     duplicate_mask = np.array([True, True, True, True])
 
     scorer_config_geo_mean = {
         "type": "geometric_mean",
+        "use_pumas" : use_pumas,
         "component": [
             {
                 "custom_alerts": {

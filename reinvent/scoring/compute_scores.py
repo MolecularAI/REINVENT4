@@ -13,6 +13,7 @@ from reinvent_plugins.components.component_results import (
 )
 from .results import TransformResults
 
+from pumas.desirability.catalogue import desirability_catalogue
 
 logger = logging.getLogger(__name__)
 SCORE_FUNC = Callable[[List[str]], ComponentResults]
@@ -125,7 +126,6 @@ def compute_component_scores(
 
     return component_results
 
-
 def compute_transform(
     component_type,
     params: Tuple,
@@ -133,6 +133,7 @@ def compute_transform(
     caches: dict,
     valid_mask: np.ndarray[bool],
     index_smiles: Optional[List[str]] = None,
+    use_pumas: bool = False,
 ) -> TransformResults:
     """Compute the component score and transform of it
 
@@ -167,10 +168,21 @@ def compute_transform(
         ),
         transforms,
     ):
-        transformed = transform(scores) if transform else scores
-        transformed_scores.append(transformed * valid_mask)
+        if use_pumas:
+            # PUMAS Transforms operate on float64 so the transformed result may be slightly different to reinvent base scoring.
+            if transform:
+                transformed = [transform(score) for score in scores]
+            else:
+                transformed = scores
+            transformed_scores.append(transformed * valid_mask)
+        else:
+            transformed = transform(scores) if transform else scores
+            transformed_scores.append(transformed * valid_mask)
 
-    transform_types = [transform.params.type if transform else None for transform in transforms]
+    if use_pumas:
+        transform_types= [transform.name if transform else None for transform in transforms]
+    else:
+        transform_types = [transform.params.type if transform else None for transform in transforms]
 
     transform_result = TransformResults(
         component_type,

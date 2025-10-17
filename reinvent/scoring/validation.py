@@ -14,3 +14,4 @@ class ScorerConfig(BaseModel):
     filetype: Optional[str] = None
     component: List[dict[str, dict]]
     parallel: int = Field(1, ge=1, le=MAX_ALLOWED_CPU)
+    use_pumas: bool = False
