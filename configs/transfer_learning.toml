@@ -9,7 +9,6 @@ device = "cuda:0"  # set torch device e.g. "cpu"
 tb_logdir = "tb_TL"  # name of the TensorBoard logging directory
 json_out_config = "json_transfer_learning.json"  # write this TOML to JSON
 
-
 [parameters]
 
 num_epochs = 3  # number of steps to run
@@ -18,6 +17,7 @@ batch_size = 50
 num_refs = 100  # number of reference molecules randomly chosen for similarity
                 # set this to zero for large datasets (>200 molecules)!
 sample_batch_size = 100  # number of sampled molecules to compute sample loss
+tb_isim = true  # track iSIM similarity in TensorBoard
 # Uncomment one of the comment blocks below.  Each generator needs a model
 # file and possibly a SMILES file with seed structures.
 
@@ -29,9 +29,9 @@ sample_batch_size = 100  # number of sampled molecules to compute sample loss
 
 ## Mol2Mol
 input_model_file = "priors/mol2mol_scaffold_generic.prior"
-smiles_file = "compounds.smi"  # read 1st column
+smiles_file = "configs/mol2mol.smi"  # read 1st column (Change file names)
 output_model_file = "TL_Mol2Mol.model"
-validation_smiles_file = "validation_compounds.smi"  # read 1st column
+validation_smiles_file = "configs/mol2mol_valid.smi"  # read 1st column (Change file names)
 
 # Define the type of similarity and its parameters
 pairs.type = "tanimoto"
