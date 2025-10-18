@@ -85,3 +85,7 @@ class TLTBReporter:
             self.reporter.add_histogram(
                 "Tanimoto similarity on RDKitFingerprint", similarities, data.epoch
             )
+
+            
+            if data.isim is not None:
+                self.reporter.add_scalar(f"iSIM: Average similarity", data.isim, data.epoch)

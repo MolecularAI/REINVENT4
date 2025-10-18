@@ -144,6 +144,7 @@ def run_transfer_learning(
         optimizer,
         lr_scheduler,
         lr_config,
+        tb_isim=parameters.tb_isim,
         zero_epoch=parameters.training_zero_epoch_start,
     )
 
