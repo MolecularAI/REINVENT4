@@ -30,10 +30,10 @@ class IntrinsicPenalty(ABC):
         penalty_function: str,
         bucket_size: int,
         minscore: float,
-        rdkit_smiles_flags: dict,
         device: torch.device,
         prior_model_file_path: str,
         learning_rate: float,
+        rdkit_smiles_flags: dict,
     ):
         """Set up the diversity filters.
 
@@ -66,7 +66,7 @@ class IntrinsicPenalty(ABC):
     @abstractmethod
     def update_score(
         self, scores: np.ndarray, smilies: List[str], mask: np.ndarray, sampled: SampleBatch
-    ) -> Tuple[List | None, np.ndarray]:
+    ) -> List:
         """Update the score according to the concrete fitler.
 
         :param scores: an array with precomputed scores
@@ -82,7 +82,7 @@ class IntrinsicPenalty(ABC):
         smilies: List[str],
         mask: np.ndarray,
         topological: bool,
-    ) -> Tuple[List, np.ndarray, List[int]]:
+    ) -> Tuple[List, List[int]]:
         """Score the found scaffolds
 
         :param smilies: list of SMILES
@@ -112,7 +112,7 @@ class IntrinsicPenalty(ABC):
 
                 scores[i] *= penalty
 
-        return scaffolds, np.copy(scores), active_idxs
+        return scaffolds, active_idxs
 
     def _calculate_scaffold(self, smile: str, topological: bool) -> str:
         """Compute the Murcko scaffold for the given SMILES string

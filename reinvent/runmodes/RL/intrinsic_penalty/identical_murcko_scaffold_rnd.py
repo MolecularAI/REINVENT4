@@ -7,7 +7,7 @@ from copy import deepcopy
 import numpy as np
 import torch
 
-from intrinsic_penalty import IntrinsicPenalty
+from .intrinsic_penalty import IntrinsicPenalty
 
 from reinvent.models.model_factory.sample_batch import SampleBatch
 
@@ -17,9 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
-    """Provides intrinsic rewards based on random network distillation."""
+    """Provides extrinsic reward penalty and intrinsic rewards based on random network distillation."""
 
     def __init__(self, *args, **kwargs):
+
         super().__init__(*args, **kwargs)
 
         supported_novelty_functions = {
@@ -48,13 +49,21 @@ class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
         # This would save memory, especially for the transformers model
         self._target_network = deepcopy(self._prediction_network)
 
+        self._target_network, _, model_type_pred = create_adapter(
+            dict_filename=self.prior_model_file_path,
+            mode="inference",
+            device=self.device,
+        )
+
+        assert (
+            model_type == model_type_pred
+        ), f"Model type mismatch between target and prediction networks: {model_type} vs {model_type_pred}"
+
         # Randomly initialize target network parameters and freeze them
         for param in self._target_network.get_network_parameters():
             if param.dim() > 1:
                 torch.nn.init.xavier_uniform_(param)
             param.requires_grad_(False)
-
-        self._target_network.set_mode("inference")
 
         self._optimizer = torch.optim.Adam(
             self._prediction_network.get_network_parameters(), lr=self.learning_rate
@@ -66,14 +75,14 @@ class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
         smilies: List[str],
         mask: np.ndarray,
         sampled: SampleBatch,
-    ) -> Tuple[List, np.ndarray]:
+    ) -> List:
         """Compute the score and add intrinsic rewards based on RND."""
 
         assert len(smilies) == len(
             sampled.items2
         ), f"Length of smilies ({len(smilies)}) and sampled.items2 ({len(sampled.items2)}) must be the same"
 
-        scaffolds, original_scores, active_idxs = self.score_scaffolds(
+        scaffolds, active_idxs = self.score_scaffolds(
             scores,
             smilies,
             mask,
@@ -82,7 +91,7 @@ class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
 
         self._add_intrinsic_reward(sampled, scores, active_idxs)
 
-        return scaffolds, original_scores
+        return scaffolds
 
     def _calculate_novelty_reinvent(
         self, sampled: SampleBatch, scores: np.ndarray, active_idxs: List[int]
