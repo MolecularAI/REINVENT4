@@ -388,7 +388,6 @@ class Learning(ABC):
         if self.tb_isim:
             fingerprints = binary_fps(smilies, fp_type="RDKIT", n_bits=None)
             isim = calculate_isim(fingerprints, n_ary="JT")
-            logger.debug(f"iSIM computed: {isim} (tb_isim={self.tb_isim}, have_isim={have_isim})")
 
         if self.internal_diversity:
             similarities = mutual_similarities(sampled_fps)
