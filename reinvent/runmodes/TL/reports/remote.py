@@ -32,7 +32,6 @@ class TLRemoteReporter:
                 "training": data.mean_nll,
                 "validation": data.mean_nll_validation,
                 "sampled": float(data.sampled_nlls.mean()),
-                "isim": data.isim,
             },
             "smiles_report": [
                 {"legend": f"Times sampled: {smiles_counts[smiles]:d}", "smiles": smiles}
