@@ -2,7 +2,7 @@
 
 __all__ = ["TLReportData"]
 from dataclasses import dataclass
-from typing import Sequence, Optional   
+from typing import Sequence, Optional
 
 
 @dataclass
