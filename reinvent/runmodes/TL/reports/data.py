@@ -2,7 +2,7 @@
 
 __all__ = ["TLReportData"]
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Sequence, Optional
 
 
 @dataclass
@@ -10,6 +10,7 @@ class TLReportData:
     epoch: int
     model_path: str
     mean_nll: float
+    isim: Optional[float]
     sampled_smilies: Sequence
     sampled_nlls: Sequence
     fingerprints: Sequence

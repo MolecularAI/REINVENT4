@@ -18,6 +18,7 @@ batch_size = 50
 num_refs = 100  # number of reference molecules randomly chosen for similarity
                 # set this to zero for large datasets (>200 molecules)!
 sample_batch_size = 100  # number of sampled molecules to compute sample loss
+tb_isim = false  # track iSIM similarity in TensorBoard
 # Uncomment one of the comment blocks below.  Each generator needs a model
 # file and possibly a SMILES file with seed structures.
 
