@@ -28,4 +28,5 @@ class ReinventConfig(GlobalConfig):
     stage: Optional[list] = None
     learning_strategy: Optional[dict] = None
     diversity_filter: Optional[dict] = None
+    intrinsic_penalty: Optional[dict] = None
     inception: Optional[dict] = None

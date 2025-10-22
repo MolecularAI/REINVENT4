@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from reinvent.runmodes.samplers import Sampler
     from reinvent.runmodes.RL import RLReward, terminator_callable
     from reinvent.runmodes.RL.memories import Inception
+    from reinvent.runmodes.RL.intrinsic_penalty.intrinsic_penalty import IntrinsicPenalty
     from reinvent.models import ModelAdapter
     from reinvent.scoring import Scorer, ScoreResults
 
@@ -61,6 +62,7 @@ class Learning(ABC):
         responder_config: dict = None,
         tb_logdir: str = None,
         tb_isim: bool = False,
+        intrinsic_penalty: IntrinsicPenalty | None = None,
     ):
         """Setup of the common framework"""
 
@@ -71,6 +73,7 @@ class Learning(ABC):
         # Seed the starting state, need update in every stage
         self._state = state
         self.inception = inception
+        self.intrinsic_penalty = intrinsic_penalty
 
         # Need update in every stage
         self.scoring_function = scoring_function
@@ -139,6 +142,12 @@ class Learning(ABC):
 
                 scaffolds = self._state.diversity_filter.update_score(
                     results.total_scores, results.smilies, df_mask
+                )
+            elif self.intrinsic_penalty:
+                df_mask = np.where(self.invalid_mask, True, False)
+
+                scaffolds = self.intrinsic_penalty.update_score(
+                    results.total_scores, results.smilies, df_mask, self.sampled
                 )
 
             # FIXME: check for NaNs

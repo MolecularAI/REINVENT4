@@ -105,7 +105,13 @@ Run reinforcement learning (RL) and/or curriculum learning (CL).  CL is simply a
 | bucket\_size         | number of scaffolds to store before molecule is scored zero                                                                    |
 | minscore             | minimum score                                                                                                                  |
 | minsimilarity        | minimum similarity in "ScaffoldSimilarity"                                                                                     |
-| penalty\_multiplier  | penalty penalty for each molecule in "PenalizeSameSmiles"                                                                      |
+| penalty\_multiplier  | penalty penalty for each molecule in "PenalizeSameSmiles"                                  
+| [intrinsic\_penalty]  | starts the section for the intrinsic penalty filter, any global DF overwrites this.                                                           |
+| type                 | name of the filter type: "IdenticalMurckoScaffoldRND" |
+| penalty_function     | name of the penalty function type: "Step", "Sigmoid", "Linear", "Tanh", "Erf" |
+| bucket\_size         | number of scaffolds to store before molecule is scored zero                                                                    |
+| minscore             | minimum score |
+| learning_rate        | learning rate for the torch optimizer of the prediction_network in rnd. Only used by filter type "IdenticalMurckoScaffoldRND". |
 | [inception]          | starts the inception section                                                                                                   |
 | smiles\_file         | filename for the "good" SMILES                                                                                                 |
 | memory\_size         | number of SMILES to hold in inception memory                                                                                   |
