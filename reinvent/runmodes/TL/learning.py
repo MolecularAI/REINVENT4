@@ -22,6 +22,14 @@ from torch.nn.utils import clip_grad_norm_
 from rdkit import Chem, DataStructs
 import tqdm
 
+try:
+    from iSIM.comp import calculate_isim
+    from iSIM.utils import binary_fps
+
+    have_isim = True
+except ImportError:
+    have_isim = False
+
 from reinvent.runmodes.TL.reports import TLTBReporter, TLRemoteReporter, TLReportData
 from reinvent.utils.logmon import get_reporter
 from reinvent.runmodes.setup_sampler import setup_sampler
@@ -51,6 +59,7 @@ class Learning(ABC):
         lr_scheduler: torch.optim.lr_scheduler.LRScheduler,
         lr_config,
         zero_epoch,
+        tb_isim: bool = False,
     ):
         """Setup
 
@@ -126,6 +135,11 @@ class Learning(ABC):
         if hasattr(self._config, "clip_gradient_norm"):
             self.clip_gradient_norm = self._config.clip_gradient_norm
 
+        self.tb_isim = None
+
+        if have_isim:
+            self.tb_isim = tb_isim
+
     @abstractmethod
     def prepare_dataloader(self):
         """Prepare a pytorch Dataloader"""
@@ -181,8 +195,7 @@ class Learning(ABC):
                 free_memory, total_memory = torch.cuda.mem_get_info()
                 used_memory = total_memory - free_memory
                 logger.info(
-                    f"{used_memory // 1024 ** 2} MiB GPU memory used "
-                    f"in epoch {epoch_no}"
+                    f"{used_memory // 1024 ** 2} MiB GPU memory used " f"in epoch {epoch_no}"
                 )
 
             if epoch_no % self.save_freq == 0 or epoch_no == end_epoch:
@@ -367,6 +380,15 @@ class Learning(ABC):
         intdiv = 0.0
         sampled_fps = [Chem.RDKFingerprint(mol) for mol in mols]
 
+        smilies = np.array(sampled_smilies)
+
+        # Ensure isim is always defined so we don't reference it before assignment
+        isim = None
+
+        if self.tb_isim:
+            fingerprints = binary_fps(smilies, fp_type="RDKIT", n_bits=None)
+            isim = calculate_isim(fingerprints, n_ary="JT")
+
         if self.internal_diversity:
             similarities = mutual_similarities(sampled_fps)
             intdiv = internal_diversity(similarities, p=2)
@@ -374,6 +396,7 @@ class Learning(ABC):
         report_data = TLReportData(
             epoch=epoch_no,
             model_path=model_path,
+            isim=isim,  # Add isim to report_data
             mean_nll=mean_nll,
             mean_nll_validation=mean_nll_valid,
             fingerprints=sampled_fps,
