@@ -134,13 +134,11 @@ class Learning(ABC):
 
         if hasattr(self._config, "clip_gradient_norm"):
             self.clip_gradient_norm = self._config.clip_gradient_norm
-        
+
         self.tb_isim = None
 
         if have_isim:
             self.tb_isim = tb_isim
-      
-
 
     @abstractmethod
     def prepare_dataloader(self):
@@ -197,8 +195,7 @@ class Learning(ABC):
                 free_memory, total_memory = torch.cuda.mem_get_info()
                 used_memory = total_memory - free_memory
                 logger.info(
-                    f"{used_memory // 1024 ** 2} MiB GPU memory used "
-                    f"in epoch {epoch_no}"
+                    f"{used_memory // 1024 ** 2} MiB GPU memory used " f"in epoch {epoch_no}"
                 )
 
             if epoch_no % self.save_freq == 0 or epoch_no == end_epoch:
@@ -379,7 +376,7 @@ class Learning(ABC):
 
             if mol:
                 mols.append(mol)
-        
+
         intdiv = 0.0
         sampled_fps = [Chem.RDKFingerprint(mol) for mol in mols]
 
@@ -391,13 +388,7 @@ class Learning(ABC):
         if self.tb_isim:
             fingerprints = binary_fps(smilies, fp_type="RDKIT", n_bits=None)
             isim = calculate_isim(fingerprints, n_ary="JT")
-
-        # Debug log: Report if iSIM was calculated or not. Also help diagnose iSIM not appearing in tensorboard
-        try:
-            logger.info(f"iSIM computed: {isim} (tb_isim={self.tb_isim}, have_isim={have_isim})")
-        except Exception:
-            logger.info(f"iSIM not computed (tb_isim={self.tb_isim}, have_isim={have_isim})")
-
+            logger.debug(f"iSIM computed: {isim} (tb_isim={self.tb_isim}, have_isim={have_isim})")
 
         if self.internal_diversity:
             similarities = mutual_similarities(sampled_fps)
