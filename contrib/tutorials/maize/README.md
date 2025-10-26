@@ -7,6 +7,7 @@ This tutorial provides an overview on how to use the [Maize](https://github.com/
 - Install [maize-contrib](https://github.com/MolecularAI/maize-contrib) which also installs the Maize workflow manager.
 - Install [AutoDock GPU](https://github.com/ccsb-scripps/AutoDock-GPU).
 - Install [Gypsum-DL](https://github.com/durrantlab/gypsum_dl).
+- Adjust the paths in `maize_global_config.toml`
 
 
 ## Tutorials

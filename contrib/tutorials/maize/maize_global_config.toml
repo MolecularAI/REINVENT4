@@ -1,32 +1,32 @@
 # Global configuration for maize
 
-# Various options
+# Temporary files are stored in scatch
 scratch = "/tmp"
 packages = [
     "maize.steps.mai",
     "maize.graphs.mai"
 ]
 
-# Default SLURM options
+# Default SLURM options (not needed in the tutorial)
 [batch]
 system = "slurm"
 queue = "default"
 walltime = "12:00:00"
 max_jobs = 12
 
-# Environment vars
+# Environment variables (not needed in the tutorial)
 #[environment]
 #SCHROD_LICENSE_FILE = ""
 #OE_LICENSE = ""
 
 # Step-specific settings
-[gypsum]
+[gypsum]  # needed for tutorial
 commands.gypsum = "/home/me/miniforge3/envs/maize-dev/bin/run-gypsum-dl"
 
-[autodockgpu]
+[autodockgpu]  # needed for tutorial
 commands.autodock_gpu = "/usr/local/bin/autodock_gpu_128wi"
 
-# further examples: fill in as needed
+# other examples: fill in as needed but not needed in the tutorial
 [vina]
 commands.vina = "/usr/local/bin/vina"
 
