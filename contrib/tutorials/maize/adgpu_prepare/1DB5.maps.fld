@@ -1,0 +1,64 @@
+# AVS field file
+#
+# AutoDock Atomic Affinity and Electrostatic Grids
+#
+# Created by autogrid4 4.2.7.x.2019-07-11.
+#
+#SPACING 0.375
+#NELEMENTS 52 54 50
+#CENTER 59.644 28.966 46.746
+#MACROMOLECULE 1DB5.pdbqt
+#GRID_PARAMETER_FILE 1DB5.gpf
+#
+ndim=3			# number of dimensions in the field
+dim1=53			# number of x-elements
+dim2=55			# number of y-elements
+dim3=51			# number of z-elements
+nspace=3		# number of physical coordinates per point
+veclen=19		# number of affinity values at each point
+data=float		# data type (byte, integer, float, double)
+field=uniform		# field type (uniform, rectilinear, irregular)
+coord 1 file=1DB5.maps.xyz filetype=ascii offset=0
+coord 2 file=1DB5.maps.xyz filetype=ascii offset=2
+coord 3 file=1DB5.maps.xyz filetype=ascii offset=4
+label=HD-affinity	# component label for variable 1
+label=C-affinity	# component label for variable 2
+label=A-affinity	# component label for variable 3
+label=N-affinity	# component label for variable 4
+label=NA-affinity	# component label for variable 5
+label=OA-affinity	# component label for variable 6
+label=F-affinity	# component label for variable 7
+label=P-affinity	# component label for variable 8
+label=SA-affinity	# component label for variable 9
+label=S-affinity	# component label for variable 10
+label=Cl-affinity	# component label for variable 11
+label=CL-affinity	# component label for variable 12
+label=Br-affinity	# component label for variable 13
+label=BR-affinity	# component label for variable 14
+label=I-affinity	# component label for variable 15
+label=Si-affinity	# component label for variable 16
+label=B-affinity	# component label for variable 17
+label=Electrostatics	# component label for variable 18
+label=Desolvation	# component label for variable 19
+#
+# location of affinity grid files and how to read them
+#
+variable 1 file=1DB5.HD.map filetype=ascii skip=6
+variable 2 file=1DB5.C.map filetype=ascii skip=6
+variable 3 file=1DB5.A.map filetype=ascii skip=6
+variable 4 file=1DB5.N.map filetype=ascii skip=6
+variable 5 file=1DB5.NA.map filetype=ascii skip=6
+variable 6 file=1DB5.OA.map filetype=ascii skip=6
+variable 7 file=1DB5.F.map filetype=ascii skip=6
+variable 8 file=1DB5.P.map filetype=ascii skip=6
+variable 9 file=1DB5.SA.map filetype=ascii skip=6
+variable 10 file=1DB5.S.map filetype=ascii skip=6
+variable 11 file=1DB5.Cl.map filetype=ascii skip=6
+variable 12 file=1DB5.CL.map filetype=ascii skip=6
+variable 13 file=1DB5.Br.map filetype=ascii skip=6
+variable 14 file=1DB5.BR.map filetype=ascii skip=6
+variable 15 file=1DB5.I.map filetype=ascii skip=6
+variable 16 file=1DB5.Si.map filetype=ascii skip=6
+variable 17 file=1DB5.B.map filetype=ascii skip=6
+variable 18 file=1DB5.e.map filetype=ascii skip=6
+variable 19 file=1DB5.d.map filetype=ascii skip=6

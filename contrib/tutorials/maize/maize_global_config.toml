@@ -1,0 +1,54 @@
+# Global configuration for maize
+
+# Various options
+scratch = "/tmp"
+packages = [
+    "maize.steps.mai",
+    "maize.graphs.mai"
+]
+
+# Default SLURM options
+[batch]
+system = "slurm"
+queue = "default"
+walltime = "12:00:00"
+max_jobs = 12
+
+# Environment vars
+#[environment]
+#SCHROD_LICENSE_FILE = ""
+#OE_LICENSE = ""
+
+# Step-specific settings
+[gypsum]
+commands.gypsum = "/home/me/miniforge3/envs/maize-dev/bin/run-gypsum-dl"
+
+[autodockgpu]
+commands.autodock_gpu = "/usr/local/bin/autodock_gpu_128wi"
+
+# further examples: fill in as needed
+[vina]
+commands.vina = "/usr/local/bin/vina"
+
+[vinascore]
+commands.vina = "/usr/local/bin/vina"
+
+[vinaflex]
+commands.vina = "/usr/local/bin/vina"
+
+[gnina]
+commands.gnina = "/usr/local/bin/gnina.1.3.2"
+
+[preparegrid]
+commands.prepare_receptor = "prepare_receptor"
+commands.autogrid = "autogrid4"
+scripts.write_gpf.interpreter = "python"
+scripts.write_gpf.location = "prepare_gpf.py"
+
+[preparepdbqt]
+commands.prepare_receptor = "/usr/local/bin/prepare_receptor"
+
+[qptunapredict]
+scripts.qptuna-predict.interpreter = "/data/miniforge3/envs/reinvent4/bin/python"
+scripts.qptuna-predict.location = "qsartuna-predict"
+

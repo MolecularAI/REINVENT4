@@ -1,0 +1,201 @@
+[[component]]
+
+[component.custom_alerts]
+[[component.custom_alerts.endpoint]]
+name = "Minimal Alerts"
+
+[component.custom_alerts.endpoint.params]
+smarts = ["[*;r{8-17}]", "[#8][#8]", "[#6;+]", "[#16][#16]", "[#7;!n][#7;!n]"]
+
+
+[[component]]
+
+[component.NumRotBond]
+[[component.NumRotBond.endpoint]]
+name = "# rotatable bonds (<10)"
+weight = 1
+
+[component.NumRotBond.endpoint.transform]
+low = 6
+high = 14
+k = 0.25
+type = "reverse_sigmoid"
+
+
+[[component]]
+
+[component.NumAtomStereoCenters]
+[[component.NumAtomStereoCenters.endpoint]]
+name = "# stereo centers (<2)"
+weight = 1
+
+[component.NumAtomStereoCenters.endpoint.transform]
+low = 0
+high = 2
+k = 0.25
+type = "reverse_sigmoid"
+
+
+[[component]]
+
+[component.molecular_weight]
+[[component.molecular_weight.endpoint]]
+name = "Molecular weight (350-600)"
+weight = 1
+
+[component.molecular_weight.endpoint.transform]
+low = 300
+high = 650
+coef_div = 500
+coef_si = 20
+coef_se = 20
+type = "double_sigmoid"
+
+
+[[component]]
+
+[component.SlogP]
+[[component.SlogP.endpoint]]
+name = "logP (<=5)"
+weight = 1
+
+[component.SlogP.endpoint.transform]
+low = 0
+high = 8
+k = 0.25
+type = "reverse_sigmoid"
+
+
+[[component]]
+
+[component.tpsa]
+[[component.tpsa.endpoint]]
+name = "TPSA (<=150)"
+weight = 1
+
+[component.tpsa.endpoint.transform]
+low = 125
+high = 200
+k = 0.25
+type = "reverse_sigmoid"
+
+
+[[component]]
+
+[component.NumAromaticRings]
+[[component.NumAromaticRings.endpoint]]
+name = "# aromatic rings (<5)"
+weight = 1
+
+[component.NumAromaticRings.endpoint.transform]
+low = 4
+high = 5
+k = 0.25
+type = "reverse_sigmoid"
+
+
+[[component]]
+
+[component.GroupCount]
+[[component.GroupCount.endpoint]]
+name = "# Cl (<=1)"
+weight = 1
+
+[component.GroupCount.endpoint.params]
+smarts = "[Cl]"
+[component.GroupCount.endpoint.transform]
+low = 1
+high = 3
+k = 0.5
+type = "reverse_sigmoid"
+
+
+[[component]]
+
+[component.GroupCount]
+[[component.GroupCount.endpoint]]
+name = "# F (<4)"
+weight = 1
+
+[component.GroupCount.endpoint.params]
+smarts = "[F]"
+[component.GroupCount.endpoint.transform]
+low = 3
+high = 4
+k = 0.5
+type = "reverse_sigmoid"
+
+
+[[component]]
+
+[component.HBondDonors]
+[[component.HBondDonors.endpoint]]
+name = "# HB-donors (<5)"
+weight = 1
+
+[component.HBondDonors.endpoint.transform]
+low = 3
+high = 7
+k = 0.5
+type = "reverse_sigmoid"
+
+
+[[component]]
+
+[component.HBondAcceptors]
+[[component.HBondAcceptors.endpoint]]
+name = "# HB-acceptors (<10)"
+weight = 1
+
+[component.HBondAcceptors.endpoint.transform]
+low = 6
+high = 14
+k = 0.25
+type = "reverse_sigmoid"
+
+
+[[component]]
+[component.Maize]
+
+params.executable = "/data/miniforge3/envs/maize-dev/bin/maize"
+params.workflow = "autodock_gpu.yaml"
+params.config = "maize_global_config.toml"
+params.log = "maize_adg.log"
+params.debug = false
+
+[[component.Maize.endpoint]]
+name = "ADG (6G5J)"
+weight = 5
+
+[component.Maize.endpoint.transform]
+high = -5.0
+low = -15.0
+k = 0.3
+type = "reverse_sigmoid"
+
+[component.Maize.endpoint.params.parameters]
+grid_file = "adgpu_prepare/6G5J.maps.fld"
+save_best_pose_file = "poses/best_pose_6G5J.sdf"
+
+[[component]]
+[component.Maize]
+
+params.executable = "/data/miniforge3/envs/maize-dev/bin/maize"
+params.workflow = "autodock_gpu.yaml"
+params.config = "maize_global_config.toml"
+params.log = "maize_adg.log"
+params.debug = false
+
+[[component.Maize.endpoint]]
+name = "ADG 1DB5"
+weight = 5
+
+[component.Maize.endpoint.transform]
+high = 0.0
+low = -8.0
+k = 0.3
+type = "sigmoid"
+
+[component.Maize.endpoint.params.parameters]
+grid_file = "adgpu_prepare/1DB5.maps.fld"  # Autodock GPU
+save_best_pose_file = "poses/pose_1DB5.sdf"

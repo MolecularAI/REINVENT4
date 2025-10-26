@@ -1,0 +1,305 @@
+{
+    "run_type": "staged_learning",
+    "device": "cuda:0",
+    "use_cuda": true,
+    "tb_logdir": "tb_stage2",
+    "json_out_config": "_stage2.json",
+    "seed": null,
+    "parameters": {
+        "prior_file": "/home/kmll395/usr/src/MolecularAI/reinvent_core/priors/libinvent_transformer_pubchem.prior",
+        "agent_file": "/home/kmll395/usr/src/MolecularAI/reinvent_core/priors/libinvent_transformer_pubchem.prior",
+        "summary_csv_prefix": "stage2",
+        "use_checkpoint": false,
+        "purge_memories": true,
+        "smiles_file": "scaffold.smi",
+        "sample_strategy": "multinomial",
+        "distance_threshold": 99999,
+        "batch_size": 100,
+        "randomize_smiles": false,
+        "unique_sequences": false,
+        "temperature": 1.0,
+        "tb_isim": false
+    },
+    "scoring": null,
+    "scheduler": null,
+    "responder": null,
+    "filter": null,
+    "stage": [
+        {
+            "max_steps": 200,
+            "max_score": 1.0,
+            "chkpt_file": "stage2.chkpt",
+            "termination": "simple",
+            "min_steps": 50,
+            "scoring": {
+                "type": "geometric_mean",
+                "filename": null,
+                "component": [
+                    {
+                        "custom_alerts": {
+                            "endpoint": [
+                                {
+                                    "name": "Minimal Alerts",
+                                    "params": {
+                                        "smarts": [
+                                            "[*;r{8-17}]",
+                                            "[#8][#8]",
+                                            "[#6;+]",
+                                            "[#16][#16]",
+                                            "[#7;!n][#7;!n]"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "NumRotBond": {
+                            "endpoint": [
+                                {
+                                    "name": "# rotatable bonds (<10)",
+                                    "weight": 1,
+                                    "transform": {
+                                        "low": 6,
+                                        "high": 14,
+                                        "k": 0.25,
+                                        "type": "reverse_sigmoid"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "NumAtomStereoCenters": {
+                            "endpoint": [
+                                {
+                                    "name": "# stereo centers (<2)",
+                                    "weight": 1,
+                                    "transform": {
+                                        "low": 0,
+                                        "high": 2,
+                                        "k": 0.25,
+                                        "type": "reverse_sigmoid"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "molecular_weight": {
+                            "endpoint": [
+                                {
+                                    "name": "Molecular weight (350-600)",
+                                    "weight": 1,
+                                    "transform": {
+                                        "low": 300,
+                                        "high": 650,
+                                        "coef_div": 500,
+                                        "coef_si": 20,
+                                        "coef_se": 20,
+                                        "type": "double_sigmoid"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "SlogP": {
+                            "endpoint": [
+                                {
+                                    "name": "logP (<=5)",
+                                    "weight": 1,
+                                    "transform": {
+                                        "low": 0,
+                                        "high": 8,
+                                        "k": 0.25,
+                                        "type": "reverse_sigmoid"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "tpsa": {
+                            "endpoint": [
+                                {
+                                    "name": "TPSA (<=150)",
+                                    "weight": 1,
+                                    "transform": {
+                                        "low": 125,
+                                        "high": 200,
+                                        "k": 0.25,
+                                        "type": "reverse_sigmoid"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "NumAromaticRings": {
+                            "endpoint": [
+                                {
+                                    "name": "# aromatic rings (<5)",
+                                    "weight": 1,
+                                    "transform": {
+                                        "low": 4,
+                                        "high": 5,
+                                        "k": 0.25,
+                                        "type": "reverse_sigmoid"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "GroupCount": {
+                            "endpoint": [
+                                {
+                                    "name": "# Cl (<=1)",
+                                    "weight": 1,
+                                    "params": {
+                                        "smarts": "[Cl]"
+                                    },
+                                    "transform": {
+                                        "low": 1,
+                                        "high": 3,
+                                        "k": 0.5,
+                                        "type": "reverse_sigmoid"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "GroupCount": {
+                            "endpoint": [
+                                {
+                                    "name": "# F (<4)",
+                                    "weight": 1,
+                                    "params": {
+                                        "smarts": "[F]"
+                                    },
+                                    "transform": {
+                                        "low": 3,
+                                        "high": 4,
+                                        "k": 0.5,
+                                        "type": "reverse_sigmoid"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "HBondDonors": {
+                            "endpoint": [
+                                {
+                                    "name": "# HB-donors (<5)",
+                                    "weight": 1,
+                                    "transform": {
+                                        "low": 3,
+                                        "high": 7,
+                                        "k": 0.5,
+                                        "type": "reverse_sigmoid"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "HBondAcceptors": {
+                            "endpoint": [
+                                {
+                                    "name": "# HB-acceptors (<10)",
+                                    "weight": 1,
+                                    "transform": {
+                                        "low": 6,
+                                        "high": 14,
+                                        "k": 0.25,
+                                        "type": "reverse_sigmoid"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "Maize": {
+                            "params": {
+                                "executable": "/home/kmll395/miniforge3/envs/maize-dev/bin/maize",
+                                "workflow": "autodock_gpu.yaml",
+                                "config": "maize_global_config.toml",
+                                "log": "maize_adg.log",
+                                "debug": false
+                            },
+                            "endpoint": [
+                                {
+                                    "name": "ADG PLA2X",
+                                    "weight": 5,
+                                    "transform": {
+                                        "high": -5.0,
+                                        "low": -15.0,
+                                        "k": 0.3,
+                                        "type": "reverse_sigmoid"
+                                    },
+                                    "params": {
+                                        "parameters": {
+                                            "grid_file": "adg_prepare/6G5J.maps.fld",
+                                            "save_best_pose_file": "poses/best_pose_6G5J.sdf"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "Maize": {
+                            "params": {
+                                "executable": "/home/kmll395/miniforge3/envs/maize-dev/bin/maize",
+                                "workflow": "autodock_gpu.yaml",
+                                "config": "maize_global_config.toml",
+                                "log": "maize_adg.log",
+                                "debug": false
+                            },
+                            "endpoint": [
+                                {
+                                    "name": "ADG hERG",
+                                    "weight": 5,
+                                    "transform": {
+                                        "high": 0.0,
+                                        "low": -8.0,
+                                        "k": 0.3,
+                                        "type": "sigmoid"
+                                    },
+                                    "params": {
+                                        "parameters": {
+                                            "grid_file": "adg_prepare/8ZYP.maps.fld",
+                                            "save_best_pose_file": "poses/pose_hERG.sdf"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "diversity_filter": null
+        }
+    ],
+    "learning_strategy": {
+        "type": "dap",
+        "sigma": 128,
+        "rate": 0.0001
+    },
+    "diversity_filter": {
+        "type": "PenalizeSameSmiles",
+        "bucket_size": 25,
+        "minscore": 0.4,
+        "minsimilarity": 0.4,
+        "penalty_multiplier": 0.5
+    },
+    "inception": {
+        "smiles_file": null,
+        "memory_size": 50,
+        "sample_size": 10,
+        "deduplicate": true
+    }
+}

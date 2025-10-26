@@ -1,0 +1,252 @@
+Structure4
+                    3D
+ Schrodinger Suite 2023-4.
+ 51 53  0  0  1  0            999 V2000
+   59.3490   27.8750   47.0580 C   0  0  0  0  0  0
+   59.8990   28.4530   48.2260 C   0  0  0  0  0  0
+   59.8380   29.8460   48.3830 C   0  0  0  0  0  0
+   59.2350   30.6900   47.4190 C   0  0  0  0  0  0
+   58.6880   30.1210   46.2750 C   0  0  0  0  0  0
+   58.7530   28.7230   46.1130 C   0  0  0  0  0  0
+   59.0480   32.0430   47.3390 N   0  0  0  0  0  0
+   58.3920   32.3290   46.1630 C   0  0  0  0  0  0
+   58.1550   31.1320   45.4630 C   0  0  0  0  0  0
+   59.4340   33.0920   48.3090 C   0  0  0  0  0  0
+   60.9200   33.1620   48.6040 C   0  0  0  0  0  0
+   61.8870   32.9370   47.6080 C   0  0  0  0  0  0
+   63.2500   33.0090   47.9230 C   0  0  0  0  0  0
+   63.6730   33.2810   49.2070 C   0  0  0  0  0  0
+   62.7290   33.5060   50.2120 C   0  0  0  0  0  0
+   61.3480   33.4420   49.9300 C   0  0  0  0  0  0
+   57.9850   33.7380   45.6830 C   0  0  0  0  0  0
+   57.4580   31.0110   44.1280 C   0  0  0  0  0  0
+   56.4890   29.9060   43.9890 C   0  0  0  0  0  0
+   56.6840   29.2890   42.8760 N   0  0  0  0  0  0
+   55.6680   29.6090   44.8690 O   0  0  0  0  0  0
+   59.3810   26.4910   46.8640 O   0  0  0  0  0  0
+   58.7630   25.9260   45.7240 C   0  0  0  0  0  0
+   57.5650   25.2360   46.3190 C   0  0  0  0  0  0
+   56.7240   24.5680   45.2860 C   0  0  0  0  0  0
+   55.2400   24.8120   45.5210 C   0  0  0  0  0  0
+   54.5600   23.8930   44.8550 O   0  5  0  0  0  0
+   54.6280   25.6650   46.2100 O   0  0  0  0  0  0
+   60.3635   27.8318   48.9777 H   0  0  0  0  0  0
+   60.2688   30.2764   49.2753 H   0  0  0  0  0  0
+   58.3061   28.3524   45.2139 H   0  0  0  0  0  0
+   58.9032   32.8564   49.2324 H   0  0  0  0  0  0
+   59.0949   34.0757   47.9871 H   0  0  0  0  0  0
+   61.5884   32.7220   46.5925 H   0  0  0  0  0  0
+   63.9820   32.8419   47.1462 H   0  0  0  0  0  0
+   64.7280   33.3217   49.4338 H   0  0  0  0  0  0
+   63.0599   33.7224   51.2171 H   0  0  0  0  0  0
+   60.6300   33.6086   50.7197 H   0  0  0  0  0  0
+   57.6140   33.7754   44.6612 H   0  0  0  0  0  0
+   57.2058   34.1533   46.3180 H   0  0  0  0  0  0
+   58.8274   34.4293   45.7145 H   0  0  0  0  0  0
+   58.2422   30.9864   43.3666 H   0  0  0  0  0  0
+   56.8967   31.9102   43.8966 H   0  0  0  0  0  0
+   56.1273   28.4676   42.6646 H   0  0  0  0  0  0
+   57.4594   29.5357   42.2741 H   0  0  0  0  0  0
+   59.4571   25.1448   45.4429 H   0  0  0  0  0  0
+   58.5918   26.4920   44.8134 H   0  0  0  0  0  0
+   57.0333   26.0184   46.8580 H   0  0  0  0  0  0
+   57.8618   24.5105   47.0778 H   0  0  0  0  0  0
+   56.9675   23.5020   45.2684 H   0  0  0  0  0  0
+   56.9500   24.9397   44.2840 H   0  0  0  0  0  0
+  1  2  1  0  0  0
+  1  6  2  0  0  0
+  1 22  1  0  0  0
+  2  3  2  0  0  0
+  2 29  1  0  0  0
+  3  4  1  0  0  0
+  3 30  1  0  0  0
+  4  5  2  0  0  0
+  4  7  1  0  0  0
+  5  6  1  0  0  0
+  5  9  1  0  0  0
+  6 31  1  0  0  0
+  7  8  1  0  0  0
+  7 10  1  0  0  0
+  8  9  2  0  0  0
+  8 17  1  0  0  0
+  9 18  1  0  0  0
+ 10 11  1  0  0  0
+ 10 32  1  0  0  0
+ 10 33  1  0  0  0
+ 11 12  2  0  0  0
+ 11 16  1  0  0  0
+ 12 13  1  0  0  0
+ 12 34  1  0  0  0
+ 13 14  2  0  0  0
+ 13 35  1  0  0  0
+ 14 15  1  0  0  0
+ 14 36  1  0  0  0
+ 15 16  2  0  0  0
+ 15 37  1  0  0  0
+ 16 38  1  0  0  0
+ 17 39  1  0  0  0
+ 17 40  1  0  0  0
+ 17 41  1  0  0  0
+ 18 19  1  0  0  0
+ 18 42  1  0  0  0
+ 18 43  1  0  0  0
+ 19 20  1  0  0  0
+ 19 21  2  0  0  0
+ 20 44  1  0  0  0
+ 20 45  1  0  0  0
+ 22 23  1  0  0  0
+ 23 24  1  0  0  0
+ 23 46  1  0  0  0
+ 23 47  1  0  0  0
+ 24 25  1  0  0  0
+ 24 48  1  0  0  0
+ 24 49  1  0  0  0
+ 25 26  1  0  0  0
+ 25 50  1  0  0  0
+ 25 51  1  0  0  0
+ 26 27  1  0  0  0
+ 26 28  2  0  0  0
+M  CHG  1  27  -1
+M  END
+> <i_m_Source_File_Index>
+1
+
+> <i_m_stars>
+0
+
+> <i_pdb_PDB_CRYST1_z>
+12
+
+> <b_m_subgroup_collapsed>
+0
+
+> <b_ppw_created_disulfur>
+1
+
+> <b_ppw_prepared>
+1
+
+> <r_i_Bend_Energy-S-OPLS>
+119.289
+
+> <r_i_Dihedral_Energy-S-OPLS>
+116.895
+
+> <r_i_El-14_Energy-S-OPLS>
+-207.37
+
+> <r_i_Electrostatic_Energy-S-OPLS>
+-4050.47
+
+> <r_i_LJ-14_Energy-S-OPLS>
+222.02
+
+> <r_i_Max_Derivative-S-OPLS>
+0.765733
+
+> <r_i_Potential_Energy-S-OPLS>
+-3967.69
+
+> <r_i_RMS_Derivative-S-OPLS>
+0.0440354
+
+> <r_i_Stretch_Energy-S-OPLS>
+4.33415
+
+> <r_i_Van_der_Waals_Energy-S-OPLS>
+-172.391
+
+> <r_i_target_temperature>
+298
+
+> <r_pdb_PDB_CRYST1_a>
+76.36
+
+> <r_pdb_PDB_CRYST1_alpha>
+90
+
+> <r_pdb_PDB_CRYST1_b>
+76.36
+
+> <r_pdb_PDB_CRYST1_beta>
+90
+
+> <r_pdb_PDB_CRYST1_c>
+91.53
+
+> <r_pdb_PDB_CRYST1_gamma>
+120
+
+> <r_pdb_PDB_EXPDTA_PH>
+7
+
+> <r_pdb_PDB_EXPDTA_TEMPERATURE>
+298
+
+> <r_pdb_PDB_R>
+0.196
+
+> <r_pdb_PDB_RESOLUTION>
+2.8
+
+> <r_pdb_PDB_Rfree>
+0.24
+
+> <r_ppw_preprocess_pH>
+7.4
+
+> <s_m_Source_File>
+proteinprep_1-out.maegz
+
+> <s_m_Source_Path>
+C:\Users\kmll395\OneDrive - AZCollaboration\Documents\Schrodinger\proteinprep_1
+
+> <s_m_entry_id>
+4
+
+> <s_m_entry_name>
+Structure4
+
+> <s_m_job_name>
+proteinprep_1
+
+> <s_m_subgroup_title>
+proteinprep_1-out
+
+> <s_m_subgroupid>
+proteinprep_1-out
+
+> <s_pdb_PDB_CLASSIFICATION>
+HYDROLASE/HYDROLASE INHIBITOR
+
+> <s_pdb_PDB_CRYST1_Space_Group>
+P 61 2 2
+
+> <s_pdb_PDB_DEPOSITION_DATE>
+02-NOV-99
+
+> <s_pdb_PDB_EXPDTA>
+X-RAY DIFFRACTION
+
+> <s_pdb_PDB_ID>
+1DB5
+
+> <s_pdb_PDB_REMARK_350_Biomolecule_1_Transform_1_Chains>
+A
+
+> <s_pdb_PDB_REMARK_350_Biomolecule_1_Transform_1_Matrix_1>
+1.000000 0.000000 0.000000   0.000000;0.000000 1.000000 0.000000   0.000000;0.000000 0.000000 1.000000   0.000000
+
+> <s_pdb_PDB_TITLE>
+HUMAN S-PLA2 IN COMPLEX WITH INDOLE 6
+
+> <s_pdb_PDB_format_version>
+3.30
+
+> <s_ppw_het_states>
+eJztld1qwzAMhV8l+LorsfMn71XCCKFzu0CWlCQdjNB3n6W2Jx4Lu9gudrHeFB1Z9lH1VXRW1ZsbxqbvKvUY5alOsk3kc3V7cpyZVeI/y1ntXurh4EYWpc3tJoqfNlFpixiRRmQQJYhSRBmiHFGBiBDBg+BB8CB4EDwIHgQPggfBg+BB8LDwsPCw8LDwsPCw8LDi4UPVD89+mMuMZDxaii7S3zaLtDjlOpmgwSxljBoDlVmaQGY4Ta4vh7KAzFjmnyVB5tdis0haXi5YLneJiy0kfwVmYwKJNvhAeGmQE2gG+IScBkO5awBNeGmQE2ihtLdiHqJA08An5DQYCj4NkMJQg6aADGXOLzPNo+vqdnr3OJNtQfywenVT3VaXg0a2YVZpGlakGdTZy3HXD85nulPbetl0+74apyHIjFU/NIfGv+iT+7odnb9337fVfXvQ94X7FwsXb+P42327Fci6ifjxtrGzXvuTK259Lb+yL12u9/irXsxaL/QHvZzPH9OX7+Y=
+
+> <s_ppw_prepared_with_version>
+2023-4
+
+$$$$
