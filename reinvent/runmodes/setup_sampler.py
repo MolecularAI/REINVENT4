@@ -50,10 +50,7 @@ def setup_sampler(model_type: str, config: dict, agent: ModelAdapter):
             stacklevel=2,
         )
 
-    if model_type in TRANSFORMERS + ["Reinvent"]:
-        sample_strategy = config.get("sample_strategy", "multinomial")
-    else:
-        sample_strategy = None
+    sample_strategy = config.get("sample_strategy", "multinomial")
 
     isomeric = False
 
