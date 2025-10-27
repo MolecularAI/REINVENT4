@@ -75,7 +75,7 @@ class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
         smilies: List[str],
         mask: np.ndarray,
         sampled: SampleBatch,
-    ) -> List:
+    ) -> Tuple[List, np.ndarray]:
         """Compute the score and add intrinsic rewards based on RND."""
 
         assert len(smilies) == len(
@@ -89,9 +89,13 @@ class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
             topological=False,
         )
 
+        # Copy total_scores to save the penalized scores before adding intrinsic rewards
+        # This is returned for back-compatible reporting of scores.
+        penalized_scores = scores.copy()
+
         self._add_intrinsic_reward(sampled, scores, active_idxs)
 
-        return scaffolds
+        return scaffolds, penalized_scores
 
     def _calculate_novelty_reinvent(
         self, sampled: SampleBatch, scores: np.ndarray, active_idxs: List[int]

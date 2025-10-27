@@ -66,14 +66,14 @@ class IntrinsicPenalty(ABC):
     @abstractmethod
     def update_score(
         self, scores: np.ndarray, smilies: List[str], mask: np.ndarray, sampled: SampleBatch
-    ) -> List:
+    ) -> Tuple[List, np.ndarray]:
         """Update the score according to the concrete fitler.
 
         :param scores: an array with precomputed scores
         :param smilies: list of SMILES
         :param mask: mask for valid SMILES
         :param sampled: batch of sampled SMILES
-        :return: array with the updated scores and scaffolds where available
+        :return: in-place updated scores, scaffolds where available and penalized scores
         """
 
     def score_scaffolds(

@@ -143,10 +143,11 @@ class Learning(ABC):
                 scaffolds = self._state.diversity_filter.update_score(
                     results.total_scores, results.smilies, df_mask
                 )
+
             elif self.intrinsic_penalty:
                 df_mask = np.where(self.invalid_mask, True, False)
 
-                scaffolds = self.intrinsic_penalty.update_score(
+                scaffolds, penalized_scores = self.intrinsic_penalty.update_score(
                     results.total_scores, results.smilies, df_mask, self.sampled
                 )
 
@@ -156,6 +157,11 @@ class Learning(ABC):
 
             state_dict = self._state.as_dict()
             self._state_info.update(state_dict)
+
+            if not self._state.diversity_filter and self.intrinsic_penalty:
+                # Remove the intrinsic penalty scores from the results for reporting
+                # This is done after using intrinsic scores for the update
+                results.total_scores = penalized_scores
 
             nan_idx = np.isnan(results.total_scores)
             scores = results.total_scores[~nan_idx]
