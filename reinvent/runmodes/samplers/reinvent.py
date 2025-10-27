@@ -3,9 +3,8 @@
 __all__ = ["ReinventSampler"]
 import logging
 
-from rdkit import Chem, DataStructs
+from rdkit import Chem
 from dppy.finite_dpps import FiniteDPP
-import numpy as np
 
 from .sampler import Sampler, remove_duplicate_sequences, validate_smiles
 from .params import SAMPLE_BATCH_SIZE
