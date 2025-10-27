@@ -10,10 +10,13 @@ from rdkit.Chem import (
     MolToSmiles,
     MolStandardize,
 )
+from rdkit.Chem.Scaffolds import MurckoScaffold
+from rdkit.Chem.AtomPairs import Pairs
 from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.rdmolops import RenumberAtoms
-from rdkit.DataStructs.cDataStructs import UIntSparseIntVect
+from rdkit.DataStructs.cDataStructs import UIntSparseIntVect, ExplicitBitVect
 from molvs import Standardizer
+from reinvent.models.transformer.mol2mol.dataset.preprocessing import scaffold
 
 
 class Conversions:
@@ -176,3 +179,55 @@ def randomize_smiles(smiles: str) -> str:
         random.shuffle(new_atom_order)
         random_mol = RenumberAtoms(mol, newOrder=new_atom_order)
         return MolToSmiles(random_mol, canonical=False, isomericSmiles=False)
+
+
+def mol_to_scaffold(mol: Mol, topological: bool) -> Mol:
+    """Compute the Murcko scaffold for the given SMILES string
+
+    :param mol: A Mol object to compute the scaffold from
+    :param topological: whether the scaffold should be made generic
+    :returns: A Mol object of the scaffold
+    """
+
+    try:
+        scaffold = MurckoScaffold.GetScaffoldForMol(mol)
+
+        if topological:
+            scaffold = MurckoScaffold.MakeScaffoldGeneric(scaffold)
+
+    except ValueError:
+        return None
+
+    return scaffold
+
+
+def mols_to_scaffolds_and_indices(
+    molecules: List[Mol], topological: bool
+) -> Tuple[List[Mol], List[int]]:
+    """Compute the Murcko scaffolds for the given Mol objects
+
+    :param molecules: A list of Mol objects to compute the scaffolds from
+    :param topological: whether the scaffold should be made generic
+    :returns: Mol objects of scaffolds and their valid indices
+    """
+    scaffolds = [mol_to_scaffold(mol, topological) for mol in molecules]
+    valid_mask = [mol is not None for mol in scaffolds]
+    valid_idxs = [idx for idx, is_valid in enumerate(valid_mask) if is_valid]
+    valid_scaffolds = [scaffolds[idx] for idx in valid_idxs]
+
+    return valid_scaffolds, valid_idxs
+
+
+def mols_to_atom_pair_fingerprints(molecules: List[Mol]) -> List[ExplicitBitVect]:
+    """Compute the Murcko scaffold for the given SMILES string
+
+    :param smile: the SMILES strings to compute the scaffold from
+    :param topological: whether the scaffold should be made generic
+    :returns: scaffold SMILES string
+    """
+
+    fp_gen = AllChem.GetAtomPairGenerator()
+
+    atom_pair_fingerprints = [fp_gen.GetFingerprint(mol) for mol in molecules]
+
+    return atom_pair_fingerprints
