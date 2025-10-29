@@ -106,7 +106,17 @@ def param(request, json_config):
     return params[request.param]
 
 
-IDs = ["reinvent", "reinvent-dpp", "libinvent", "libinvent-dpp", "linkinvent", "linkinvent-dpp", "mol2mol-multi", "mol2mol-beam", "mol2mol-dpp"]
+IDs = [
+    "reinvent",
+    "reinvent-dpp",
+    "libinvent",
+    "libinvent-dpp",
+    "linkinvent",
+    "linkinvent-dpp",
+    "mol2mol-multi",
+    "mol2mol-beam",
+    "mol2mol-dpp",
+]
 
 
 @pytest.fixture
@@ -147,4 +157,3 @@ def test_run_sampling_with_likelihood(param, setup, pytestconfig):
     num_smiles = param["smiles_multiplier"] * param["num_smiles"]
 
     assert num_lines == num_smiles
-
