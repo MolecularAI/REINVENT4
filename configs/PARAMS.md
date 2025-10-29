@@ -16,7 +16,7 @@ Sample a number of SMILES with associated NLLs.
 | [parameters]       | starts the parameter section                                                                         |
 | model\_file        | filename to model file from which to sample                                                          |
 | smiles\_file       | filename for input SMILES for Lib/LinkInvent and Mol2Mol                                            |
-| sample\_strategy   | Transformer models: "beamsearch" or "multinomial"                                                    |
+| sample\_strategy   | Transformer models: "beamsearch", "dpp" or "multinomial". Other models: "dpp" or "multinomial" (default if dpp is not chosen)                                                     |
 | output\_file       | filename for the CSV file with samples SMILES and NLLs                                               |
 | num\_smiles        | number of SMILES to sample, note: this is multiplied by the number of input SMILES                   |
 | unique\_molecules  | if "true" only return unique canonicalized SMILES                                                    |
