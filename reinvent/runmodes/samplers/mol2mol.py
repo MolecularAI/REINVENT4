@@ -55,9 +55,7 @@ class Mol2MolSampler(Sampler):
 
         # FIXME: should probably be done by caller
         #        replace hard-coded strings
-        if self.sample_strategy == "multinomial":
-            smilies = smilies * batch_size
-        elif self.sample_strategy == "dpp":
+        if self.sample_strategy in ["multinomial", "dpp"]:
             smilies = smilies * batch_size
 
         tokenizer = SMILESTokenizer()
