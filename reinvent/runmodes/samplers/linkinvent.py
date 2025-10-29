@@ -16,7 +16,6 @@ from reinvent.chemistry import conversions, tokens
 from reinvent.chemistry.library_design import attachment_points, bond_maker
 from ...models.transformer.core.dataset.dataset import Dataset as TransformerDataset
 from reinvent.chemistry.conversions import (
-    smiles_to_mols_and_indices,
     mols_to_scaffolds_and_indices,
     mols_to_atom_pair_fingerprints,
 )

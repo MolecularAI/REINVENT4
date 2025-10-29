@@ -16,9 +16,7 @@ from reinvent.chemistry import conversions
 from reinvent.chemistry.library_design import attachment_points, bond_maker
 from reinvent.models.transformer.core.dataset.dataset import Dataset as TransformerDataset
 from reinvent.chemistry.conversions import (
-    smiles_to_mols_and_indices,
     mols_to_fingerprints,
-    mols_to_smiles,
 )
 from reinvent.chemistry.similarity import (
     calculate_tanimoto_similarity_matrix,
