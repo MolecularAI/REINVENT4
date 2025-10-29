@@ -26,6 +26,7 @@ class SectionParameters(GlobalConfig):
     internal_diversity: bool = False
     # learning_rate_scheduler: Optional[str] = 'StepLR'
     # optimizer: Optional[str] = 'Adam'
+    tb_isim: Optional[bool] = False  # Add iSIM tracking as optional parameter
     max_sequence_length: int = Field(128, ge=64)
 
     # non-transformers
