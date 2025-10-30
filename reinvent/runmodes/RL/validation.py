@@ -37,6 +37,17 @@ class SectionDiversityFilter(GlobalConfig):
     penalty_multiplier: Optional[float] = Field(0.5, ge=0.0, le=1.0)  # PenalizeSameSmiles only
 
 
+class SectionIntrinsicPenalty(GlobalConfig):
+    type: str
+    penalty_function: str
+    bucket_size: int = Field(25, ge=1)
+    minscore: float = Field(0.4, ge=0.0, le=1.0)
+    learning_rate: float = Field(
+        1e-4,
+        gt=0.0,
+    )  # IdenticalScaffoldPenaltyRND only, defaults to 1e-4
+
+
 class SectionInception(GlobalConfig):
     smiles_file: Optional[str] = None
     memory_size: int = 50
@@ -65,5 +76,6 @@ class RLConfig(GlobalConfig):
     stage: List[SectionStage]
     learning_strategy: Optional[SectionLearningStrategy] = None
     diversity_filter: Optional[SectionDiversityFilter] = None
+    intrinsic_penalty: Optional[SectionIntrinsicPenalty] = None
     inception: Optional[SectionInception] = None
     responder: Optional[SectionResponder] = None
