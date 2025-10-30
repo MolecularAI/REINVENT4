@@ -6,7 +6,6 @@ import logging
 
 from rdkit import Chem
 import torch.utils.data as tud
-from dppy.finite_dpps import FiniteDPP
 
 from .sampler import Sampler, validate_smiles, remove_duplicate_sequences
 from . import params
@@ -15,16 +14,6 @@ from reinvent.models.transformer.core.vocabulary import SMILESTokenizer
 from reinvent.models.model_factory.sample_batch import SampleBatch
 from reinvent.chemistry import conversions
 from reinvent.chemistry.similarity import calculate_tanimoto as _calc_tanimoto
-from reinvent.chemistry.conversions import (
-    smiles_to_mols_and_indices,
-    mols_to_fingerprints,
-    mols_to_scaffolds_and_indices,
-    mols_to_atom_pair_fingerprints,
-)
-from reinvent.chemistry.similarity import (
-    calculate_dice_similarity_matrix,
-    calculate_tanimoto_similarity_matrix,
-)
 
 from ...models import SampledSequencesDTO
 
@@ -40,8 +29,6 @@ class Mol2MolSampler(Sampler):
         :param smilies: list of SMILES used for sampling
         :returns: SampleBatch
         """
-
-        n_input_smilies = len(smilies)
         # Standardize smiles in the same way as training data
         smilies = [conversions.convert_to_standardized_smiles(smile) for smile in smilies]
 
@@ -51,12 +38,10 @@ class Mol2MolSampler(Sampler):
             else smilies
         )
 
-        batch_size = self.batch_size * 10 if self.sample_strategy == "dpp" else self.batch_size
-
         # FIXME: should probably be done by caller
         #        replace hard-coded strings
-        if self.sample_strategy in ["multinomial", "dpp"]:
-            smilies = smilies * batch_size
+        if self.sample_strategy == "multinomial":
+            smilies = smilies * self.batch_size
 
         tokenizer = SMILESTokenizer()
         dataset = Dataset(smilies, self.model.get_vocabulary(), tokenizer)
@@ -72,63 +57,10 @@ class Mol2MolSampler(Sampler):
         for batch in dataloader:
             src, src_mask = batch
 
-            sampled = self.model.sample(
-                src,
-                src_mask,
-                "multinomial" if self.sample_strategy == "dpp" else self.sample_strategy,
-            )
+            sampled = self.model.sample(src, src_mask, self.sample_strategy)
 
             for batch_row in sampled:
                 sequences.append(batch_row)
-
-        if self.sample_strategy == "dpp":
-
-            sequences_dpp = []
-
-            # Process each input smile separately to get diversity among inputs
-            for i in range(n_input_smilies):
-
-                seqs = sequences[i::n_input_smilies]
-
-                sampled_smilies = [s.output for s in seqs]
-
-                valid_mols, valid_mols_idxs = smiles_to_mols_and_indices(sampled_smilies)
-
-                valid_scaffolds, valid_scaffolds_idxs = mols_to_scaffolds_and_indices(
-                    valid_mols, topological=False
-                )
-
-                valid_idxs = [valid_mols_idxs[idx] for idx in valid_scaffolds_idxs]
-
-                valid_mols = [valid_mols[idx] for idx in valid_scaffolds_idxs]
-
-                fps_morgan = mols_to_fingerprints(
-                    valid_mols, radius=3, use_counts=True, use_features=True
-                )
-
-                fps_atom_pair = mols_to_atom_pair_fingerprints(valid_scaffolds)
-
-                assert len(fps_morgan) == len(
-                    fps_atom_pair
-                ), f"Fingerprint length mismatch: {len(fps_morgan)} vs {len(fps_atom_pair)}"
-
-                dice_sim = calculate_dice_similarity_matrix(fps_atom_pair)
-
-                tanimoto_sim = calculate_tanimoto_similarity_matrix(fps_morgan)
-
-                likelihood_kernel = dice_sim + tanimoto_sim
-
-                # Initialize the DPP with the kernel matrix
-                dpp = FiniteDPP("likelihood", **{"L": likelihood_kernel})
-
-                # Sample indices from the DPP
-                idxs_dpp = dpp.sample_exact_k_dpp(self.batch_size)
-
-                valid_idxs_dpp = [valid_idxs[i] for i in idxs_dpp]
-
-                sequences_dpp.extend([seqs[i] for i in valid_idxs_dpp])
-
-            sequences = sequences_dpp
 
         sampled = SampleBatch.from_list(sequences)
 
