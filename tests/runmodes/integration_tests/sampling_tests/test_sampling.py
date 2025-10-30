@@ -36,6 +36,14 @@ def param(request, json_config):
             "sample_strategy": None,
             "num_cols": 3,
         },
+        "reinvent-dpp": {
+            "model_file": ".reinvent",
+            "num_smiles": 20,
+            "smiles_multiplier": 1,
+            "smiles_file": None,
+            "sample_strategy": "dpp",
+            "num_cols": 3,
+        },
         "libinvent": {
             "model_file": ".libinvent",
             "num_smiles": 10,
@@ -44,12 +52,28 @@ def param(request, json_config):
             "sample_strategy": None,
             "num_cols": 5,
         },
+        "libinvent-dpp": {
+            "model_file": ".libinvent",
+            "num_smiles": 10,
+            "smiles_multiplier": 2,
+            "smiles_file": json_config["LIBINVENT_SMILES_SCAFFOLDS"],
+            "sample_strategy": "dpp",
+            "num_cols": 5,
+        },
         "linkinvent": {
             "model_file": ".linkinvent",
             "num_smiles": 10,
             "smiles_multiplier": 1,
             "smiles_file": json_config["LINKINVENT_SMILES_WARHEADS"],
             "sample_strategy": "multinomial",
+            "num_cols": 5,
+        },
+        "linkinvent-dpp": {
+            "model_file": ".linkinvent",
+            "num_smiles": 10,
+            "smiles_multiplier": 1,
+            "smiles_file": json_config["LINKINVENT_SMILES_WARHEADS"],
+            "sample_strategy": "dpp",
             "num_cols": 5,
         },
         "mol2mol-multi": {
@@ -69,12 +93,30 @@ def param(request, json_config):
             "sample_strategy": "beamsearch",
             "num_cols": 5,
         },
+        "mol2mol-dpp": {
+            "model_file": ".m2m_high",
+            "num_smiles": 1,
+            "smiles_multiplier": 3,
+            "smiles_file": json_config["MOLFORMER_SMILES_SET_PATH"],
+            "sample_strategy": "dpp",
+            "num_cols": 5,
+        },
     }
 
     return params[request.param]
 
 
-IDs = ["reinvent", "libinvent", "linkinvent", "mol2mol-multi", "mol2mol-beam"]
+IDs = [
+    "reinvent",
+    "reinvent-dpp",
+    "libinvent",
+    "libinvent-dpp",
+    "linkinvent",
+    "linkinvent-dpp",
+    "mol2mol-multi",
+    "mol2mol-beam",
+    "mol2mol-dpp",
+]
 
 
 @pytest.fixture
@@ -115,4 +157,3 @@ def test_run_sampling_with_likelihood(param, setup, pytestconfig):
     num_smiles = param["smiles_multiplier"] * param["num_smiles"]
 
     assert num_lines == num_smiles
-
