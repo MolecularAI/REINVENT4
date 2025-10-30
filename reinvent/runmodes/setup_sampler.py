@@ -49,10 +49,11 @@ def setup_sampler(model_type: str, config: dict, agent: ModelAdapter):
             FutureWarning,
             stacklevel=2,
         )
+
     if model_type in TRANSFORMERS:
         sample_strategy = config.get("sample_strategy", "multinomial")
     else:
-        sample_strategy = config.get("sample_strategy", None)
+        sample_strategy = None
 
     isomeric = False
 

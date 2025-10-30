@@ -6,7 +6,6 @@ import logging
 
 import torch.utils.data as tud
 from rdkit import Chem
-from dppy.finite_dpps import FiniteDPP
 
 from .sampler import Sampler, validate_smiles, remove_duplicate_sequences
 from . import params
@@ -15,13 +14,6 @@ from reinvent.models.model_factory.sample_batch import SampleBatch
 from reinvent.chemistry import conversions
 from reinvent.chemistry.library_design import attachment_points, bond_maker
 from reinvent.models.transformer.core.dataset.dataset import Dataset as TransformerDataset
-from reinvent.chemistry.conversions import (
-    mols_to_fingerprints,
-)
-from reinvent.chemistry.similarity import (
-    calculate_tanimoto_similarity_matrix,
-)
-
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +28,6 @@ class LibinventSampler(Sampler):
         :returns: SampleBatch
         """
 
-        n_input_smilies = len(smilies)
-
         if self.model.version == 2:  # Transformer-based
             smilies = self._standardize_input(smilies)
 
@@ -49,10 +39,8 @@ class LibinventSampler(Sampler):
             if scaffold
         ]
 
-        batch_size = self.batch_size * 10 if self.sample_strategy == "dpp" else self.batch_size
-
         if self.model.version == 1:  # RNN-based
-            clean_scaffolds = clean_scaffolds * batch_size
+            clean_scaffolds = clean_scaffolds * self.batch_size
 
             dataset = Dataset(
                 clean_scaffolds,
@@ -60,8 +48,8 @@ class LibinventSampler(Sampler):
                 self.model.get_vocabulary().scaffold_tokenizer,
             )
         elif self.model.version == 2:  # Transformer-based
-            if self.sample_strategy in ["multinomial", "dpp"]:
-                clean_scaffolds = clean_scaffolds * batch_size
+            if self.sample_strategy == "multinomial":
+                clean_scaffolds = clean_scaffolds * self.batch_size
 
             dataset = TransformerDataset(
                 clean_scaffolds, self.model.get_vocabulary(), self.model.tokenizer
@@ -81,47 +69,9 @@ class LibinventSampler(Sampler):
             if self.model.version == 1:
                 sampled = self.model.sample(inputs, input_info)
             elif self.model.version == 2:
-                sampled = self.model.sample(
-                    inputs,
-                    input_info,
-                    "multinomial" if self.sample_strategy == "dpp" else self.sample_strategy,
-                )
+                sampled = self.model.sample(inputs, input_info, self.sample_strategy)
             for batch_row in sampled:
                 sequences.append(batch_row)
-
-        if self.sample_strategy == "dpp":
-            sequences_dpp = []
-
-            for i in range(n_input_smilies):
-
-                seqs = sequences[i::n_input_smilies]
-
-                mols = self._join_fragments(seqs)
-
-                valid_mask = [mol is not None for mol in mols]
-                valid_mols_idxs = [idx for idx, is_valid in enumerate(valid_mask) if is_valid]
-                valid_mols = [mols[idx] for idx in valid_mols_idxs]
-
-                fps_morgan = mols_to_fingerprints(
-                    valid_mols, radius=3, use_counts=True, use_features=True
-                )
-
-                tanimoto_sim = calculate_tanimoto_similarity_matrix(fps_morgan)
-
-                likelihood_kernel = tanimoto_sim
-
-                # Initialize the DPP with the kernel matrix
-                dpp = FiniteDPP("likelihood", **{"L": likelihood_kernel})
-
-                # Sample indices from the DPP
-                idxs_dpp = dpp.sample_exact_k_dpp(self.batch_size)
-
-                valid_idxs_dpp = [valid_mols_idxs[i] for i in idxs_dpp]
-
-                sequences_dpp.extend([seqs[i] for i in valid_idxs_dpp])
-
-            sequences = sequences_dpp
-
         sampled = SampleBatch.from_list(sequences)
 
         if self.unique_sequences:
