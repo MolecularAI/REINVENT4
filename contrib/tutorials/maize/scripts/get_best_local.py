@@ -16,9 +16,9 @@ suppl = Chem.SDMolSupplier(filename)
 
 for mol in suppl:
     if mol:
-        rmsd = float(mol.GetProp("minimizedRMSD"))
+        cnn_score = float(mol.GetProp("CNNscore"))
 
-        if rmsd < 0.5:
+        if cnn_score > 0.9:
             score = float(mol.GetProp("CNNaffinity"))
             name = mol.GetProp("_Name")
             mols[name].append((score, mol))
