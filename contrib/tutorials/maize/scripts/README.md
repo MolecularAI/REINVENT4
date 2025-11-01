@@ -12,4 +12,4 @@ Steps
 
 ## Get best Gnina poses
 - Script: `get_best_local.py gnina_local.sdf best_pose_local.sdf`
-- All poses with `minimizedRMSD` < 0.5 and highest `CNNaffinity` for each molecule
+- All poses with `CNNscore` > 0.9 and highest `CNNaffinity` for each molecule
