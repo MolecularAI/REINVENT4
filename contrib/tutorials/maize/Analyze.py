@@ -78,17 +78,15 @@ class ShowLigand:
         self.mols = mols
         self.id = None
         
-        ligand_dropdown = widgets.Dropdown(
+        self.ligand_dropdown = widgets.Dropdown(
             options=[(self.mols[i].GetProp("SMILES"), i) for i, m in enumerate(self.mols)],
             description="SMILES:",
             style={'description_width': 'initial'},
         )
 
-        widgets.interactive_output(self.show_ligand, {"index": ligand_dropdown})
+        widgets.interactive_output(self._show_ligand, {"index": self.ligand_dropdown})
 
-        display(widgets.VBox([ngl_view, ligand_dropdown]))
-
-    def show_ligand(self, index):
+    def _show_ligand(self, index):
         if self.id is not None:
             try:
                 self.view.remove_component(self.id)
@@ -97,6 +95,9 @@ class ShowLigand:
     
         self.id = self.view.add_component(self.mols[index])
         self.view[1].add_ball_and_stick
+        
+    def show(self):
+        display(widgets.VBox([self.view, self.ligand_dropdown]))        
 
 
 # %% [markdown]
@@ -192,5 +193,6 @@ ngl_view.add_representation('ball+stick', selection='CA')
 #ngl_view.add_representation('surface', selection='protein')
 
 sl = ShowLigand(ngl_view, best.Mol)
+sl.show()
 
 # %%
