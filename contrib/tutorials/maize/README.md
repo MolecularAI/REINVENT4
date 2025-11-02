@@ -16,6 +16,10 @@ The Maize workflow manager needs a global configuration file which maps executab
 
 All tutorial runs use an intricate scoring setup which combines rule-of-5/Veber rules and group counts with docking.  Protein structures have been prepared with Schrodinger Maestro (the [HiQBind Dataset](https://figshare.com/articles/dataset/BioLiP2-Opt_Dataset/27430305) may be a viable alternative).  A script `prep.sh` outlines how to convert the input PDB to the required formats for AutoDock GPU.
 
+### Visualisation and Analysis
+
+Two notebooks, `Analyze.py` and `WFViz.py`, are provided for basic analysis and workflow visualisation.  Both need to be converted to notebook format e.g. with `jupytext -o Analyze.ipynb Analyze.py`.
+
 ### AutoDock GPU workflow
 
 REINVENT passes the currently sampled SMILES to the workflow which undergo ligand preparation with Gypsum-DL.  In case Gypsum-DL fails (in about 5-10% of cases), RDKit takes over and adds hydrogens by simple valence checks.  The 3D structures are then passed to AutoDock GPU which returns the docking score to REINVENT for each of the original SMILES.  A separate branch of the workflow extracts and stores the best pose from docking.
@@ -26,7 +30,7 @@ Three runs with results (CSV, poses) are provided using the _de novo_ Reinvent p
 
 ### 1DB5
 
-Runs REINVENT docking to 1DB5 to demonstrate how to use Maize with REINVENT.
+Runs REINVENT docking to 1DB5 to demonstrate how to use Maize with REINVENT.  Some worked-out results are provided an can be explored with the notebook.
 
 ### 6G5J
 
