@@ -1,0 +1,50 @@
+run_type = "staged_learning"
+device = "cuda:0"
+tb_logdir = "tb_stage2"
+json_out_config = "_stage2.json"
+
+
+[parameters]
+
+use_checkpoint = false
+
+prior_file = "/usr/local/src/MolecularAI/REINVENT4/priors/reinvent.prior"
+agent_file = "stage1.chkpt"
+
+summary_csv_prefix = "stage2"
+
+batch_size = 50
+randomize_smiles = false
+
+
+[learning_strategy]
+
+type = "dap"
+sigma = 128
+rate = 0.0001
+
+
+[diversity_filter]
+
+type = "IdenticalMurckoScaffold"
+bucket_size = 10
+minscore = 0.7
+minsimilarity = 0.5
+
+
+[inception]
+
+memory_size = 50
+sample_size = 10
+
+
+[[stage]]
+termination = "simple"
+max_score = 1.0
+max_steps = 600
+
+chkpt_file = 'stage2.chkpt'
+
+[stage.scoring]
+type = "geometric_mean"
+filename = "stage2_scoring.toml"

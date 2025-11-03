@@ -1,0 +1,142 @@
+# AutoDock GPU
+# ============
+#
+# Runs docking with AutoDockGrPOU (with a REINVENT interface)
+#
+
+name: AutoDockGPU
+level: info
+
+nodes:
+- name: rnv_smiles_in
+  type: ReinventEntry
+- name: preplig
+  type: Gypsum
+- name: adgpu
+  type: AutoDockGPU
+- name: rnv_out
+  type: ReinventExit
+- name: void
+  type: Void
+- name: isocopy
+  type: Copy
+- name: bestisomerfilter
+  type: BestIsomerFilter
+- name: save_best_pose
+  type: SaveSingleLibrary
+
+
+
+channels:
+- sending:
+    rnv_smiles_in: out
+  receiving:
+    preplig: inp
+- sending:
+    preplig: out
+  receiving:
+    adgpu: inp
+- sending:
+    adgpu: out
+  receiving:
+    isocopy: inp
+- sending:
+    isocopy: out
+  receiving:
+    rnv_out: inp
+- sending:
+    isocopy: out
+  receiving:
+    bestisomerfilter: inp
+- sending:
+    bestisomerfilter: out
+  receiving:
+    save_best_pose: inp
+- sending:
+    rnv_smiles_in: out_metadata
+  receiving:
+    void: inp
+- sending:
+    adgpu: out_scores
+  receiving:
+    void: inp   
+
+parameters:
+
+# DO NOT TOUCH: required input parameters
+- name: inp
+  map:
+  - rnv_smiles_in: data
+- name: out
+  map:
+  - rnv_out: data
+- name: scores_only
+  value: false
+  map:
+  - adgpu: scores_only
+- name: strict
+  value: false
+  map:
+  - adgpu: strict
+
+# Gpysum (optional)
+- name: num_variants  # optional
+  map:
+  - preplig: n_variants  # int
+- name: thoroughness  # optional
+  map:
+  - preplig: thoroughness  # int
+- name: pH_range  # optional
+  map:
+  - preplig: ph_range  # list(float, float)
+- name: num_jobs  # optional
+  map:
+  - preplig: n_jobs  # int
+
+# Autodock GPU
+- name: grid_file  # mandatory
+  map:
+  - adgpu: grid_file  # str
+- name: ref_ligand  # optional
+  map:
+  - adgpu: ref_ligand  # str
+- name: seed  # optional
+  map:
+  - adgpu: seed  # int
+- name: heuristics  # optional
+  map:
+  - adgpu: heuristics  # int
+- name: heurmax  # optional
+  map:
+  - adgpu: heurmax  # int
+- name: num_runs  # optional
+  map:
+  - adgpu: nrun  # int
+- name: population_size  # optional
+  map:
+  - adgpu: population_size  # int
+- name: local_search_iterations  # optional
+  map:
+  - adgpu: lsit # int
+- name: atom_mapping  # optional
+  map:
+  - adgpu: derivtypes  # dict
+- name: constraints  # optional
+  map:
+  - adgpu: constraints  # bool
+
+# BestIsomerFilter
+- name: score_tag  # optional
+  map:
+  - bestisomerfilter: score_tag   # str
+
+# SaveSingleLibrary
+- name: save_best_pose_file
+  map:
+  - save_best_pose: file
+
+# REINVENT
+- name: tag
+  value: energy
+  map:
+  - rnv_out: tag

@@ -1,0 +1,29 @@
+parameter_file boron-silicon-atom_par.dat
+npts 52 52 48
+gridfld 6G5J.maps.fld
+spacing 0.375
+receptor_types HD C A N NA OA F P SA S Cl Br I Mg Ca Mn Fe Zn
+ligand_types HD C A N NA OA F P SA S Cl CL Br BR I Si B
+receptor 6G5J.pdbqt
+gridcenter -4.613 21.174 -30.468
+smooth 0.500
+map 6G5J.HD.map
+map 6G5J.C.map
+map 6G5J.A.map
+map 6G5J.N.map
+map 6G5J.NA.map
+map 6G5J.OA.map
+map 6G5J.F.map
+map 6G5J.P.map
+map 6G5J.SA.map
+map 6G5J.S.map
+map 6G5J.Cl.map
+map 6G5J.CL.map
+map 6G5J.Br.map
+map 6G5J.BR.map
+map 6G5J.I.map
+map 6G5J.Si.map
+map 6G5J.B.map
+elecmap 6G5J.e.map
+dsolvmap 6G5J.d.map
+dielectric -42.000

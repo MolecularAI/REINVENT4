@@ -1,0 +1,54 @@
+# Global configuration for maize
+
+# Temporary files are stored in scatch
+scratch = "/tmp"
+packages = [
+    "maize.steps.mai",
+    "maize.graphs.mai"
+]
+
+# Default SLURM options (not needed in the tutorial)
+[batch]
+system = "slurm"
+queue = "default"
+walltime = "12:00:00"
+max_jobs = 12
+
+# Environment variables (not needed in the tutorial)
+#[environment]
+#SCHROD_LICENSE_FILE = ""
+#OE_LICENSE = ""
+
+# Step-specific settings
+[gypsum]  # needed for tutorial
+commands.gypsum = "/home/me/miniforge3/envs/maize-dev/bin/run-gypsum-dl"
+
+[autodockgpu]  # needed for tutorial
+commands.autodock_gpu = "/usr/local/bin/autodock_gpu_128wi"
+
+# other examples: fill in as needed but not needed in the tutorial
+[vina]
+commands.vina = "/usr/local/bin/vina"
+
+[vinascore]
+commands.vina = "/usr/local/bin/vina"
+
+[vinaflex]
+commands.vina = "/usr/local/bin/vina"
+
+[gnina]
+commands.gnina = "/usr/local/bin/gnina.1.3.2"
+
+[preparegrid]
+commands.prepare_receptor = "prepare_receptor"
+commands.autogrid = "autogrid4"
+scripts.write_gpf.interpreter = "python"
+scripts.write_gpf.location = "prepare_gpf.py"
+
+[preparepdbqt]
+commands.prepare_receptor = "/usr/local/bin/prepare_receptor"
+
+[qptunapredict]
+scripts.qptuna-predict.interpreter = "/data/miniforge3/envs/reinvent4/bin/python"
+scripts.qptuna-predict.location = "qsartuna-predict"
+
