@@ -12,7 +12,8 @@ This tutorial provides an overview on how to use the [Maize](https://github.com/
 
 ## Tutorials
 
-The Maize workflow manager needs a global configuration file which maps executables and scripts, allows setting up environent variables and slurm (neither used in this tutorial), etc.  The actural workflow is provided in a YAML file.  Visualisation of the workflow can be done through the provided notebook (convert from Python to notebook with jypytext) and the ready PDF file.  The workflow is largely controlled through setting parameters in the REINVENT TOML file.
+The Maize workflow manager needs a global configuration file which maps executables and scripts, allows setting up environent variables and slurm (neither used in this tutorial), etc.  The actural workflow is provided in a YAML file.  Visualisation of the workflow can be done through the provided notebook (convert from Python to notebook with jypytext)  The workflow is largely controlled through setting parameters in the REINVENT TOML file.
+![AutoDock GPU workflow](autodock_gpu.svg)
 
 All tutorial runs use an intricate scoring setup which combines rule-of-5/Veber rules and group counts with docking.  Protein structures have been prepared with Schrodinger Maestro (the [HiQBind Dataset](https://figshare.com/articles/dataset/BioLiP2-Opt_Dataset/27430305) may be a viable alternative).  A script `prep.sh` outlines how to convert the input PDB to the required formats for AutoDock GPU.
 
