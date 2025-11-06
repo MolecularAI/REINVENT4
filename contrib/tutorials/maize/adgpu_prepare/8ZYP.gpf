@@ -1,0 +1,27 @@
+parameter_file boron-silicon-atom_par.dat
+npts 56 66 46
+gridfld 8ZYP.maps.fld
+spacing 0.375
+receptor_types HD C A N NA OA F P SA S Cl Br I Mg Ca Mn Fe Zn
+ligand_types HD C A N NA OA F P SA S Cl Br I Si B
+receptor 8ZYP.pdbqt
+gridcenter 143.607 153.736 132.607
+smooth 0.500
+map 8ZYP.HD.map
+map 8ZYP.C.map
+map 8ZYP.A.map
+map 8ZYP.N.map
+map 8ZYP.NA.map
+map 8ZYP.OA.map
+map 8ZYP.F.map
+map 8ZYP.P.map
+map 8ZYP.SA.map
+map 8ZYP.S.map
+map 8ZYP.Cl.map
+map 8ZYP.Br.map
+map 8ZYP.I.map
+map 8ZYP.Si.map
+map 8ZYP.B.map
+elecmap 8ZYP.e.map
+dsolvmap 8ZYP.d.map
+dielectric -42.000

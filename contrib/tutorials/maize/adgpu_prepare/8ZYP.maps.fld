@@ -1,0 +1,60 @@
+# AVS field file
+#
+# AutoDock Atomic Affinity and Electrostatic Grids
+#
+# Created by autogrid4 4.2.7.x.2019-07-11.
+#
+#SPACING 0.375
+#NELEMENTS 56 66 46
+#CENTER 143.607 153.736 132.607
+#MACROMOLECULE 8ZYP.pdbqt
+#GRID_PARAMETER_FILE 8ZYP.gpf
+#
+ndim=3			# number of dimensions in the field
+dim1=57			# number of x-elements
+dim2=67			# number of y-elements
+dim3=47			# number of z-elements
+nspace=3		# number of physical coordinates per point
+veclen=17		# number of affinity values at each point
+data=float		# data type (byte, integer, float, double)
+field=uniform		# field type (uniform, rectilinear, irregular)
+coord 1 file=8ZYP.maps.xyz filetype=ascii offset=0
+coord 2 file=8ZYP.maps.xyz filetype=ascii offset=2
+coord 3 file=8ZYP.maps.xyz filetype=ascii offset=4
+label=HD-affinity	# component label for variable 1
+label=C-affinity	# component label for variable 2
+label=A-affinity	# component label for variable 3
+label=N-affinity	# component label for variable 4
+label=NA-affinity	# component label for variable 5
+label=OA-affinity	# component label for variable 6
+label=F-affinity	# component label for variable 7
+label=P-affinity	# component label for variable 8
+label=SA-affinity	# component label for variable 9
+label=S-affinity	# component label for variable 10
+label=Cl-affinity	# component label for variable 11
+label=Br-affinity	# component label for variable 12
+label=I-affinity	# component label for variable 13
+label=Si-affinity	# component label for variable 14
+label=B-affinity	# component label for variable 15
+label=Electrostatics	# component label for variable 16
+label=Desolvation	# component label for variable 17
+#
+# location of affinity grid files and how to read them
+#
+variable 1 file=8ZYP.HD.map filetype=ascii skip=6
+variable 2 file=8ZYP.C.map filetype=ascii skip=6
+variable 3 file=8ZYP.A.map filetype=ascii skip=6
+variable 4 file=8ZYP.N.map filetype=ascii skip=6
+variable 5 file=8ZYP.NA.map filetype=ascii skip=6
+variable 6 file=8ZYP.OA.map filetype=ascii skip=6
+variable 7 file=8ZYP.F.map filetype=ascii skip=6
+variable 8 file=8ZYP.P.map filetype=ascii skip=6
+variable 9 file=8ZYP.SA.map filetype=ascii skip=6
+variable 10 file=8ZYP.S.map filetype=ascii skip=6
+variable 11 file=8ZYP.Cl.map filetype=ascii skip=6
+variable 12 file=8ZYP.Br.map filetype=ascii skip=6
+variable 13 file=8ZYP.I.map filetype=ascii skip=6
+variable 14 file=8ZYP.Si.map filetype=ascii skip=6
+variable 15 file=8ZYP.B.map filetype=ascii skip=6
+variable 16 file=8ZYP.e.map filetype=ascii skip=6
+variable 17 file=8ZYP.d.map filetype=ascii skip=6
