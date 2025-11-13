@@ -1,5 +1,25 @@
+New in REINVENT 4.7
+===================
+
+For details see CHANGELOG.md.
+
+* SynthSense: enhanced version of CAZP
+* Integration of Syngenta's PUMAS scoring subsystem
+* iSIM support for TL
+* Variants of penalty functions and RND-based filter
+* Inception for all generators
+* Multi-score support in maize scoring component
+* Improvements to ring precedence scoring component
+* Fix in CamSol scoring component
+* Intel XPU support
+* Safer SMILES checks
+* Removed JSON configuration examples and add conversion script
+
+
 New in REINVENT 4.6
 ===================
+
+For details see CHANGELOG.md.
 
 * All priors now on [Zenodo](https://doi.org/10.5281/zenodo.15641296)
 * CAZP scoring component: interface to AiZynthFinder
@@ -117,6 +137,8 @@ For details see CHANGELOG.md.
 
 New in REINVENT 4.0
 ===================
+
+For details see CHANGELOG.md.
 
 * Combined RL/CL (staged learning)
 * New transformer model for molecule optimization

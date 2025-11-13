@@ -24,16 +24,7 @@ name = "Alerts"  # user chosen name for output
 # no weight because as a filter it will be applied globally
 
 params.smarts = [
-    "[*;r8]",
-    "[*;r9]",
-    "[*;r10]",
-    "[*;r11]",
-    "[*;r12]",
-    "[*;r13]",
-    "[*;r14]",
-    "[*;r15]",
-    "[*;r16]",
-    "[*;r17]",
+    "[*;r{8-17}]",
     "[#8][#8]",
     "[#6;+]",
     "[#16][#16]",

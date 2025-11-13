@@ -43,6 +43,7 @@ def test_complevel_params():
         {
             "external_process": {
                 "params": {  # Component-level params.
+                    "executable": "path/to/executable1",
                     "args": "--loglevel DEBUG",
                 },
                 "endpoint": [
@@ -50,17 +51,39 @@ def test_complevel_params():
                         "name": "Endpoint1",
                         "weight": 0.5,
                         "params": {  # Endpoint-level params.
-                            "executable": "path/to/executable1",
-                            "property": "Property 1",
+                            "property": "Property 1",   # Endpoint key.
                         },
                     },
                     {
                         "name": "Endpoint2",
                         "weight": 0.7,
-                        "params": {
-                            "executable": "/dev/null",
-                            "args": "--loglevel INFO",
-                            "property": "Property 2",
+                        "params": {  # Endpoint-level params.
+                            "property": "Property 2",  # Endpoint key.
+                        },
+                    },
+                ],
+            }
+        },
+        {
+            "external_process": {
+                "params": {  # Component-level params.
+                    "executable": "path/to/executable1",
+                    "args": "",
+                    "property": "Property 1",  # Will be overridden by endpoint.
+                },
+                "endpoint": [
+                    {
+                        "name": "Endpoint1",
+                        "weight": 0.5,
+                        "params": {  # Endpoint-level params.
+                            # Property not overridden here, will use component-level.
+                        },
+                    },
+                    {
+                        "name": "Endpoint2",
+                        "weight": 0.7,
+                        "params": {  # Endpoint-level params.
+                            "property": "Property 2",  # Overridden by endpoint.
                         },
                     },
                 ],
@@ -70,12 +93,21 @@ def test_complevel_params():
 
     components_dict = get_components(components)
 
-    assert len(components_dict.scorers) == 2
+    assert len(components_dict.scorers) == 3
     assert "qed" == components_dict.scorers[0].component_type
+
     assert "externalprocess" == components_dict.scorers[1].component_type
     name, comp, transform, weights = components_dict.scorers[1].params
-    assert comp.executables == ["path/to/executable1", "/dev/null"]
-    assert comp.args == ["--loglevel DEBUG", "--loglevel INFO"]
+    assert comp.executable == "path/to/executable1"  # The first one.
+    # The first one, from Endpoint1, which inherited from component-level.
+    assert comp.args == "--loglevel DEBUG"
+
+    assert "externalprocess" == components_dict.scorers[2].component_type
+    name, comp, transform, weights = components_dict.scorers[2].params
+    assert comp.properties == [
+        "Property 1", # From Endpoint1, inherited from component-level.
+        "Property 2", # From Endpoint2, overridden by endpoint.
+    ]
 
     assert not components_dict.filters
     assert not components_dict.penalties

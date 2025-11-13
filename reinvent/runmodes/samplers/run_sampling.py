@@ -144,7 +144,9 @@ def run_sampling(
         if model_type == "Pepinvent":
             filler_headers, filler_columns = PepinventSampler.split_fillers(sampled)
             HEADERS[model_type] += tuple(filler_headers)
-            records = zip(sampled.smilies, states, sampled.items1, sampled.items2, nlls, *filler_columns)
+            records = zip(
+                sampled.smilies, states, sampled.items1, sampled.items2, nlls, *filler_columns
+            )
     elif model_type == "Mol2Mol":
         if parameters.unique_molecules:
             mask_idx = np.nonzero(state == SmilesState.VALID)[0]

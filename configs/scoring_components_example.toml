@@ -1,6 +1,5 @@
 ## this file shows and example of most scoring components available
 ## with appropratie transforms
-version = 4
 run_type = "scoring"
 json_out_config = "scoring_all_test_config.json"
 
@@ -247,19 +246,10 @@ params.use_chirality = false
 [[scoring.component]]
 [scoring.component.custom_alerts]
 [[scoring.component.custom_alerts.endpoint]]
-name = "custom alerts"
+name = "minimal custom alerts"
 weight = 1
 params.smarts = [
-    "[*;r8]",
-    "[*;r9]",
-    "[*;r10]",
-    "[*;r11]",
-    "[*;r12]",
-    "[*;r13]",
-    "[*;r14]",
-    "[*;r15]",
-    "[*;r16]",
-    "[*;r17]",
+    "[*;r{8-17}]",
     "[#8][#8]",
     "[#6;+]",
     "[#16][#16]"
@@ -291,7 +281,13 @@ MMP = 0.5
 [[scoring.component.RingPrecedence.endpoint]]
 name = "Precedence of ring systems in database "  # user chosen name for output
 params.database_file =  "PATH_TO_DATABASE.json"
-params.nll_method = "total" # or max
+params.make_generic = false
+params.nll_method = "max" # or max
+transform.type = "reverse_sigmoid"
+transform.high = 9
+transform.low = 6
+transform.k = 0.5
+
 
 # Physics/structure/ligand based components:
 [[scoring.component]]

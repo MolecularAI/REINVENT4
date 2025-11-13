@@ -26,6 +26,16 @@ class SampledSequencesDTO:
     output: str  # SMILES
     nll: float  # negative log likelihood
 
+    # dunders for numpy.unique
+    def __lt__(self, other):
+        me = self.input + self.output
+        them = other.input + other.output
+
+        return me < them
+
+    def __hash__(self):
+        return hash(self.input + self.output)
+
 
 @dataclass
 class LinkInventBatchDTO:

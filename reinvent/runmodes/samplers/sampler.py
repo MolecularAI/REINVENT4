@@ -63,6 +63,8 @@ def remove_duplicate_sequences(
     We keep this for backward compatibility with R3.
 
     :param sampled: sampled results from the model
+    :param is_reinvent: whether the model is Reinvent
+    :param is_mol2mol: whether the model is Mol2Mol
     """
 
     orig_len = len(sampled.output)
@@ -116,6 +118,20 @@ def validate_smiles(
             if not failed:
                 canonical_smiles = Chem.MolToSmiles(mol, canonical=True, isomericSmiles=isomeric)
 
+                # NOTE: Canonicalization above may still lead to invalid SMILES when later read
+                #       with RDKit (e.g. scoring components), so we use this defensive check here
+                try:
+                    canonical_smiles = Chem.MolToSmiles(
+                        Chem.MolFromSmiles(canonical_smiles),
+                        canonical=True,
+                        isomericSmiles=isomeric,
+                    )
+                except Exception:  # FIXME: not sure what to catch here
+                    logger.warning(f"Sanitized SMILES {canonical_smiles} found to be invalid.")
+                    smilies_states.append(SmilesState.INVALID)
+                    validated_smilies.append(sampled_smiles)
+                    continue
+
                 if canonical_smiles in seen_before:
                     smilies_states.append(SmilesState.DUPLICATE)
                 else:
@@ -129,6 +145,9 @@ def validate_smiles(
             else:
                 validated_smilies.append(sampled_smiles)
                 smilies_states.append(SmilesState.INVALID)
+
+                # typically it is kekuleization that fails but log all failures
+                logger.info(f"Sampled SMILES {sampled_smiles} failed to sanitize.")
         else:
             validated_smilies.append(sampled_smiles)
             smilies_states.append(SmilesState.INVALID)

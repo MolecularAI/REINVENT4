@@ -26,7 +26,7 @@ class ComponentType:
 class ComponentData:
     component_type: str
     params: Tuple
-    cache: Dict
+    cache: Optional[Dict]
 
 
 def get_components(components: list[dict[str, dict]], use_pumas: bool = False) -> ComponentType:
@@ -125,10 +125,16 @@ def get_components(components: list[dict[str, dict]], use_pumas: bool = False) -
             component_params = ComponentParams(**collected_params)
 
         component = Component(component_params)
+
+        cache=defaultdict(dict)
+
+        if hasattr(component, "no_cache") and component.no_cache:
+            cache = None
+        
         data = ComponentData(
             component_type=component_type_lookup,
             params=(names, component, transforms, weights),
-            cache=defaultdict(dict),
+            cache=cache,
         )
 
         if Component.__component == "filter":

@@ -10,11 +10,11 @@ import tempfile
 import yaml
 
 from reinvent_plugins.components.run_program import run_command
-from reinvent_plugins.components.cazp.aizynthfinder_config import (
+from reinvent_plugins.components.synthsense.aizynthfinder_config import (
     ensure_custom_stock_is_inchikey,
     prepare_config,
 )
-from reinvent_plugins.components.cazp.parameters import ComponentLevelParameters
+from reinvent_plugins.components.synthsense.parameters import ComponentLevelParameters
 
 logger = logging.getLogger("reinvent")
 

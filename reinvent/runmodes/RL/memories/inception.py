@@ -9,273 +9,182 @@ replaced by newly created SMILES during optimization.
 
 from __future__ import annotations
 
-__all__ = ["inception_filter", "Inception"]
+__all__ = ["Inception"]
 import random
-from dataclasses import dataclass, field
-from typing import Tuple, List, Callable, TYPE_CHECKING
+from enum import IntEnum
 import logging
 
 import torch
 import numpy as np
 
-if TYPE_CHECKING:
-    from reinvent.models import ModelAdapter
-
-
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class InceptionMemory:
-    """Simple memory for inception. The data structure is specific to inception.
+class Order(IntEnum):
+    """Storage order"""
+
+    SAMPLED_SMILES = 0
+    SCORES = 1
+    LLS = 2
+
+
+class Inception:
+    """Implementation of a replay memory.
 
     The class takes in a list of SMILES, a list of scores and a list of
     likelihoods.  Internally a single list holds this data in transposed form.
     The data will be kept in sorted order (by scores) and only the top
-    scorers are stored.
+    scorers are stored and returned an so acts as a filter.
     """
 
-    maxsize: int
-    storage: List[Tuple] = field(default_factory=list, init=False)
-    deduplicate: bool = True  # for R3 backward compatibility: False
-    _smilies: list = field(default_factory=set, repr=False, init=False)  # internal SMILES memory
-
-    def add(self, smilies: List[str], scores: np.ndarray, lls: np.ndarray):
-        """Add lists to memory in sorter order"""
-
-        _smilies = []
-        _scores = []
-        _lls = []
-
-        if self.deduplicate:  # global deduplication, R3 did local
-            for smiles, score, ll in zip(smilies, scores, lls):
-                if smiles not in self._smilies:
-                    _smilies.append(smiles)
-                    _scores.append(score)
-                    _lls.append(ll)
-
-            self._smilies.update(_smilies)
-        else:
-            _smilies = smilies
-            _scores = scores
-            _lls = lls
-
-        self._to_internal_order(_smilies, _scores, _lls)
-
-    def sample(self, num_samples):
-        """Return a number of random samples"""
-
-        if not self.storage:
-            return None
-
-        sample_size = min(num_samples, len(self.storage))
-        seq = random.sample(self.storage, sample_size)
-
-        return tuple(self._from_internal_order(seq))
-
-    def _to_internal_order(self, smilies, scores, lls):
-        """Keep internal order
-
-        The SMILES, score and likelihood are stored in transposed form and
-        are kept in sorted order.  Sorting is done on the scores with highest
-        score first.
-        """
-
-        transpose = zip(smilies, scores, lls)
-        self.storage.extend(transpose)
-        seq = sorted(self.storage, key=lambda row: row[1], reverse=True)
-
-        logger.debug(f"Inception top score: {self.storage[0]}")
-
-        self.storage = seq[: self.maxsize]
-
-    def _from_internal_order(self, seq):
-        """Return original order"""
-
-        # TODO: see if this can be solved more elegantly
-        transpose = list(zip(*seq))
-        transpose[1] = np.array(transpose[1])
-        transpose[2] = np.array(transpose[2])
-
-        return transpose
-
-    def __len__(self):
-        return len(self.storage)
-
-
-class Inception:
     def __init__(
         self,
         memory_size: int,
         sample_size: int,
-        smilies: List[str],
+        seed_smilies: list[str],
         scoring_function,
         prior,
-        deduplicate: bool,
     ):
         """Inception setup
 
-        :param memory_size: memory size
-        :param sample_size:
-        :param smilies: list of SMILES
-        :param scoring_function:
-        :param prior:
+        :param memory_size: SMILES memory size
+        :param sample_size: number of SMILES to be sampled
+        :param seed_smilies: list of seed SMILES
+        :param scoring_function: scoring function for inception memory ordering
+        :param prior: prior model
         """
+
+        self.maxsize = memory_size
         self.sample_size = sample_size
-        self.smilies = smilies
+        self.seed_smilies = seed_smilies
         self.scoring_function = scoring_function
         self.prior = prior
 
-        valid_smiles_idx = self._validate_smiles_to_prior_vocabulary(smilies)
+        self.storage = []  # stores maxsize of data for smiles
+        self._storage_smilies = set()
+        self.step = 0
 
-        if len(valid_smiles_idx) < len(smilies):
-            invalid_smilies = []
+    def __call__(
+        self,
+        orig_smilies: np.ndarray,
+        scores: torch.Tensor,
+        prior_lls: torch.Tensor,
+    ) -> tuple:
+        """Compute the top scoring molecules.
 
-            for i, smi in enumerate(smilies):
-                if i not in valid_smiles_idx:
-                    invalid_smilies.append(smi)
-
-            raise RuntimeError(
-                f"Found smilies incompatible with the prior: {', '.join(invalid_smilies)}"
-            )
-
-        self.memory = InceptionMemory(maxsize=memory_size, deduplicate=deduplicate)
-
-    def _validate_smiles_to_prior_vocabulary(self, smilies: List[str]) -> list:
-        """Return the list of SMILES indices compatibles with the prior vocabulary
-
-        : param smiles: list of SMILES
+        :param orig_smilies: the current SMILES directly sampled from the model, needed for
+                             deduplication only
+        :param scores: the aggregation scores from scoring, needed for ordering
+        :param prior_lls: thr prior's log likelihoods, stored for reward function
+        :returns: the SMILES, scores and prior NLLs form the top scoring SMILES in the
+                  inception memory
         """
-        valid_idx = []
-        for i, smi in enumerate(smilies):
-            if smi is None:
-                continue
-            all_tokens_in_vocabulary = True
-            for token in self.prior.tokenizer.tokenize(smi):
-                all_tokens_in_vocabulary = all_tokens_in_vocabulary and (
-                    token in self.prior.vocabulary.tokens()
-                )
-            if all_tokens_in_vocabulary:
-                valid_idx.append(i)
-        return valid_idx
 
-    def _load_smilies_to_memory(self):
-        if len(self.smilies):
-            # NOTE: we assume that the SMILES have been standardized earlier
-            standardized = [smiles for smiles in self.smilies if smiles is not None]
+        self.add(orig_smilies, scores, prior_lls)
+        self.step += 1
 
-            # FIXME: validate in caller, check for duplicates
-            filter_mask = np.full(len(standardized), True, dtype=bool)
+        return self.sample()
 
-            score = self.scoring_function(self.smilies, filter_mask, filter_mask)
+    def add(self, orig_smilies: np.ndarray, scores: torch.Tensor, lls: torch.Tensor) -> None:
+        """Add new data to the memory
 
-            # TODO: likelihood_smiles() expects different data types
-            #       depending on model e.g. List[str] for Reinvent and
-            #       List[SampledSequencesDTO] for Libinvent
-            likelihood = self.prior.likelihood_smiles(self.smilies)
-            lls = -likelihood.detach().cpu().numpy()
+        :param orig_smilies: SMILES to add to storage
+        :param scores: scores to add to storage
+        :param lls: likelihoods to add to storage
+        """
 
-            self.memory.add(standardized, score.total_scores, lls)
+        self._to_internal_order(orig_smilies, scores, lls)
 
-    def update_scoring_function(self, scoring_functiom) -> None:
+    def sample(self) -> tuple | None:
+        """Return a random sample of given size from the top scorers."""
+
+        if not self.storage:
+            return None
+
+        sample_size = min(self.sample_size, len(self.storage))
+        seq = random.sample(self.storage, sample_size)
+        sampled = self._from_internal_order(seq)
+
+        return sampled
+
+    def update(self, scoring_functiom) -> None:
         """Update the scoring function
+
+        Supports setup with multiple scoring functions.  Also reads in
+        the seed SMILES.
+        NOTE: must run before first use of the inception memory.
 
         :param scoring_functiom: the new scoring function
         """
 
         self.scoring_function = scoring_functiom
-        self._load_smilies_to_memory()
+        self._load_seed_smilies_to_memory()
 
-    def add(self, smiles: List[str], scores: torch.Tensor, lls: torch.Tensor) -> None:
-        """Add new data to the memory"""
-        scores = scores.detach().cpu().numpy()
-        lls = lls.detach().cpu().numpy()
+    def _load_seed_smilies_to_memory(self) -> None:
+        if len(self.seed_smilies):
+            # NOTE: we assume that the SMILES have been standardized earlier
+            standardized = np.array([smiles for smiles in self.seed_smilies if smiles is not None])
+            filter_mask = np.full(len(standardized), True, dtype=bool)
 
-        valid_smiles_idx = self._validate_smiles_to_prior_vocabulary(smiles)
-        if len(valid_smiles_idx) < len(smiles):
-            logger.warning(
-                f"Found {len(smiles)-len(valid_smiles_idx):d} of {len(smiles):d} smilies incompatible with the prior for the inception filter"
-            )
+            result = self.scoring_function(standardized, filter_mask, filter_mask)
+            scores = result.total_scores
 
-        if len(valid_smiles_idx) > 0:
-            smiles = [smiles[i] for i in valid_smiles_idx]
-            scores = scores[valid_smiles_idx]
-            lls = lls[valid_smiles_idx]
+            # TODO: likelihood_smiles() expects different data types
+            #       depending on model e.g. List[str] for Reinvent and
+            #       List[SampledSequencesDTO] for Libinvent
+            likelihood = self.prior.likelihood_smiles(self.seed_smilies)
+            lls = -likelihood.cpu().numpy()
 
-            self.memory.add(smiles, scores, lls)
+            self.add(standardized, scores, lls)
+            self._storage_smilies.update(standardized)  # NOTE: writing to global variable!
 
-    # FIXME: return type
-    def sample(self):
-        """Return a random sample of given size from the top scorers."""
+    def _to_internal_order(
+        self, orig_smilies: np.ndarray, scores: torch.Tensor, lls: torch.Tensor
+    ) -> None:
+        """Keep internal order
 
-        sampled = self.memory.sample(self.sample_size)
+        The score and likelihood are stored in transposed form and are kept
+        in sorted order.  Sorting is done on the scores with highest score
+        first.
+        """
 
-        if sampled:
-            return sampled
+        storage = []
 
-        return None
+        if self.step < 1:
+            uniq, idx = np.unique(orig_smilies, return_index=True)
 
+            if len(uniq) < len(orig_smilies):
+                logger.debug(f"Inception: duplicated SMILES found in first batch")
 
-def inception_filter(
-    agent: ModelAdapter,
-    loss: torch.Tensor,
-    prior_lls: torch.Tensor,
-    sigma: float,
-    inception: Inception,
-    scores: np.ndarray,
-    mask_idx: np.ndarray,
-    smilies: List[str],
-    RL_strategy: Callable,
-) -> torch.Tensor:
-    """Compute the loss from the random SAMPLE taken from the inception memory
+            orig_smilies = uniq
+            scores = scores[idx]
+            lls = lls[idx]
 
-    :param agent: agent model
-    :param loss: current loss
-    :param prior_lls: thr prior's log likelihoods
-    :param sigma: score amplifier
-    :param inception: the inception object
-    :param scores: the aggregation scores from scoring
-    :param mask_idx: indices of valid SMILES
-    :param smilies: the current SMILES
-    :param RL_strategy: reward function to call
-    :returns: updated loss
-    """
+        for orig_smiles, score, ll in zip(orig_smilies, scores, lls):
+            if orig_smiles not in self._storage_smilies:
+                storage.append((orig_smiles, score, ll))
 
-    result = inception.sample()
+        self.storage.extend(storage)
+        seq = sorted(self.storage, key=lambda row: row[Order.SCORES], reverse=True)
+        self.storage = seq[: self.maxsize]
+        self._storage_smilies = set([e[Order.SAMPLED_SMILES] for e in self.storage])
 
-    # FIXME: assume this only happens for the first call when no seed SMILES
-    #        have been provided
-    #        as the scores are zero, besiaclly discard the first batch
-    if not result:
-        _smilies = np.array(smilies)[mask_idx]
-        nsmilies = len(_smilies)
-        _scores = torch.full((nsmilies,), 0.0)
-        _prior_lls = torch.full((nsmilies,), 99.0)
+        if logger.parent.level <= logging.DEBUG and self.storage:
+            first = self.storage[0]
+            smiles = first[Order.SAMPLED_SMILES]
+            score = first[Order.SCORES]
+            ll = first[Order.LLS]
+            logger.debug(f"Inception top score: {smiles} {score:.5f} {ll:.2f}")
 
-        inception.add(_smilies, _scores, _prior_lls)
+    def _from_internal_order(self, seq) -> tuple:
+        """Return original order
 
-        return loss
+        Order is: SMILES, originally sampled SMILES, scores, LLs
+        """
 
-    inception_smilies, inception_scores, inception_prior_lls = result
-    total_loss = loss
+        transpose = tuple(zip(*seq))
 
-    if len(inception_smilies) > 0:
-        agent_lls = -agent.likelihood_smiles(inception_smilies)
+        return transpose
 
-        inception_loss, _ = RL_strategy(
-            agent_lls,
-            torch.tensor(inception_scores).to(agent_lls),
-            torch.tensor(inception_prior_lls).to(agent_lls),
-            sigma,
-        )
-
-        total_loss = torch.cat((loss, inception_loss), 0)
-
-    # filter for valid SMILES
-    _smilies = np.array(smilies)[mask_idx]
-    _scores = scores[mask_idx]
-    _prior_lls = prior_lls[mask_idx]
-
-    inception.add(_smilies, _scores, _prior_lls)
-
-    return total_loss
+    def __len__(self) -> int:
+        return len(self.storage)

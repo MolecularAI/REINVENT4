@@ -31,13 +31,12 @@ The code is written in Python 3 (>= 3.10).  The list of
 dependencies can be found in the repository (see also Installation below).
 
 A GPU is not strictly necessary but strongly recommended for performance
-reasons especially for transfer learning and model training.  Reinforcement
-learning (RL) requires the computation of scores where most scoring
-components run on the CPU.  Thus, a GPU is less important for RL (depending
-on how much time is spent on the CPU).
+reasons especially for transfer learning and model training.  For Reinforcement
+learning (RL) a GPU is less important becayse most scoring components run on
+the CPU.
 
 Note that if no GPU is installed in your computer the code will run on the
-CPU automatically.  REINVENT [supports](https://pytorch.org/get-started/locally/) NVIDIA GPUs and also some AMD GPUs.
+CPU automatically.  REINVENT [supports](https://pytorch.org/get-started/locally/), as of this writing, NVIDIA GPUs, some AMD GPUs and Intel ARC.
 For most design tasks a memory of about 8 GiB for both CPU main memory and
 GPU memory is sufficient.
 
@@ -45,16 +44,19 @@ GPU memory is sufficient.
 Installation
 ------------
 
-1. Clone this Git repository.
-1. Create a Python environment and install a compatible version of Python, for example with [Conda](https://conda.io/projects/conda/en/latest/index.html) (other virtual environments like Docker, pyenv, or the system package manager work too).
+1. Clone this Git repository. Add `--depth 1` for only the newest version as the repository has grown quite large over time.
+    ```shell
+    git clone git@github.com:MolecularAI/REINVENT4.git  # --depth 1
+    ```
+1. Create a Python environment and install a compatible version of Python, for example with [Conda](https://conda.io/projects/conda/en/latest/index.html) or other virtual environments.
     ```shell
     conda create --name reinvent4 python=3.10
     conda activate reinvent4
     ```
-1. Change directory to the repository and install all dependencies.  You will need to set the right processor type, see [PyTorch versions](https://pytorch.org/get-started/locally/). Linux supports CUDA (e.g. "cu124"), ROCm (e.g. "rocm6.2.4")  and CPU. Windows supports CUDA and CPU.  MacOSX only supports CPU (use "mac" as processor type!). Optionally, you can select dependencies "openeye" (for ROCS; you need to obtain your own license), "isim" for similarity tracking in TensorBoard or "none" to skip all.  The default is installation of "all" dependencies.  See the help text from the install script for details.
+1. Change directory to the repository to install all dependencies.  You will need to set the right processor type, see [PyTorch versions](https://pytorch.org/get-started/locally/). Linux supports CUDA (e.g. "cu126"), AMD ROCm (e.g. "rocm6.4"), Intel XPU ("xpu") and CPU. Windows supports CUDA, XPU and CPU.  MacOSX only supports CPU (use "mac" as processor type!). Optionally, you can select dependencies "openeye" (for ROCS; you need to obtain your own license), "isim" for similarity tracking in TensorBoard or "none" to skip all.  The default is installation of "all" dependencies.  See the help text from the install script for details.
     ```shell
     python install.py --help
-    python install.py cu124  # or rocm6.2.4, cpu, mac, etc.
+    python install.py cu126  # or rocm6.4, xpu, cpu, mac, etc.
     ```
 1. Test the tool. The installer has added a script `reinvent` to your PATH.
     ```shell
@@ -79,23 +81,25 @@ This writes logging information to the file `sampling.log`.  If you wish to writ
 this to the screen, leave out the `-l sampling.log` part. `sampling.toml` is the
 configuration file.  The main format is [TOML](https://toml.io/en/) as it tends to be more user friendly.  JSON and YAML are supported too.
 
-Sample configuration files for all run modes are
-located in `configs/` in the repository. File paths in these files would need to be
-adjusted to your local installation.  You will need to choose a model and the
-appropriate run mode depending on the research problem you are trying to address.
-There is additional documentation in `configs/` in several `*.md` files with
-instructions on how to configure the TOML file.  Internal priors can be referenced with a
-dot notation (see `reinvent/prior_registry.py`).
+Sample TOML configuration files for all run modes are located in `configs/` in
+the repository.  File paths in these files need to be adjusted to your local
+installation.  You will need to choose a model and the appropriate run mode
+depending on the research problem you are trying to address.  There is
+additional documentation in `configs/` in several `*.md` files with
+instructions on how to configure the TOML file.  Internal priors can be
+referenced with a dot notation (see `reinvent/prior_registry.py`).
 
 
 Tutorials / `Jupyter` notebooks
 -------------------------------
 
-Basic instructions can be found in the comments in the config examples in `configs/`.
+Basic instructions can be found in the comments in the config examples in
+`configs/`.
 
-Notebooks are provided in the `notebooks/` directory.  Please note that we
-provide the notebooks in jupytext "light script" format.  To work with the light
-scripts you will need to install jupytext.  A few other packages will come in handy too.
+Notebooks are provided in the `notebooks/` directory and contributed notebooks
+and tutorials in `contrib/`.  Please note that we provide the notebooks in
+jupytext "light script" format.  To work with the light scripts you will need
+to install jupytext.  A few other packages will come in handy too.
 
 ```shell
 pip install jupytext mols2grid seaborn

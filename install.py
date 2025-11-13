@@ -16,10 +16,14 @@ PYTORCH_BASE_URL = "https://download.pytorch.org/whl"
 
 
 def main(args):
-    packages = args.optional_dependencies.split(",")
+    packages = args.optional_dependencies
 
     extra_dependencies = None
     openeye_url = []
+
+    if "none" in packages and "all" in packages:
+        print("Cannot have both 'none' and 'all' as packages")
+        exit(1)
 
     if "none" in packages:
         extra_dependencies = ""
@@ -48,7 +52,9 @@ def main(args):
     final_cmd = list(filter(None, cmd))
 
     print(" ".join(final_cmd))
-    sp.run(final_cmd)
+
+    if not args.dry_run:
+        sp.run(final_cmd)
 
 
 def parse_command_line():
@@ -68,9 +74,10 @@ def parse_command_line():
         "-d",
         "--optional-dependencies",
         metavar="PKGS",
-        #       choices=OPTIONAL_DEPENDENCIES,
+        choices=OPTIONAL_DEPENDENCIES,
         default="all",
-        help="Optional dependencies, comma separated, no spaces",
+        nargs="+",
+        help="optional dependencies, separated by space",
     )
 
     parser.add_argument(
@@ -80,6 +87,11 @@ def parse_command_line():
         help="editable install",
     )
 
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="do not install",
+    )
     return parser.parse_args()
 
 

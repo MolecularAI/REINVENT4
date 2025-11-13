@@ -3,6 +3,124 @@
 This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 
 
+## [4.7.14] 2025-11-12
+
+### Added
+
+- Variants of penalty functions and a RND-based filter type
+￼
+
+## [4.7.13] 2025-11-12
+
+### Added
+
+- SynthSense as CAZP replacement
+
+
+## [4.7.12] 2025-11-06
+
+### Added
+
+- version information in --help
+
+
+## [4.7.11] 2025-11-03
+
+### Changed
+
+- Maize step counter starts at 1
+
+### Removed
+
+- Maize does not pass on names anymore (are not used in ReinventEntry)
+
+
+## [4.7.10] 2025-10-31
+
+### Added
+
+- iSIM support for TL
+
+
+## [4.7.9] 2025-10-24
+
+### Fixed
+
+- Saver, conservative SMILES check to avoid later problems in scoring components
+
+
+## [4.7.8] 2025-10-17
+
+### Fixed
+
+- Torch's CPU interface is not the same as for the GPU e.g. get\_device\_name() does not exist for the CPU
+
+
+## [4.7.7] 2025-10-10
+
+### Added
+
+- Support reporting on XPU architetures
+
+
+## [4.7.6] 2025-10-07
+
+### Added
+
+- No cache feature for scoring components e.g. CAZP in some settings
+
+
+## [4.7.5] 2025-10-07
+
+### Changed
+
+- New install procedure using a Python script to construct pip command line
+
+### Removed
+
+- JSON configuration files
+
+### Added
+
+- Simple script to convert TOML to JSON
+- CAZP support files
+
+
+## [4.7.4] 2025-10-07
+
+### Fixed
+
+- Wrong str converion in inception
+
+
+## [4.7.3] 2025-10-07
+
+### Fixed
+
+- Tests for RDKit 2025 
+
+
+## [4.7.2] 2025-10-03
+
+### Added
+
+- Multi-score support for maize
+
+
+## [4.7.1] 2025-10-02
+
+### Added
+
+- Metadata and QoL improvements to ring precedence scoring component
+
+
+## [4.7.0] 2025-09-19
+
+### Added
+
+- Inception for all generators
+
+
 ## [4.6.27] 2025-08-28
 
 ### Fixed

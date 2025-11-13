@@ -47,19 +47,44 @@ class RingPrecedence:
     Scoring component based on Pat Walter's ring extraction code
     Estimate the (negative log) likelihood of the ring systems in a molecule
     based on empirical probabilities from a database file.
-    Database file should deseriaize to a dictionary
+    Database file should deseriaize to a dictionary containing two dictionaries:
+        - "rings": maps specific ring SMILES to NLL values
+        - "generic_rings": maps generic ring SMILES to NLL values
+
+    Parameters:
+        - database_file: Path to the database file containing NLL values.
+        - nll_method: Scoring method, either "total" (sum of NLLs for all rings) or "max" (maximum NLL among rings).
+        - make_generic: use generic rings (all atom/bond types removed); otherwise, uses the full smiles
+    Returns:
+        - scores: A numpy array of NLL scores for each molecule.
+        - metadata: A dictionary containing "highest_nll_ring", the ring with the highest NLL for each molecule.
+
+
+    Example database format:
 
     {
     rings: {ring_1_smiles:nll_1, ring_2_smiles:nll_2},
     generic_rings: {generic_ring_1_smiles:nll_1, generic_ring_2_smiles:nll_2}
      }
-    Eg. from CHEMBL
+    E.g. from CHEMBL
     {"rings": {"c1ccccc1": 0.9884668635576631, "c1ccncc1": 2.9117327924945817,...},
     "generic_rings": {"C1CCCCC1": 0.7977199282489262, "C1CCCC1": 1.7240993251931773...}
     }
 
+    Parameters:
+        - database_file: Path to the database file containing NLL values.
+        - nll_method: Scoring method, either "total" (sum of NLLs for all rings) or "max" (maximum NLL among rings).
+        - make_generic: If True, uses generic ring representations for scoring; otherwise, uses specific rings.
 
+    Returns:
+        - scores: A numpy array of NLL scores for each molecule.
+        - metadata: A dictionary containing "highest_nll_ring", the ring with the highest NLL for each molecule.
 
+    Example database format:
+    {
+        "rings": {"c1ccccc1": 0.98, "c1ccncc1": 2.91, ...},
+        "generic_rings": {"C1CCCCC1": 0.79, "C1CCCC1": 1.72, ...}
+    }
     """
 
     def __init__(self, params: Parameters):
@@ -68,7 +93,8 @@ class RingPrecedence:
         self.nll_method = params.nll_method[0]
 
     def __call__(self, smilies: List[str]) -> ComponentResults:
-        return ComponentResults(self._compute_scores(smilies))
+        empirical_ring_nlls, metadata = self._compute_scores(smilies)
+        return ComponentResults(empirical_ring_nlls, metadata=metadata)
 
     @molcache
     def _compute_scores(self, mols: List[Mol]) -> np.array:
@@ -82,20 +108,23 @@ class RingPrecedence:
             nll_dictionary = self.database["generic_rings"]
         else:
             nll_dictionary = self.database["rings"]
-        print(all_rings)
-        if self.nll_method == "total":
-            empirical_ring_nlls = np.array(
-                [
-                    np.sum([compute_ring_nll(ring, nll_dictionary) for ring in rings])
-                    for rings in all_rings
-                ]
-            )
-        elif self.nll_method == "max":
-            empirical_ring_nlls = np.array(
-                [
-                    np.max([compute_ring_nll(ring, nll_dictionary) for ring in rings])
-                    for rings in all_rings
-                ]
-            )
+        ## compute empirical nll for each ring in each molecule and also log the highest nll ring for each molecule
+        empirical_ring_nll_scores = []
+        highest_nll_rings = []
+        for rings in all_rings:
+            empirical_ring_nlls = [compute_ring_nll(ring, nll_dictionary) for ring in rings]
+            if empirical_ring_nlls:
+                max_nll = np.max(empirical_ring_nlls)
+                max_ring = rings[np.argmax(empirical_ring_nlls)]
+            else:
+                max_nll = None
+                max_ring = None
+            if self.nll_method == "total":
+                empirical_ring_nll_scores.append(np.sum(empirical_ring_nlls))
+            elif self.nll_method == "max":
+                empirical_ring_nll_scores.append(max_nll)
+            highest_nll_rings.append(max_ring)
 
-        return [empirical_ring_nlls]
+        empirical_ring_nll_scores = np.array(empirical_ring_nll_scores)
+
+        return [empirical_ring_nll_scores], {"highest_nll_ring": highest_nll_rings}

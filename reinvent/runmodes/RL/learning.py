@@ -28,8 +28,8 @@ except ImportError:
 from .reports import RLTBReporter, RLCSVReporter, RLRemoteReporter, RLReportData
 from reinvent.runmodes.RL.data_classes import ModelState
 from reinvent.models.model_factory.sample_batch import SmilesState
+from reinvent.models.model_factory.model_adapter import SampledSequencesDTO
 from reinvent.utils import get_reporter
-from reinvent_plugins.normalizers.rdkit_smiles import normalize
 
 if TYPE_CHECKING:
     from reinvent.runmodes.samplers import Sampler
@@ -81,7 +81,8 @@ class Learning(ABC):
 
         self.sampling_model = sampling_model
 
-        self.seed_smilies = smilies
+        self.smiles_memory = set()  # inception, diversity filter
+        self.input_smilies = smilies
         self.distance_threshold = distance_threshold
 
         self.rdkit_smiles_flags = rdkit_smiles_flags
@@ -129,7 +130,9 @@ class Learning(ABC):
         self.start_time = time.time()
 
         for step in range(self.max_steps):
-            self.sampled = self.sampling_model.sample(self.seed_smilies)
+            self.sampled = self.sampling_model.sample(self.input_smilies)
+            self.smiles_memory.update(self.sampled.smilies)  # NOTE: global -> only update here!
+
             self.invalid_mask = np.where(self.sampled.states == SmilesState.INVALID, False, True)
             self.duplicate_mask = np.where(
                 self.sampled.states == SmilesState.DUPLICATE, False, True
@@ -150,9 +153,15 @@ class Learning(ABC):
                     results.total_scores, results.smilies, df_mask, self.sampled
                 )
 
-            # FIXME: check for NaNs
-            #        inception filter
-            agent_lls, prior_lls, augmented_nll, loss = self.update(results)
+            if self.prior.model_type == "Reinvent":
+                orig = self.sampled.output
+            else:
+                orig = []
+
+                for inp, outp, nll in zip(self.sampled.input, self.sampled.output, self.sampled.nlls):
+                    orig.append(SampledSequencesDTO(inp, outp, nll))
+
+            agent_lls, prior_lls, augmented_nll, loss = self.update(results, orig)
 
             state_dict = self._state.as_dict()
             self._state_info.update(state_dict)
@@ -220,56 +229,34 @@ class Learning(ABC):
         return results
 
     @abstractmethod
-    def update(self, score):
+    def update(self, score, orig_smilies):
         """Apply the learning strategy.
 
         :params score: the score from self._score()
         """
 
-    def _update_common(self, results: ScoreResults):
+    def _update_common(self, results: ScoreResults, orig_smilies):
         """Common update for LibInvent and LinkInvent
 
         :param results: scoring results object
         :return: total loss
         """
 
-        result = self._state.agent.likelihood_smiles(self.sampled)
+        likelihood_dto = self._state.agent.likelihood_smiles(self.sampled)
 
-        agent_nlls = result.likelihood
+        agent_nlls = likelihood_dto.likelihood
         prior_nlls = self.prior.likelihood_smiles(self.sampled).likelihood
 
         # NOTE: only Reinvent has inception at the moment, would need the
         #       SMILES
         return self.reward_nlls(
+            orig_smilies,
+            results.total_scores,
             agent_nlls,
             prior_nlls,
-            results.total_scores,
-            self.inception,
-            results.smilies,
-            self._state.agent,
             np.argwhere(self.sampled.states == SmilesState.VALID).flatten(),
-        )
-
-    def _update_common_transformer(self, results: ScoreResults):
-        """Common update for Transformer-based models, Mol2Mol, LibInvent and LinkInvent
-
-        :param results: scoring results object
-        :return: total loss
-        """
-        likelihood_dto = self._state.agent.likelihood_smiles(self.sampled)
-
-        prior_nlls = self.prior.likelihood_smiles(self.sampled).likelihood
-
-        agent_nlls = likelihood_dto.likelihood
-
-        return self.reward_nlls(
-            agent_nlls,
-            prior_nlls,
-            results.total_scores,
             self.inception,
-            results.smilies,
             self._state.agent,
-            np.argwhere(self.sampled.states == SmilesState.VALID).flatten(),
         )
 
     def _setup_reporters(self, tb_logdir):

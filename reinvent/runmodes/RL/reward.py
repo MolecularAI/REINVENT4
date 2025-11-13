@@ -12,14 +12,13 @@ __all__ = [
     "mascof_reinforce_strategy",
     "mauli_reinforce_strategy",
 ]
+
 import logging
-from typing import Callable, List, Tuple, Optional, TYPE_CHECKING
+from typing import Callable, Optional, TYPE_CHECKING
 import warnings
 
 import numpy as np
 import torch
-
-from reinvent.runmodes.RL.memories.inception import inception_filter
 
 if TYPE_CHECKING:
     from reinvent.models import ModelAdapter
@@ -39,7 +38,7 @@ warnings.formatwarning = format_warning
 ### The reward functions from the LibInvent paper
 def dap_strategy(
     agent_lls: torch.Tensor, scores: torch.Tensor, prior_lls: torch.Tensor, sigma: float
-) -> Tuple[torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor]:
     """
 
     :param agent_lls: agent (actor) log-likelihood
@@ -178,20 +177,21 @@ class RLReward:
 
     def __call__(
         self,
+        orig_smilies: list[str],
+        scores: np.ndarray,
         agent_nlls: torch.Tensor,
         prior_nlls: torch.Tensor,
-        scores: torch.Tensor,
+        mask_idx: np.ndarray,
         inception: Optional[Inception],
-        smilies: List,
         agent: Optional[ModelAdapter],
-        mask_idx: np.ndarray = None,
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Entry point to run the learning strategy.
 
+        :param orig_smilies: originally sampled SMILES
+        :param scores: scores
         :param agent_nlls: agent (actor) NLLa
         :param prior_nlls: prior (critic) NLLs
-        :param scores: scores
-        :param smilies: list of SMILES needed for inception
+        :param mask_idx: indices of the valid SMILES, needed for inception
         :param inception: instance of the inception memory
         :param agent: the agent network model, needed for inception
         :returns: the negative log likelihoods for agent, prior and augmented, and the mean loss
@@ -213,18 +213,27 @@ class RLReward:
             self._sigma,
         )
 
-        if inception:
-            loss = inception_filter(
-                agent,
-                loss,
-                prior_lls,
-                self._sigma,
-                inception,
-                scores_nonnan,
-                mask_idx,
-                smilies,
-                self._strategy,
+        if inception is not None:
+            _orig_smilies, _scores, _prior_lls = inception(
+                np.array(orig_smilies)[mask_idx], scores_nonnan[mask_idx], prior_lls[mask_idx]
             )
+
+            # compute the agent NLLs for the _current_ state of the agent
+            lls = agent.likelihood_smiles(_orig_smilies)
+
+            if isinstance(lls, torch.Tensor):  # Reinvent
+                _agent_lls = -lls
+            else:  # all other models
+                _agent_lls = -lls.likelihood
+
+            inception_loss, _ = self._strategy(
+                _agent_lls,
+                torch.tensor(_scores).to(_agent_lls),
+                torch.tensor(_prior_lls).to(_agent_lls),
+                self._sigma,
+            )
+
+            loss = torch.cat((loss, inception_loss), 0)
 
         loss = loss.mean()
 

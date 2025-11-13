@@ -1,230 +1,21 @@
 """Multi-stage learning with RL"""
 
 from __future__ import annotations
-import os
 import logging
-from typing import List, TYPE_CHECKING
 
 import torch
 
 from reinvent.utils import setup_logger, CsvFormatter, config_parse, get_tokens_from_vocabulary
 from reinvent.runmodes import Handler, RL, create_adapter
 from reinvent.runmodes.setup_sampler import setup_sampler
-from reinvent.runmodes.RL import intrinsic_penalty, learning, terminators, memories
-from reinvent.runmodes.RL.data_classes import WorkPackage, ModelState
+from reinvent.runmodes.RL.data_classes import ModelState
 from reinvent.runmodes.utils import disable_gradients
-from reinvent.scoring import Scorer
+from .setup import create_packages, setup_diversity_filter, setup_intrinsic_penalty, setup_inception, setup_reward_strategy
 from .validation import RLConfig
-
-if TYPE_CHECKING:
-    from reinvent.runmodes.RL import terminator_callable
-    from reinvent.models import ModelAdapter
-    from .validation import (
-        SectionDiversityFilter,
-        SectionLearningStrategy,
-        SectionInception,
-        SectionStage,
-        SectionIntrinsicPenalty,
-    )
 
 logger = logging.getLogger(__name__)
 
 TRANSFORMERS = ["Mol2Mol", "LinkinventTransformer", "LibinventTransformer", "Pepinvent"]
-
-
-def setup_diversity_filter(config: SectionDiversityFilter, rdkit_smiles_flags: dict):
-    """Setup of the diversity filter
-
-    Basic setup of the diversity filter memory.  The parameters are from a
-    dict, so the keys (parameters) are hard-coded here.
-
-    :param config: config parameter specific to the filter
-    :param rdkit_smiles_flags: RDKit flags for canonicalization
-    :return: the set up diversity filter
-    """
-
-    if config is None or not hasattr(config, "type"):
-        return None
-
-    diversity_filter = getattr(memories, config.type)
-
-    logger.info(f"Using diversity filter {config.type}")
-
-    return diversity_filter(
-        bucket_size=config.bucket_size,
-        minscore=config.minscore,
-        minsimilarity=config.minsimilarity,
-        penalty_multiplier=config.penalty_multiplier,
-        rdkit_smiles_flags=rdkit_smiles_flags,
-    )
-
-
-def setup_intrinsic_penalty(
-    config: SectionIntrinsicPenalty,
-    device: torch.device,
-    prior_model_file_path: str,
-    rdkit_smiles_flags: dict,
-):
-    """Setup of the intrinsic penalty
-
-    Basic setup of the intrinsic penalty memory. The parameters are from a
-    dict, so the keys (parameters) are hard-coded here.
-
-    :param config: config parameter specific to the filter
-    :param rdkit_smiles_flags: RDKit flags for canonicalization
-    :param device: device to run any intrinsic reward model on
-    :param prior_model_file_path: path to prior model file
-    :return: the set up diversity filter
-    """
-
-    if config is None or not hasattr(config, "type"):
-        return None
-
-    diversity_filter = getattr(intrinsic_penalty, config.type)
-
-    logger.info(f"Using intrinsic penalty {config.type}")
-
-    return diversity_filter(
-        penalty_function=config.penalty_function,
-        bucket_size=config.bucket_size,
-        minscore=config.minscore,
-        learning_rate=config.learning_rate,
-        device=device,
-        prior_model_file_path=prior_model_file_path,
-        rdkit_smiles_flags=rdkit_smiles_flags,
-    )
-
-
-def setup_reward_strategy(config: SectionLearningStrategy, agent: ModelAdapter):
-    """Setup the Reinforcement Learning reward strategy
-
-    Basic parameter setup for RL learning including the reward function. The
-    parameters are from a dict, so the keys (parameters) are hard-coded here.
-
-    DAP has been found to be the best choice, see https://doi.org/10.1021/acs.jcim.1c00469.
-    SDAP seems to have a smaller learning rate while the other two (MAULI, MASCOF)
-    do not seem to bes useful at all.
-
-    :param config: the configuration
-    :param agent: the agent model network
-    :return: the set up RL strategy
-    """
-
-    learning_rate = config.rate
-    sigma = config.sigma  # determines how dominant the score is
-
-    reward_strategy_str = config.type
-
-    try:
-        reward_strategy = getattr(RL, f"{reward_strategy_str}_strategy")
-    except AttributeError:
-        msg = f"Unknown reward strategy {reward_strategy_str}"
-        logger.critical(msg)
-        raise RuntimeError(msg)
-
-    torch_optim = torch.optim.Adam(agent.get_network_parameters(), lr=learning_rate)
-    learning_strategy = RL.RLReward(torch_optim, sigma, reward_strategy)
-
-    logger.info(f"Using reward strategy {reward_strategy_str}")
-
-    return learning_strategy
-
-
-def setup_inception(config: SectionInception, prior: ModelAdapter):
-    """Setup inception memory
-
-    :param config: the config specific to the inception memory
-    :param prior: the prior network
-    :return: the set up inception memory or None
-    """
-
-    smilies = []
-    deduplicate = config.deduplicate
-    smilies_filename = config.smiles_file
-
-    if smilies_filename and os.path.exists(smilies_filename):
-        allowed_tokens = get_tokens_from_vocabulary(prior.vocabulary)
-        smilies = config_parse.read_smiles_csv_file(smilies_filename, 0, allowed_tokens)
-
-        if not smilies:
-            msg = f"Inception SMILES could not be read from {smilies_filename}"
-            logger.critical(msg)
-            raise RuntimeError(msg)
-        else:
-            logger.info(f"Inception SMILES read from {smilies_filename}")
-
-    if not smilies:
-        logger.info(f"No SMILES for inception. Populating from first sampled batch.")
-
-    if deduplicate:
-        logger.info("Global SMILES deduplication for inception memory")
-
-    inception = memories.Inception(
-        memory_size=config.memory_size,
-        sample_size=config.sample_size,
-        smilies=smilies,
-        scoring_function=None,
-        prior=prior,
-        deduplicate=deduplicate,
-    )
-
-    logger.info(f"Using inception memory")
-
-    return inception
-
-
-def create_packages(
-    reward_strategy: RL.RLReward, stages: List[SectionStage], rdkit_smiles_flags: dict
-) -> List[WorkPackage]:
-    """Create work packages
-
-    Collect the stage parameters and build a work package for each stage.  The
-    parameters are from a dict, so the keys (parameters) are hard-coded here.
-    Each stage can define its own scoring function.
-
-    :param reward_strategy: the reward strategy
-    :param stages: the parameters for each work package
-    :param rdkit_smiles_flags: RDKit flags for canonicalization
-    :return: a list of work packages
-    """
-    packages = []
-
-    for stage in stages:
-        chkpt_filename = stage.chkpt_file
-
-        scoring_function = Scorer(stage.scoring)
-
-        max_score = stage.max_score
-        min_steps = stage.min_steps
-        max_steps = stage.max_steps
-
-        terminator_param = stage.termination
-        terminator_name = terminator_param.lower().title()
-
-        try:
-            terminator: terminator_callable = getattr(terminators, f"{terminator_name}Terminator")
-        except KeyError:
-            msg = f"Unknown termination criterion: {terminator_name}"
-            logger.critical(msg)
-            raise RuntimeError(msg)
-
-        diversity_filter = None
-
-        if stage.diversity_filter:
-            diversity_filter = setup_diversity_filter(stage.diversity_filter, rdkit_smiles_flags)
-
-        packages.append(
-            WorkPackage(
-                scoring_function,
-                reward_strategy,
-                max_steps,
-                terminator(max_score, min_steps),
-                diversity_filter,
-                chkpt_filename,
-            )
-        )
-
-    return packages
 
 
 def run_staged_learning(
@@ -324,7 +115,7 @@ def run_staged_learning(
             device,
             prior_model_filename,
             rdkit_smiles_flags2,
-        )
+        )    
 
     if parameters.purge_memories:
         logger.info("Purging diversity filter memories after each stage")
@@ -333,11 +124,11 @@ def run_staged_learning(
 
     inception = None
 
-    # Inception only set up for the very first step
-    if config.inception and model_type == "Reinvent":
+    # Inception only set up here for the very first step
+    if config.inception:  # and model_type == "Reinvent":
         inception = setup_inception(config.inception, prior)
 
-    if not inception and model_type == "Reinvent":
+    if inception is None and model_type == "Reinvent":
         logger.warning("Inception disabled but may speed up convergence")
 
     packages = create_packages(reward_strategy, stages, rdkit_smiles_flags2)
@@ -395,8 +186,9 @@ def run_staged_learning(
                 intrinsic_penalty=intrinsic_penalty,
             )
 
-            if device.type == "cuda" and torch.cuda.is_available():
-                free_memory, total_memory = torch.cuda.mem_get_info()
+            if hasattr(torch, device.type):
+                gpu = getattr(torch, device.type)
+                free_memory, total_memory = gpu.mem_get_info()
                 free_memory //= 1024**2
                 used_memory = total_memory // 1024**2 - free_memory
                 logger.info(
@@ -406,8 +198,8 @@ def run_staged_learning(
             handler.out_filename = package.out_state_filename
             handler.register_callback(optimize.get_state_dict)
 
-            if inception:
-                inception.update_scoring_function(package.scoring_function)
+            if inception is not None:
+                inception.update(package.scoring_function)
 
             terminate = optimize(package.terminator)
             state = optimize.state

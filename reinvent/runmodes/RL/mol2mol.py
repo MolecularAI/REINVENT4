@@ -21,5 +21,5 @@ class Mol2MolLearning(Learning):
     def score(self):
         return _score(self)
 
-    def update(self, results: ScoreResults):
-        return self._update_common_transformer(results)
+    def update(self, results: ScoreResults, orig_smilies):
+        return self._update_common(results, orig_smilies)

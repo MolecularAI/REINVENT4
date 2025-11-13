@@ -1,4 +1,4 @@
-# This function is taken with minor modiifcaitons from Pat Walter's "Useful RDKit Utilites"
+# This function is taken with minor modiifcations from Pat Walter's "Useful RDKit Utilities"
 # https://github.com/PatWalters/useful_rdkit_utils, available under the MIT License, copied below
 # particularly https://github.com/PatWalters/useful_rdkit_utils/blob/master/useful_rdkit_utils/ring_systems.py
 # commit version c251860
@@ -31,7 +31,7 @@ from rdkit import Chem
 
 from rdkit import Chem
 from rdkit.Chem.Scaffolds.MurckoScaffold import MakeScaffoldGeneric
-
+from rdkit.Chem.rdchem import AtomKekulizeException, AtomValenceException
 
 def get_rings(mol):
     ring_system_finder = RingSystemFinder()
@@ -48,9 +48,12 @@ def make_rings_generic(rings):
             if ring == "linear":
                 generic_rings.append(ring)
             else:
-                generic_rings.append(
-                    Chem.MolToSmiles(MakeScaffoldGeneric(Chem.MolFromSmiles(ring)))
-                )
+                try:
+                    generic_rings.append(
+                        Chem.MolToSmiles(MakeScaffoldGeneric(Chem.MolFromSmiles(ring)))
+                    )
+                except AtomValenceException:
+                    print(f"Atom valence exception for ring {ring}, skipping")
 
         generic_rings = list(set(generic_rings))  # keep unique only as per RingSystemFinder
     return generic_rings
@@ -117,9 +120,12 @@ class RingSystemFinder:
                             atm.SetAtomicNum(1)
                         atm.SetIsotope(0)
                 # Convert explict Hs to implicit
-                frag = Chem.RemoveAllHs(frag)
-                frag = self.fix_bond_stereo(frag)
-                ring_system_list.append(frag)
+                try:
+                    frag = Chem.RemoveAllHs(frag)
+                    frag = self.fix_bond_stereo(frag)
+                    ring_system_list.append(frag)
+                except  AtomKekulizeException:
+                    print(f"Cannot kekulize molecule {Chem.MolToSmiles(mol)} frag: {frag}, skipping")
         return ring_system_list
 
     @staticmethod

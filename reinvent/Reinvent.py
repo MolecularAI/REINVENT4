@@ -119,12 +119,14 @@ def main(args: Any):
 
     actual_device = set_torch_device(args.device, device)
 
-    if actual_device.type == "cuda":
-        current_device = torch.cuda.current_device()
-        device_name = torch.cuda.get_device_name(current_device)
-        logger.info(f"Using CUDA device:{current_device} {device_name}")
+    if hasattr(torch, actual_device.type) and actual_device.type != "cpu":  # "cuda" (incl. ROCm) and "xpu"
+        gpu = getattr(torch, actual_device.type)
 
-        free_memory, total_memory = torch.cuda.mem_get_info()
+        current_device = gpu.current_device()
+        device_name = gpu.get_device_name(current_device)
+        logger.info(f"Using GPU device:{current_device} {device_name}")
+
+        free_memory, total_memory = gpu.mem_get_info()
         logger.info(
             f"GPU memory: {free_memory // 1024**2} MiB free, "
             f"{total_memory // 1024**2} MiB total"

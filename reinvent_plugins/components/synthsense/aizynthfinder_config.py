@@ -6,7 +6,7 @@ from typing import Tuple
 import pandas as pd
 import yaml
 
-from reinvent_plugins.components.cazp.parameters import ComponentLevelParameters
+from reinvent_plugins.components.synthsense.parameters import ComponentLevelParameters
 
 
 __ENV_NAME = "CAZP_PROFILES"

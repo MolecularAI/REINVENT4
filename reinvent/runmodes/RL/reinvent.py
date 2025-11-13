@@ -20,17 +20,18 @@ logger = logging.getLogger(__name__)
 class ReinventLearning(Learning):
     """Reinvent optimization"""
 
-    def update(self, results: ScoreResults):
+    def update(self, results: ScoreResults, orig_smilies):
         """Run the learning strategy"""
 
         agent_nlls = self._state.agent.likelihood_smiles(self.sampled.items2)
         prior_nlls = self.prior.likelihood_smiles(self.sampled.items2)
+
         return self.reward_nlls(
-            agent_nlls,  # agent NLL
-            prior_nlls,  # prior NLL
+            orig_smilies,
             results.total_scores,
-            self.inception,
-            results.smilies,
-            self._state.agent,
+            agent_nlls,
+            prior_nlls,
             np.argwhere(self.sampled.states == SmilesState.VALID).flatten(),
+            self.inception,
+            self._state.agent,
         )

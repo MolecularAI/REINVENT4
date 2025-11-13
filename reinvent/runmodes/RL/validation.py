@@ -52,7 +52,7 @@ class SectionInception(GlobalConfig):
     smiles_file: Optional[str] = None
     memory_size: int = 50
     sample_size: int = 10
-    deduplicate: bool = True
+    deduplicate: bool = True  # obsolete, True by default now
 
 
 class SectionStage(GlobalConfig):

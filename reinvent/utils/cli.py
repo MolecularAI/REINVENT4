@@ -11,12 +11,14 @@ import os
 from pathlib import Path
 import logging
 
+import torch
+
 from reinvent import version
 from reinvent.utils import config_parse
 
 RDKIT_CHOICES = ("all", "error", "warning", "info", "debug")
 LOGLEVEL_CHOICES = tuple(level.lower() for level in logging._nameToLevel.keys())
-VERSION_STR = f"{version.__progname__} {version.__version__} {version.__copyright__}"
+VERSION_STR = f"{version.__progname__} {version.__version__} {version.__copyright__} using PyTorch {torch.__version__}"
 OVERWRITE_STR = "Overwrites setting in the configuration file"
 
 

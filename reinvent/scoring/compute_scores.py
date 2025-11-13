@@ -55,9 +55,11 @@ def compute_component_scores(
     # this can occur for example in LinkInvent when multiple warheads generate the same linker
     smilies_to_score_indices, masked_scores_indices, cache_hits_indices = [], [], []
 
+    use_cache = cache is not None  # some components need the cache to be turned off
+
     for idx, (filter_flag, smiles) in enumerate(zip(filter_mask, smilies)):
         if filter_flag:
-            if smiles in cache.keys():
+            if use_cache and smiles in cache.keys():
                 cache_hits.append(smiles)
                 cache_hits_indices.append(idx)
             else:
@@ -101,16 +103,15 @@ def compute_component_scores(
             component_results=scoring_function(smilies_to_score), smiles=index_smiles_to_score
         )
 
-        # update cache
-        cache.update((smiles, component_results[smiles]) for smiles in index_smiles_to_score)
-
+        if use_cache:
+            cache.update((smiles, component_results[smiles]) for smiles in index_smiles_to_score)
     else:
         # in this case, there are no compounds to score. Create blank ComponentResults
         component_results = SmilesAssociatedComponentResults.create_from_scores(
             smiles=[], scores=[[]]
         )
 
-    if len(cache_hits) > 0:  # update the results
+    if use_cache and len(cache_hits) > 0:  # update the results
         for smiles in cache_hits:
             component_results.data[smiles] = cache[smiles]
 
@@ -148,8 +149,10 @@ def compute_transform(
 
     names, scoring_function, transforms, weights = params
 
+    cache = caches.get(component_type) if caches is not None else None
+
     component_results = compute_component_scores(
-        smilies, scoring_function, caches[component_type], valid_mask, index_smiles
+        smilies, scoring_function, cache, valid_mask, index_smiles
     )
 
     transformed_scores = []
@@ -168,6 +171,13 @@ def compute_transform(
         ),
         transforms,
     ):
+
+        # NOTE: The valid SMILES here are the molecules which are both valid
+        #       AND not duplicates i.e. duplicate (and invalid) SMILES in the
+        #       BATCH are scored as zero.  This is the same behaviour as in
+        #       REINVENT3 and earlier.  The duplicate handling is independent
+        #       of the diversity filter (DF) which scores ALL duplicates as
+        #       zero i.e. the DF acts globally.
         if use_pumas:
             # PUMAS Transforms operate on float64 so the transformed result may be slightly different to reinvent base scoring.
             if transform:

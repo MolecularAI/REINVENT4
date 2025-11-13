@@ -162,3 +162,27 @@ def test_compute_scores_duplicates_not_in_cache():
             ]
         ),
     )
+
+
+def test_compute_component_scores_with_index_smiles_and_duplicates():
+    smilies = ["CCO", "CCN", "CCO", "CCC"] # duplicates, e.g. same linkers in LinkInvent
+    index_smiles = ["CCON", "CCNN", "CCOO", "CCCC"]  # unique, representing full molecules
+    filter_mask = np.array([True, True, True, True])
+    cache = {}
+
+    component_results = compute_component_scores(
+        smilies, scoring_function, cache, filter_mask, index_smiles=index_smiles
+    )
+    np.testing.assert_almost_equal(
+        list(zip(*component_results.fetch_scores(index_smiles)))[0],
+        np.array(
+            [
+                46.069,
+                45.085,
+                46.069,
+                44.097,
+            ]
+        ),
+    )
+
+    assert set(component_results.data.keys()) == {"CCON", "CCNN", "CCOO", "CCCC"} # cehck all are scored

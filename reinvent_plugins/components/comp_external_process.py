@@ -12,7 +12,7 @@ import os
 import shlex
 import json
 from typing import List
-
+import logging
 import numpy as np
 from pydantic.dataclasses import dataclass
 
@@ -21,6 +21,8 @@ from .run_program import run_command
 from .add_tag import add_tag
 
 SKIP_EXEC = "/dev/null"
+
+logger = logging.getLogger("reinvent")
 
 
 @add_tag("__parameters")
@@ -50,6 +52,7 @@ class ExternalProcess:
 
     specific_parameters.executable = "/home/user/miniconda3/condabin/conda"
     specific_parameters.args = "run -n qptuna python predict.py"
+    specific_parameters.property = "predictions"
 
     And predict.py as
 
@@ -69,29 +72,54 @@ class ExternalProcess:
     """
 
     def __init__(self, params: Parameters):
-        self.executables = params.executable
 
-        if self.executables[0] == SKIP_EXEC:
-            raise ValueError(f"{__name__}: first endpoint executable must not be {SKIP_EXEC}")
+        self.executable = params.executable[0]
+        self.args = params.args[0]
 
-        self.args = params.args
+        # Ensure only one executable is used for all endpoints
+        for exe, arg in zip(params.executable, params.args):
+            if (exe, arg) != (self.executable, self.args):
+                raise ValueError(
+                    f"{__name__}: Only one executable and arguments per ExternalProcess scoring component is supported. "
+                    f"Got '{self.executable} {self.args}' and '{exe} {arg}'. "
+                    f"For multiple executables, separate them into multiple components."
+                )
+
         self.properties = params.property
-        self.number_of_endpoints = len(params.executable)
+        self.number_of_endpoints = len(self.properties)
 
-    def __call__(self, smilies: List[str]) -> np.array:
+    def __call__(self, smilies: List[str]) -> ComponentResults:
+
+        _executable = os.path.abspath(self.executable)
+        _args = shlex.split(self.args)
+        smiles_input = "\n".join(smilies)
+
+        result = run_command([_executable] + _args, input=smiles_input)
+        data = json.loads(result.stdout)
+
+        if "payload" not in data:
+            raise ValueError(
+                f"{__name__}: Stdout from {self.executable} does not contain 'payload': {result.stdout}"
+            )
+
+        payload = data["payload"]
+
         scores = []
+        for property in self.properties:
 
-        for executable, args, property in zip(self.executables, self.args, self.properties):
-            if executable != SKIP_EXEC:
-                _executable = os.path.abspath(executable)
-                _args = shlex.split(args)
-                smiles_input = "\n".join(smilies)
+            if property not in payload:
+                raise ValueError(
+                    f"{__name__}: Payload from {self.executable} does not contain '{property}': {payload}"
+                )
 
-                result = run_command([_executable] + _args, input=smiles_input)
+            # Extract property as scores.
+            scores.append(np.array(payload[property]))
 
-                data = json.loads(result.stdout)
+        # Extract all other keys as metadata (all keys in payload except the properties).
+        metadata = {k: v for k, v in payload.items() if k not in self.properties}
+        logger.debug(
+            f"{__name__}: Executed '{_executable} {self.args}' with {len(smilies)} SMILES, "
+            f"extracted properties: {self.properties}, metadata: {metadata}"
+        )
 
-            # '{"version": 1, "payload": {"predictions": [1, 2, 3, 4, 5]}}'
-            scores.append(np.array(data["payload"][property]))
-
-        return ComponentResults(scores)
+        return ComponentResults(scores, metadata=metadata)

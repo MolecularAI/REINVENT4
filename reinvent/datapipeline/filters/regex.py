@@ -32,7 +32,7 @@ SMILES_TOKENS_REGEX = re.compile(
 
 ELEMENT = re.compile(r"[A-Za-z]+")
 ISOTOPE = re.compile(r"\[\d+")
-ISOTOPE_EXTRACT = re.compile("[A-Za-z@+-]+\d*")
+ISOTOPE_EXTRACT = re.compile(r"[A-Za-z@+-]+\d*")
 STEREO = re.compile(r"\w+@{1,2}[H+-]?")
 ATOM_MAP = re.compile(r"[^[].*:\d+")
 

@@ -31,11 +31,7 @@ class LinkinventLearning(Learning):
 
         return results
 
-    def update(self, results: ScoreResults):
-        if self.prior.version == 1:  # RNN-based
-            return self._update_common(results)
-        elif self.prior.version == 2:  # Transformer-based
-            return self._update_common_transformer(results)
-
+    def update(self, results: ScoreResults, orig_smilies):
+        return self._update_common(results, orig_smilies)
 
 LinkinventTransformerLearning = LinkinventLearning
