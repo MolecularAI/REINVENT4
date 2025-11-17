@@ -162,7 +162,7 @@ name = "AutoDockGPU"
 weight = 5
 
 [component.Maize.endpoint.params]
-executable = "/home/kmll395/miniforge3/envs/maize-dev/bin/maize"
+executable = "/home/me/miniforge3/envs/maize-dev/bin/maize"
 workflow = "autodock_gpu.yaml"
 config = "maize_global_config.toml"
 log = "maize_adgpu_6G5J.log"

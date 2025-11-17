@@ -157,7 +157,7 @@ type = "reverse_sigmoid"
 [[component]]
 [component.Maize]
 
-params.executable = "/home/kmll395/miniforge3/envs/maize-dev/bin/maize"
+params.executable = "/home/me/miniforge3/envs/maize-dev/bin/maize"
 params.workflow = "autodock_gpu.yaml"
 params.config = "maize_global_config.toml"
 params.log = "maize_adg.log"
@@ -180,7 +180,7 @@ save_best_pose_file = "poses/best_pose_6G5J.sdf"
 [[component]]
 [component.Maize]
 
-params.executable = "/home/kmll395/miniforge3/envs/maize-dev/bin/maize"
+params.executable = "/home/me/miniforge3/envs/maize-dev/bin/maize"
 params.workflow = "autodock_gpu.yaml"
 params.config = "maize_global_config.toml"
 params.log = "maize_adg.log"

@@ -8,8 +8,8 @@ json_out_config = "_stage2.json"
 
 use_checkpoint = false
 
-prior_file = "/home/kmll395/usr/src/MolecularAI/reinvent_core/priors/libinvent_transformer_pubchem.prior"
-agent_file = "/home/kmll395/usr/src/MolecularAI/reinvent_core/priors/libinvent_transformer_pubchem.prior"
+prior_file = "/home/me/usr/src/MolecularAI/reinvent_core/priors/libinvent_transformer_pubchem.prior"
+agent_file = "/home/me/usr/src/MolecularAI/reinvent_core/priors/libinvent_transformer_pubchem.prior"
 smiles_file = "scaffold.smi"
 
 summary_csv_prefix = "stage2"
