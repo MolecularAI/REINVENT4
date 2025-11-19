@@ -7,7 +7,6 @@ from typing import Any
 import logging
 
 logger = logging.getLogger("reinvent")
-COMPATIBILITY_KEY = "scores"
 
 
 def create_extra_parameters(filename: str, parameters: dict[str, Any]) -> None:
@@ -46,7 +45,7 @@ def wait_for_output(filename: str, sleep_for: float = 3) -> dict:
     return data
 
 
-def parse_output(data: dict, key: str, compat_mode: bool) -> list[float]:
+def parse_output(data: dict, key: str) -> list[float]:
     """Parse JSON output from maize's ReinventEXit node
 
     The "scores" filed is either a dict for multiple scores or a list in
@@ -54,23 +53,24 @@ def parse_output(data: dict, key: str, compat_mode: bool) -> list[float]:
 
     :param data: the JSON dict
     :param key: the property (score) name
-    :param compat_mode: single score if true
     :returns: list of scores
     """
 
     logger.debug(f"JSON data from maize: {data}")
     logger.debug(f"{key=}")
-    logger.debug(f"{compat_mode=}")
 
     if "scores" not in data:
         raise ValueError(f"{__name__}: JSON file does not contain 'scores'")
 
-    if compat_mode:
-        scores = data[COMPATIBILITY_KEY]
-    else:
-        if key not in data["scores"]:
-            raise ValueError(f"{__name__}: JSON file does not contain scores {key}")
+    scores = data["scores"]
 
-        scores = data["scores"][key]
+    if isinstance(scores, list):  # compatibility mode
+        results = scores
+    else:  # dict
+        if key not in scores:
+            raise ValueError(f"{__name__}: JSON file does not contain score {key}")
 
-    return scores
+        logger.info(f"Known maize scores: {', '.join([key for key in scores])}")
+        results = scores[key]
+
+    return results

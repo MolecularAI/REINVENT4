@@ -142,7 +142,6 @@ from .utils import (
     prepare_input_json,
     wait_for_output,
     parse_output,
-    COMPATIBILITY_KEY,
 )
 
 
@@ -178,7 +177,7 @@ class Parameters:
     skip_on_failure: list[bool] = Field(default_factory=lambda: [True])
     pass_fragments: list[bool] = Field(default_factory=lambda: [False])
 
-    property: list[str] = Field(default_factory=lambda: [COMPATIBILITY_KEY])
+    property: list[str] = Field(default_factory=lambda: [""])
 
 
 CMD = "{exe} {config} --inp {inp} --out {out} --parameters {params}"
@@ -208,10 +207,8 @@ class Maize:
         self.number_of_endpoints = len(self.properties)
         self.smiles_type = "rdkit_smiles"
 
-        logger.info(f"Using maize executable {self.executable} with workflow "
-                    f"{self.workflow}")
-        logger.info(f"Requested maize score names: "
-                    f"{', '.join([p for p in self.properties])}")
+        logger.info(f"Using maize executable {self.executable} with workflow " f"{self.workflow}")
+        logger.info(f"Requested maize score names: " f"{', '.join([p for p in self.properties])}")
 
     @normalize_smiles
     def __call__(self, smilies: list[str]) -> np.array:
@@ -267,14 +264,7 @@ class Maize:
             data = wait_for_output(out_filename)
 
             for key in self.properties:
-                compat_mode = False
-
-                if self.number_of_endpoints == 1 and key == COMPATIBILITY_KEY:
-                    compat_mode = True
-                else:
-                    logger.info(f"Known maize scores: {', '.join([key for key in data['scores']])}")
-
-                endpoint_scores = parse_output(data, key, compat_mode)
+                endpoint_scores = parse_output(data, key)
 
                 # FIXME: The NaN to zero conversion here is to deal with docking
                 #        in case many/most/all docking fails.  Needs
@@ -282,4 +272,4 @@ class Maize:
                 scores = np.nan_to_num(np.array(endpoint_scores))
                 all_scores.append(scores)
 
-        return ComponentResults(scores=all_scores)
+        return ComponentResults(scores=all_scores, metadata={"Maize ID": data["names"]})

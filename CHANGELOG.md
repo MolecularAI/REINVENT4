@@ -3,6 +3,13 @@
 This follows the guideline on [keep a changelog](https://keepachangelog.com/)
 
 
+## [4.7.15] 2025-11-17
+
+### Change
+
+- More robust way to detect legacy JSON from Maize
+￼
+
 ## [4.7.14] 2025-11-12
 
 ### Added
