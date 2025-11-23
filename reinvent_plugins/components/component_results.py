@@ -157,10 +157,13 @@ class SmilesAssociatedComponentResults:
         # first, update all metadata names available
         metadata_names = self.get_metadata_names()
         metadata_collection = dict()
+
         for metadata_name in metadata_names:
             metadata_collection[metadata_name] = []
+
             for smile in smiles:
                 smile_metadata = self[smile].metadata
+
                 if metadata_name in smile_metadata.keys():
                     metadata_collection[metadata_name].append(str(smile_metadata[metadata_name]))
                 else:
@@ -170,4 +173,5 @@ class SmilesAssociatedComponentResults:
 
     def __getitem__(self, smiles: str) -> SmilesResult:
         """Retrieve all results data for a single smile strings"""
-        return self.data[smiles]
+
+        return self.data[smiles] if smiles in self.data else None
