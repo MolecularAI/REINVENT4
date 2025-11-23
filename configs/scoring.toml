@@ -13,7 +13,7 @@ output_csv = "scoring.csv"  # name of output CSV to write, optional
 [scoring]
 
 type = "geometric_mean"  # or arithmetic_mean
-parallel = false  # do not run scoring components in parallel
+parallel = 1  # number of cpus running in parallel
 
 [[scoring.component]]
 # Custom alerts if a filter of unwanted groups
