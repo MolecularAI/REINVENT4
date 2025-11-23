@@ -147,7 +147,6 @@ def compute_transform(
     component_results = compute_component_scores(
         smilies, scoring_function, cache, valid_mask, index_smiles
     )
-    logger.debug(f"{cache=}")
 
     transformed_scores = []
     # this loop is over multiple scores per component
@@ -156,10 +155,11 @@ def compute_transform(
         missing_scores = [smiles for smiles in index_smiles if smiles not in component_results.data]
     else:
         missing_scores = [smiles for smiles in smilies if smiles not in component_results.data]
+
     if missing_scores:
-        logger.debug(f"{component_results.data=}")
-        logger.warning(f"Missing scores for {component_type} for {missing_scores}")
-        #raise RuntimeError(f"Missing scores for {component_type} for {missing_scores}")
+        logger.debug(f"{cache=}")
+        logger.debug(f"{component_results.data.keys()=}")
+        raise RuntimeError(f"Missing scores for {component_type} for {missing_scores}")
 
     for scores, transform in zip(
         component_results.fetch_scores(
