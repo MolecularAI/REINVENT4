@@ -93,11 +93,6 @@ def compute_component_scores(
         index_smiles_to_score = smilies_to_score
         index_smiles_with_masked_scores = smiles_with_masked_scores
 
-    # debug statement here as invalids are passed in as "None" instead of smiles.
-    logger.debug(
-        f"Masked smilies for {type(scoring_function).__name__} are {smiles_with_masked_scores}"
-    )
-
     if len(smilies_to_score) > 0:
         component_results = SmilesAssociatedComponentResults(
             component_results=scoring_function(smilies_to_score), smiles=index_smiles_to_score
@@ -131,7 +126,7 @@ def compute_transform(
     component_type,
     params: Tuple,
     smilies: List[str],
-    caches: dict,
+    cache: dict,
     valid_mask: np.ndarray[bool],
     index_smiles: Optional[List[str]] = None,
     use_pumas: bool = False,
@@ -141,15 +136,13 @@ def compute_transform(
     :param component_type: type of the component
     :param params: parameters for the component
     :param smilies: list of SMILES
-    :param caches: the component's cache
+    :param cache: the component's cache
     :param valid_mask: mask for valid SMILES, i.e. false for invalid
     :param index_smiles: list of SMILES to index scores, used when the scored SMILES are fragments
     :returns: dataclass with transformed results
     """
 
     names, scoring_function, transforms, weights = params
-
-    cache = caches.get(component_type) if caches is not None else None
 
     component_results = compute_component_scores(
         smilies, scoring_function, cache, valid_mask, index_smiles
@@ -162,7 +155,10 @@ def compute_transform(
         missing_scores = [smiles for smiles in index_smiles if smiles not in component_results.data]
     else:
         missing_scores = [smiles for smiles in smilies if smiles not in component_results.data]
+
     if missing_scores:
+        logger.debug(f"{cache=}")
+        logger.debug(f"{component_results.data.keys()=}")
         raise RuntimeError(f"Missing scores for {component_type} for {missing_scores}")
 
     for scores, transform in zip(

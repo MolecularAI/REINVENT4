@@ -56,9 +56,6 @@ def parse_output(data: dict, key: str) -> list[float]:
     :returns: list of scores
     """
 
-    logger.debug(f"JSON data from maize: {data}")
-    logger.debug(f"{key=}")
-
     if "scores" not in data:
         raise ValueError(f"{__name__}: JSON file does not contain 'scores'")
 
