@@ -1,0 +1,10 @@
+{
+    "base_aizynthfinder_config": "config_synthsense.yml",
+    "custom_aizynth_command": "local_submitter.sh",
+    "stock_profiles":
+    {
+    },
+    "reactions_profiles":
+    {
+    }
+}

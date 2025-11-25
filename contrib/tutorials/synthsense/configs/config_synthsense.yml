@@ -1,0 +1,29 @@
+expansion:
+  uspto:
+    - uspto_model.onnx
+    - uspto_unique_templates_with_classes.csv.gz
+filter:
+  uspto: uspto_filter_model.onnx
+stock:
+  Enamine_BB: Enamine-FullCatalogue_EUR.csv
+
+scorer:
+  ReactionClassMembershipScorer:
+    in_set_score: 1.0
+    not_in_set_score: 0.1
+    reaction_class_set: [
+                        "3.1.1", # Bromo Suzuki coupling
+                        "2.1.1", # Amide Schotten-Baumann
+                        "1.3.7", # Chloro N-arylation
+                        ]
+  StockAvailabilityScorer:
+    default_score: 0.1
+    source_score:
+      Enamine_BB: 1.0
+
+search:
+  exclude_target_from_stock: false
+  iteration_limit: 40
+  max_transforms: 3
+  return_first: false
+  time_limit: 60
