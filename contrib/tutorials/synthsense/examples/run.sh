@@ -8,7 +8,7 @@
 #SBATCH --partition=cpu
 ################################################################################
 
-export HITINVENT_PROFILES="stocks_and_reactions_profiles.json"
+export CAZP_PROFILES="stocks_and_reactions_profiles.json"
 
 # Set up environment
 export PATH="miniforge3/envs/reinvent4/bin:$PATH"
