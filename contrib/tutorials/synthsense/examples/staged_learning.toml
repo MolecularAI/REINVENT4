@@ -1,0 +1,102 @@
+run_type = "staged_learning"
+device = "cpu"
+tb_logdir = "./logs/tb_logs"
+
+[parameters]
+use_checkpoint = false
+purge_memories = false
+prior_file = "REINVENT4/priors/reinvent.prior"
+agent_file = "REINVENT4/priors/reinvent.prior"
+batch_size = 128
+unique_sequences = true
+randomize_smiles = true
+
+[learning_strategy]
+type = "dap"
+sigma = 128
+rate = 0.0001
+
+[[stage]]
+chkpt_file = './checkpoints/RL1_basic_properties.chkpt'
+termination = "simple"
+max_score = 0.8
+min_steps = 1000
+max_steps = 1001
+
+[stage.scoring]
+type = "geometric_mean"
+
+[[stage.scoring.component]]
+[stage.scoring.component.QED]
+[[stage.scoring.component.QED.endpoint]]
+name = "QED"
+weight = 1
+
+[[stage.scoring.component]]
+[stage.scoring.component.SynthSense]
+[[stage.scoring.component.SynthSense.endpoint]]
+name = "SFScore"
+params.number_of_steps = 3
+params.reaction_step_coefficient = 0.9
+params.stock_profile  = "enamine_bb"
+params.reactions_profile = "SelectedReactions"
+params.time_limit_seconds = 60
+params.score_to_extract = "sfscore"
+weight = 1
+
+[[stage.scoring.component]]
+[stage.scoring.component.SynthSense]
+[[stage.scoring.component.SynthSense.endpoint]]
+name = "RRScore"
+params.number_of_steps = 2
+params.time_limit_seconds = 60
+params.stock_profile  = "enamine_bb"
+params.score_to_extract = "rrscore"
+params.reference_route_file = "reference_route_312_2110.json"
+transform.type = "ExponentialDecay"
+transform.k = 1.0
+weight = 1
+
+[[stage.scoring.component]]
+[stage.scoring.component.SynthSense]
+[[stage.scoring.component.SynthSense.endpoint]]
+name = "Route Popularity"
+params.number_of_steps = 3
+params.stock_profile  = "enamine_bb"
+params.reactions_profile = "SelectedReactions"
+params.time_limit_seconds = 60
+params.score_to_extract = "route_popularity"
+params.popularity_threshold = 1.0
+params.penalty_multiplier = 1.0
+weight = 1
+
+[[stage.scoring.component]]
+[stage.scoring.component.SynthSense]
+[[stage.scoring.component.SynthSense.endpoint]]
+name = "Fill-a-Plate"
+params.number_of_steps = 3
+params.stock_profile  = "enamine_bb"
+params.time_limit_seconds = 60
+
+params.score_to_extract = "fill_a_plate"
+params.bucket_threshold = 1000
+params.min_steps_for_penalization = 1
+params.penalization_enabled = true
+weight = 1
+
+[[stage.scoring.component]]
+[stage.scoring.component.rocssimilarity]
+[[stage.scoring.component.rocssimilarity.endpoint]]
+name = "ROCS similarity"
+weight = 1
+params.color_weight = 0.5
+params.shape_weight = 0.5
+params.similarity_measure = "Tanimoto"
+params.max_stereocenters = 4
+params.ewindow = 10
+params.maxconfs = 200
+params.rocs_input = "S58.sq"
+transform.type = "sigmoid"
+transform.high = 0.65
+transform.low = 0.3
+transform.k = 0.3
