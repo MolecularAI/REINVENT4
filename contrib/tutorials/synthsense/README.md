@@ -1,7 +1,7 @@
 # SynthSense: Synthesis-aware REINVENT Rewards
 
 <p align="center">
-  <img src="robo.png" alt="SynthSense Logo" width="400"/>
+  <img src="robo.svg" alt="SynthSense Logo" width="400"/>
 </p>
 
 **SynthSense** is a scoring component for [REINVENT4](https://github.com/MolecularAI/REINVENT4) that evaluates molecules based on their synthetic feasibility and route coherence using retrosynthetic analysis from [AiZynthFinder](https://github.com/MolecularAI/aizynthfinder).
