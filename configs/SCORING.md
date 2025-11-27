@@ -83,7 +83,7 @@ QSAR/QSPR model-related components:
 * CustomAlerts: SMARTS substructure filter applied to the total score
   * _smarts_: list of SMARTS
 * Qptuna: QSAR models with Qptuna
-  * _mode\_file_: model file name
+  * _model\_file_: model file name
 
 Scoring components about drug-likeness, synthesizability & reactions:
 * Qed: QED drug-likeness score (RDKit)
