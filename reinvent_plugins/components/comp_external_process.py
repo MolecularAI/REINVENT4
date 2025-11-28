@@ -48,11 +48,12 @@ class ExternalProcess:
     The (optional) arguments to the executable are followed by the SMILES
     string by string.  The executable is expected to return the scores
     in a JSON list.  E.g. run a conda script (predict.py) in a specific
-    environment (qptuna):
+    environment (qptuna)
 
-    specific_parameters.executable = "/home/user/miniconda3/condabin/conda"
-    specific_parameters.args = "run -n qptuna python predict.py"
-    specific_parameters.property = "predictions"
+    Add this to the TOML file under an ExternalProcess.endpoint:
+    params.executable = "/home/user/miniconda3/envs/qsartuna/bin/python"
+    params.args = "predict.py"
+    params.property = "predictions"
 
     And predict.py as
 
@@ -68,7 +69,7 @@ class ExternalProcess:
     scores = model.predict_from_smiles(smilies)
     data = {"version": 1, "payload": {"predictions": list(scores)}}
 
-    print(json.dumps(list(scores)))
+    print(json.dumps(data))
     """
 
     def __init__(self, params: Parameters):
