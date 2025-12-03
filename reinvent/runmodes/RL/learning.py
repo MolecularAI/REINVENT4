@@ -189,7 +189,7 @@ class Learning(ABC):
             )
 
             if len(self.smiles_memory) > self.max_smiles:
-                logger.info(f"Max SMILES reached, terminating in {step = }")
+                logger.info(f"Max SMILES ({self.max_smiles}) reached, terminating in {step = }")
                 break
 
             if converged(mean_scores, step):
