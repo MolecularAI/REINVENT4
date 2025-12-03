@@ -133,7 +133,12 @@ class Learning(ABC):
 
         for step in range(self.max_steps):
             self.sampled = self.sampling_model.sample(self.input_smilies)
-            self.smiles_memory.update(self.sampled.smilies)  # NOTE: global -> only update here!
+            # Add only valid non-duplicate SMILES to memory
+            memory_update = [
+                smi for smi, sta in zip(self.sampled.smilies, self.sampled.states)
+                if sta == SmilesState.VALID
+            ]
+            self.smiles_memory.update(memory_update)  # NOTE: global -> only update here!
 
             self.invalid_mask = np.where(self.sampled.states == SmilesState.INVALID, False, True)
             self.duplicate_mask = np.where(
