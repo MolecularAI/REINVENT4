@@ -49,6 +49,7 @@ class Learning(ABC):
     def __init__(
         self,
         max_steps: int,
+        max_smiles: int,
         stage_no: int,
         prior: ModelAdapter,
         state: ModelState,
@@ -67,6 +68,7 @@ class Learning(ABC):
         """Setup of the common framework"""
 
         self.max_steps = max_steps
+        self.max_smiles = max_smiles
         self.stage_no = stage_no
         self.prior = prior
 
@@ -180,6 +182,10 @@ class Learning(ABC):
                 augmented_nll=augmented_nll,
                 loss=float(loss),
             )
+
+            if len(self.smiles_memory) > self.max_smiles:
+                logger.info(f"Max SMILES reached, terminating in {step = }")
+                break
 
             if converged(mean_scores, step):
                 logger.info(f"Terminating early in {step = }")

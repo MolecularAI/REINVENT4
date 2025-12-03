@@ -38,6 +38,7 @@ def create_packages(
         max_score = stage.max_score
         min_steps = stage.min_steps
         max_steps = stage.max_steps
+        max_smiles = stage.max_smiles
 
         terminator_param = stage.termination
         terminator_name = terminator_param.lower().title()
@@ -59,6 +60,7 @@ def create_packages(
                 scoring_function,
                 reward_strategy,
                 max_steps,
+                max_smiles,
                 terminator(max_score, min_steps),
                 diversity_filter,
                 chkpt_filename,
