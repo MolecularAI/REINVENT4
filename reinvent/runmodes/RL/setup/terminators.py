@@ -96,3 +96,48 @@ class PlateauTerminator:
                     return True
 
         return False
+
+
+class TopkTerminator:
+    """Terminate when the top-k scores of unique molecules no longer improves."""
+
+    def __init__(self, patience: int, min_steps: float, topk: int = 10):
+        """Parameterise terminator.
+
+        :param patience: terminate if top-k stops improving for patience epochs
+        :param min_steps: minimum number of steps to carry out
+        :param topk: how many scores to consider
+        """
+        self.min_steps = min_steps
+        self.topk = topk
+        self.patience = patience
+        self.count = 0
+        self.sum = 0
+
+        self.heap = []
+
+    def __call__(self, scores: int, step: int) -> bool:
+        """Terminate when top-k scores for unique SMILES stops improving
+
+        :param scores: current scores
+        :param step: current step number
+        """
+
+        for score in scores:
+            if len(self.heap) < self.topk:
+                heapq.heappush(self.heap, score)
+            else:
+                if score > self.heap[0]:
+                    heapq.heapreplace(self.heap, score)
+
+        if step > self.min_steps:
+            new_sum = sum(self.heap)
+            if new_sum > self.sum:
+                self.sum = new_sum
+                self.count = 0
+            else:
+                self.count += 1
+            if self.count >= self.patience:
+                return True
+
+        return False

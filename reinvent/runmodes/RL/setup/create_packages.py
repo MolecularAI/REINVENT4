@@ -38,6 +38,8 @@ def create_packages(
         max_score = stage.max_score
         min_steps = stage.min_steps
         max_steps = stage.max_steps
+        patience = stage.patience
+        topk = stage.topk
         max_smiles = stage.max_smiles
 
         terminator_param = stage.termination
@@ -45,6 +47,12 @@ def create_packages(
 
         try:
             terminator: terminator_callable = getattr(terminators, f"{terminator_name}Terminator")
+            # Uses mean scores
+            if terminator_name in ["Simple", "Plateau"]:
+                terminator = terminator(max_score, min_steps)
+            # Uses batch scores
+            elif terminator_name == "Topk":
+                terminator = terminator(patience, min_steps, topk)
         except KeyError:
             msg = f"Unknown termination criterion: {terminator_name}"
             logger.critical(msg)
@@ -61,7 +69,7 @@ def create_packages(
                 reward_strategy,
                 max_steps,
                 max_smiles,
-                terminator(max_score, min_steps),
+                terminator,
                 diversity_filter,
                 chkpt_filename,
             )

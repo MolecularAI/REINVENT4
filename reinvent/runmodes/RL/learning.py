@@ -129,16 +129,14 @@ class Learning(ABC):
 
         step = -1
         scaffolds = None
+        if converged.__class__.__name__ == 'TopkTerminator':
+            term_mode = 'topk'
+        else:
+            term_mode = 'score'
         self.start_time = time.time()
 
         for step in range(self.max_steps):
             self.sampled = self.sampling_model.sample(self.input_smilies)
-            # Add only valid non-duplicate SMILES to memory
-            memory_update = [
-                smi for smi, sta in zip(self.sampled.smilies, self.sampled.states)
-                if sta == SmilesState.VALID
-            ]
-            self.smiles_memory.update(memory_update)  # NOTE: global -> only update here!
 
             self.invalid_mask = np.where(self.sampled.states == SmilesState.INVALID, False, True)
             self.duplicate_mask = np.where(
@@ -188,12 +186,30 @@ class Learning(ABC):
                 loss=float(loss),
             )
 
-            if len(self.smiles_memory) > self.max_smiles:
-                logger.info(f"Max SMILES ({self.max_smiles}) reached, terminating in {step = }")
+            # Consider only valid non-duplicate SMILES for top-k/memory
+            valid_idx = np.where(self.sampled.states == SmilesState.VALID)[0]
+
+            if term_mode == 'topk':
+                # Consider only scores for new unique molecules
+                new_scores = [
+                    scores[i] for i in valid_idx
+                    if self.sampled.smilies[i] not in self.smiles_memory
+                ]
+                is_converged = converged(new_scores, step)
+            else:
+                is_converged = converged(mean_scores, step)
+                print(step, mean_scores)
+
+            if is_converged:
+                logger.info(f"Terminating early in {step = }")
                 break
 
-            if converged(mean_scores, step):
-                logger.info(f"Terminating early in {step = }")
+            # Update memory after checking top-k convergence
+            memory_update = [self.sampled.smilies[i] for i in valid_idx]
+            self.smiles_memory.update(memory_update)  # NOTE: global -> only update here!
+
+            if len(self.smiles_memory) > self.max_smiles:
+                logger.info(f"Max SMILES ({self.max_smiles}) reached, terminating in {step = }")
                 break
 
         if self.tb_reporter:  # FIXME: context manager?

@@ -59,6 +59,8 @@ class SectionStage(GlobalConfig):
     max_steps: int = Field(ge=1)
     max_score: Optional[float] = Field(1.0, ge=0.0, le=1.0)
     max_smiles: int = Field(100000000, ge=0) # arbitrary maximum
+    topk: Optional[int] = Field(10, ge=1)
+    patience: Optional[int] = Field(100, ge=1)
     chkpt_file: Optional[str] = None
     termination: str = "simple"
     min_steps: Optional[int] = Field(50, ge=0)
