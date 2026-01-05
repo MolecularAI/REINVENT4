@@ -78,7 +78,7 @@ class SmilesAssociatedComponentResults:
         """
         values_to_upack = [smiles, list(zip(*scores))]
 
-        if metadata is not None:
+        if metadata is not None and metadata:
             # if we have metadata, we need to arrange it by smiles for each key.
 
             values_to_upack.append(
