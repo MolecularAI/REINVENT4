@@ -22,6 +22,7 @@ class WorkPackage:
     scoring_function: Scorer
     learning_strategy: RLReward
     max_steps: int
+    max_smiles: int
     terminator: Callable
     diversity_filter: DiversityFilter = None
     out_state_filename: str = None
