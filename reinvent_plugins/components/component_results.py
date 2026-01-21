@@ -56,7 +56,7 @@ class SmilesAssociatedComponentResults:
     """
 
     # this is the main holder for smiles-associated results
-    data: Dict[str, smilesResult] = field(default=None)
+    data: Dict[str, SmilesResult] = field(default=None)
 
     # this the base ComponentResults input
     component_results: Optional[ComponentResults] = field(init=False, default=None)
@@ -69,7 +69,7 @@ class SmilesAssociatedComponentResults:
         smiles: List[str],
         scores: List[List[float | str]],
         metadata: Optional[Dict[str, List[float | str]]] = None,
-    ) -> dict[str, smilesResult]:
+    ) -> dict[str, SmilesResult]:
         """Utility method for converting from scores in the form of [[score0_mol0,score0_mol1,...],
                                                                       [score1_mol0,score1_mol2,...]]]
 
@@ -108,7 +108,7 @@ class SmilesAssociatedComponentResults:
         return metadata_names
 
     def __init__(
-        self, component_results: ComponentResults = None, smiles: List[Str] = None, data=None
+        self, component_results: ComponentResults = None, smiles: List[str] = None, data=None
     ):
 
         """Constructor from either ComponentResults and smiles,  or setting th data directly"""
