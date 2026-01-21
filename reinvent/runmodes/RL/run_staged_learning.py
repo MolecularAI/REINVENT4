@@ -170,6 +170,7 @@ def run_staged_learning(
 
             optimize = model_learning(
                 max_steps=package.max_steps,
+                max_smiles=package.max_smiles,
                 stage_no=stage_no,
                 prior=prior,
                 state=state,
