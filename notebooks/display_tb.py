@@ -1,7 +1,5 @@
-# Start TensorBoard
 from tensorboard import program
 import os
-# %load_ext tensorboard
 
 wd = f"{os.getcwd()}/runs"
 
@@ -12,7 +10,7 @@ wd = os.path.join(wd, latest_subdir)
 
 print("Current working directory to visualise in tensorboard:", wd)
 
-logdir = f"{wd}/tb_stage1_0"
+logdir = f"{wd}/tb"
 tb = program.TensorBoard()
 tb.configure(argv=[None, "--bind_all", "--logdir", logdir, "--port", "8089"])
 url = tb.launch()

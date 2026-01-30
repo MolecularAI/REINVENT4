@@ -36,8 +36,10 @@ if __name__ == "__main__":
         run_reinforcement_learning(args, wd)
 
     elif runform == "both":
+        run_reinforcement_learning(args, wd)
         run_transfer_learning(args, wd)
         run_reinforcement_learning(args, wd)
+
 
     
     else:

@@ -1,14 +1,12 @@
-
 import os
 import pandas as pd
-import reinvent
 
 def run_reinforcement_learning(args, wd):
 
     global_parameters = f"""
         run_type = "staged_learning"
         device = "cuda:0"
-        tb_logdir = "{wd}/tensorboard"
+        tb_logdir = "{wd}/tb_0"
         json_out_config = "{wd}/_rl.json"
     """
 
@@ -17,7 +15,7 @@ def run_reinforcement_learning(args, wd):
     # Here we specify the model files, the prefix for the output CSV summary file and the batch size for sampling and stochastic gradient descent (SGD).  The batch size is often given in 2^N but there is in now way required.  Typically batch sizes are between 50 and 150.  Batch size effects on SGD and so also the learning rate.  Some experimentation may be required to adjust this but keep in mind that, say, raising the total score as fast as possible is not necessarily the best choice as this may hamper exploration.
 
     # +
-    prior_filename = os.path.join(reinvent.__path__[0], "..", "priors", "reinvent.prior")
+    prior_filename = args.prior
     agent_filename = prior_filename
 
     parameters = f"""
@@ -55,7 +53,7 @@ def run_reinforcement_learning(args, wd):
     [[stage]]
 
     max_score = 1.0
-    max_steps = 300
+    max_steps = 3
 
     chkpt_file = '{wd}/checkpoints/rl.chkpt'
 
@@ -95,11 +93,12 @@ def run_reinforcement_learning(args, wd):
     ]
 
     [[stage.scoring.component]]
-    [stage.scoring.component.QED]
+    [stage.scoring.component.TestScore]
 
-    [[stage.scoring.component.QED.endpoint]]
-    name = "QED"
-    weight = 0.6
+    [[stage.scoring.component.TestScore.endpoint]]
+    name = "TestScore"
+    params.target = "C"
+    weight = 1.0
 
 
     [[stage.scoring.component]]
@@ -107,13 +106,13 @@ def run_reinforcement_learning(args, wd):
 
     [[stage.scoring.component.NumAtomStereoCenters.endpoint]]
     name = "Stereo"
-    weight = 0.4
+    weight = 0.0
 
     transform.type = "left_step"
     transform.low = 0
     """
 
-    config = global_parameters + parameters + learning_strategy + stages
+    config = global_parameters + parameters + learning_strategy + stages 
 
     toml_config_filename = f"{wd}/rl.toml"
 
@@ -121,7 +120,7 @@ def run_reinforcement_learning(args, wd):
         tf.write(config)
 
     import subprocess
-    print("Running reinvent")
+    print("Running reinvent reinforcement learning")
     try:   
         # Define the command
         command = f"reinvent -l {wd}/rl.log {toml_config_filename}"
@@ -131,7 +130,7 @@ def run_reinforcement_learning(args, wd):
     except subprocess.CalledProcessError as e:
         print(f"An error occurred while running the command: {e}")
 
-    print("Finished running reinvent")
+    print("Finished running reinvent reinforcement learning")
     
     if args.statistics:
         csv_file = os.path.join(wd, "rl_1.csv")
