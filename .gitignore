@@ -25,3 +25,4 @@ mprofile_*.dat
 # Notebooks
 .ipynb_checkpoints/
 *.ipynb
+runs/

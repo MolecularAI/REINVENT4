@@ -5,11 +5,11 @@ import reinvent
 
 def run_reinforcement_learning(args, wd):
 
-    global_parameters = """
+    global_parameters = f"""
         run_type = "staged_learning"
         device = "cuda:0"
-        tb_logdir = "tb_stage1"
-        json_out_config = "_stage1.json"
+        tb_logdir = "{wd}/tensorboard"
+        json_out_config = "{wd}/_rl.json"
     """
 
     # ### Parameters
@@ -25,7 +25,7 @@ def run_reinforcement_learning(args, wd):
 
     prior_file = "{prior_filename}"
     agent_file = "{agent_filename}"
-    summary_csv_prefix = "stage1"
+    summary_csv_prefix = "{wd}/rl"
 
     batch_size = 32
 
@@ -51,13 +51,13 @@ def run_reinforcement_learning(args, wd):
     #
     # The scoring function is a weighted product of all the scoring components: QED and number of sterecentres.  The latter is used here to avoid stereocentres as they are not supported by the Reinvent prior.  Zero stereocentres aids in downstream 3D task to avoid having to carry out stereocentre enumeration.  Custom alerts is a filter which filters out (scores as zero) all generated compounds which match one of the SMARTS patterns.  Number of sterecentres uses a transformation function to ensure the component score is between 0 and 1.
 
-    stages = """
+    stages = f"""
     [[stage]]
 
     max_score = 1.0
     max_steps = 300
 
-    chkpt_file = 'stage1.chkpt'
+    chkpt_file = '{wd}/checkpoints/rl.chkpt'
 
     [stage.scoring]
     type = "geometric_mean"
@@ -115,7 +115,7 @@ def run_reinforcement_learning(args, wd):
 
     config = global_parameters + parameters + learning_strategy + stages
 
-    toml_config_filename = "stage1.toml"
+    toml_config_filename = f"{wd}/rl.toml"
 
     with open(toml_config_filename, "w") as tf:
         tf.write(config)
@@ -124,7 +124,7 @@ def run_reinforcement_learning(args, wd):
     print("Running reinvent")
     try:   
         # Define the command
-        command = f"reinvent -l stage1.log {toml_config_filename}"
+        command = f"reinvent -l {wd}/rl.log {toml_config_filename}"
 
         # Run the command
         process = subprocess.run(command, shell=True, check=True)
@@ -134,7 +134,7 @@ def run_reinforcement_learning(args, wd):
     print("Finished running reinvent")
     
     if args.statistics:
-        csv_file = os.path.join(wd, "stage1_1.csv")
+        csv_file = os.path.join(wd, "rl_1.csv")
         df = pd.read_csv(csv_file)
         total_smilies = len(df)
         invalids = df[df["SMILES_state"] == 0]
