@@ -40,22 +40,18 @@ import subprocess
 
 def run_transfer_learning(args, wd):
 
-    # ### Write config file
+    checkpoints_wd = f"{wd}/checkpoints"
+    if not os.path.isdir(checkpoints_wd):
+        os.mkdir(checkpoints_wd)
 
-    # +
     prior_filename = os.path.abspath(os.path.join(reinvent.__path__[0], "..", "priors", "reinvent.prior"))
 
-    # +
-
     tack_ds = load_dataset("ailab-bio/TACK")
-    # -
 
     tack_ds_train = tack_ds["train"].to_pandas()
-    # tack_ds_train
 
-    # +
     TL_train_filename = f"{wd}/tack_train.smi"
-    TL_validation_filename = f"{wd}tack_validation.smi"
+    TL_validation_filename = f"{wd}/tack_validation.smi"
     tack_smiles = tack_ds_train["SMILES"]
 
     #remove smiles containing %11 #FIXME: not supported by reinvent.prior change later
@@ -73,7 +69,6 @@ def run_transfer_learning(args, wd):
 
     train.to_csv(TL_train_filename, sep="\t", index=False, header=False)
     validation.to_csv(TL_validation_filename, sep="\t", index=False, header=False)
-    # -
 
 
     # #### TL setup

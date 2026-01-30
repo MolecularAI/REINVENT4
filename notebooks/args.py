@@ -13,6 +13,9 @@ def get_args():
     parser.add_argument("--statistics", action='store_true')
     parser.add_argument("--wd", type=str, default=date)
     parser.add_argument("--prior", type=str, default=prior_filename)
+    parser.add_argument("--s2", action='store_true')
+    parser.add_argument("--tl-checkpoint", type=str, default="")
+    parser.add_argument("--max-steps", type=int, default=300)
 
 
     return parser.parse_args()

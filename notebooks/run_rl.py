@@ -1,20 +1,56 @@
 import os
 import pandas as pd
+import subprocess
+import re
 
-def run_reinforcement_learning(args, wd):
+def get_scorer(is_stage_2_RL):
+    if not is_stage_2_RL:
+        return """
+            [[stage.scoring.component]]
+            [stage.scoring.component.QED]
 
+            [[stage.scoring.component.QED.endpoint]]
+            name = "QED"
+            weight = 0.6
+
+
+            [[stage.scoring.component]]
+            [stage.scoring.component.NumAtomStereoCenters]
+
+            [[stage.scoring.component.NumAtomStereoCenters.endpoint]]
+            name = "Stereo"
+            weight = 0.4
+
+            transform.type = "left_step"
+            transform.low = 0
+        """
+
+    return """
+        [[stage.scoring.component]]
+        [stage.scoring.component.QED]
+
+        [[stage.scoring.component.QED.endpoint]]
+        name = "QED"
+        weight = 1.0
+
+    """
+
+
+
+
+def run_reinforcement_learning(args, wd, is_stage_2_RL=False):
+
+    checkpoints_wd = f"{wd}/checkpoints"
+    if not os.path.isdir(checkpoints_wd):
+        os.mkdir(checkpoints_wd)
+ 
     global_parameters = f"""
         run_type = "staged_learning"
         device = "cuda:0"
-        tb_logdir = "{wd}/tb_0"
+        tb_logdir = "{wd}/tb"
         json_out_config = "{wd}/_rl.json"
     """
 
-    # ### Parameters
-    #
-    # Here we specify the model files, the prefix for the output CSV summary file and the batch size for sampling and stochastic gradient descent (SGD).  The batch size is often given in 2^N but there is in now way required.  Typically batch sizes are between 50 and 150.  Batch size effects on SGD and so also the learning rate.  Some experimentation may be required to adjust this but keep in mind that, say, raising the total score as fast as possible is not necessarily the best choice as this may hamper exploration.
-
-    # +
     prior_filename = args.prior
     agent_filename = prior_filename
 
@@ -29,9 +65,6 @@ def run_reinforcement_learning(args, wd):
 
     use_checkpoint = false
     """
-    # -
-
-    # ### Reinforcement Learning strategy
 
     learning_strategy = """
     [learning_strategy]
@@ -41,15 +74,7 @@ def run_reinforcement_learning(args, wd):
     rate = 0.0001
     """
 
-    # ###  Stage setup
-    #
-    # Here we only use a single stage. The aim of this stage is to create an agent which is highly likely to generate "drug-like" molecules (as per QED and Custom Alerts) with no stereocentres
-    #
-    # The stage will terminate when a maximum number of 300 steps is reached.  Termination could occur earlier when the maximum score of 1.0 is exceeded but this is very unlikely to occur.  A checkpoint file is written out which can be used as the agent in a subsequent stage.
-    #
-    # The scoring function is a weighted product of all the scoring components: QED and number of sterecentres.  The latter is used here to avoid stereocentres as they are not supported by the Reinvent prior.  Zero stereocentres aids in downstream 3D task to avoid having to carry out stereocentre enumeration.  Custom alerts is a filter which filters out (scores as zero) all generated compounds which match one of the SMARTS patterns.  Number of sterecentres uses a transformation function to ensure the component score is between 0 and 1.
-
-    stages = f"""
+    stage_config = f"""
     [[stage]]
 
     max_score = 1.0
@@ -91,35 +116,40 @@ def run_reinforcement_learning(args, wd):
         "[#8;!o][C;!$(C(=[O,N])[N,O])][#8;!o]",
         "[#16;!s][C;!$(C(=[O,N])[N,O])][#16;!s]"
     ]
-
-    [[stage.scoring.component]]
-    [stage.scoring.component.TestScore]
-
-    [[stage.scoring.component.TestScore.endpoint]]
-    name = "TestScore"
-    params.target = "C"
-    weight = 1.0
-
-
-    [[stage.scoring.component]]
-    [stage.scoring.component.NumAtomStereoCenters]
-
-    [[stage.scoring.component.NumAtomStereoCenters.endpoint]]
-    name = "Stereo"
-    weight = 0.0
-
-    transform.type = "left_step"
-    transform.low = 0
     """
 
-    config = global_parameters + parameters + learning_strategy + stages 
+    if is_stage_2_RL:
+        
+        agent_filename = ""
+        tl_checkpoint = args.tl_checkpoint
+        if str.lower(args.run) == "both" and not tl_checkpoint:
+            TL_checkpoint_path = f"{wd[:-11]}/Stage_2_TL/checkpoints"
+            checkpoint_files = os.listdir(TL_checkpoint_path)
+            agent_filename = max(checkpoint_files, key=lambda d: os.path.getmtime(os.path.join(TL_checkpoint_path, d)))
+
+        elif not tl_checkpoint:
+            raise Exception("""
+                    Cannot run stage 2 reinforcement learning without a TL model checkpoint. 
+                    Define using '--tl-checkpoint=$PATH'
+                """)
+        
+        else: 
+            agent_filename = tl_checkpoint
+
+        stage_config = re.sub("stage1", f"stage2", stage_config)
+        stage_config = re.sub("agent_file.*\n", f"agent_file = '{agent_filename}'\n", stage_config)
+        stage_config = re.sub("max_steps.*\n", f"max_steps = 500\n", stage_config)
+
+    stage_config += get_scorer(is_stage_2_RL)
+
+    config = global_parameters + parameters + learning_strategy + stage_config
 
     toml_config_filename = f"{wd}/rl.toml"
 
     with open(toml_config_filename, "w") as tf:
         tf.write(config)
 
-    import subprocess
+
     print("Running reinvent reinforcement learning")
     try:   
         # Define the command
