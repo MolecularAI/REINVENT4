@@ -27,13 +27,17 @@ def get_scorer(is_stage_2_RL):
 
     return """
         [[stage.scoring.component]]
-        [stage.scoring.component.QED]
-
-        [[stage.scoring.component.QED.endpoint]]
-        name = "QED"
+        [[stage.scoring.component.AtomCount.endpoint]]
+        name = "AtomCount"
+        params.target = "O"
         weight = 1.0
 
-    """
+        [[stage.scoring.component.AtomCount.endpoint]]
+        name = "AtomCount"
+        params.target = "C"
+        weight = 1.0
+
+        """
 
 
 
@@ -77,45 +81,13 @@ def run_reinforcement_learning(args, wd, is_stage_2_RL=False):
     stage_config = f"""
     [[stage]]
 
-    max_score = 1.0
     max_steps = 3
 
     chkpt_file = '{wd}/checkpoints/rl.chkpt'
 
     [stage.scoring]
-    type = "geometric_mean"
+    type = "custom_sum"
 
-    [[stage.scoring.component]]
-    [stage.scoring.component.custom_alerts]
-
-    [[stage.scoring.component.custom_alerts.endpoint]]
-    name = "Alerts"
-
-    params.smarts = [
-        "[*;r8]",
-        "[*;r9]",
-        "[*;r10]",
-        "[*;r11]",
-        "[*;r12]",
-        "[*;r13]",
-        "[*;r14]",
-        "[*;r15]",
-        "[*;r16]",
-        "[*;r17]",
-        "[#8][#8]",
-        "[#6;+]",
-        "[#16][#16]",
-        "[#7;!n][S;!$(S(=O)=O)]",
-        "[#7;!n][#7;!n]",
-        "C#C",
-        "C(=[O,S])[O,S]",
-        "[#7;!n][C;!$(C(=[O,N])[N,O])][#16;!s]",
-        "[#7;!n][C;!$(C(=[O,N])[N,O])][#7;!n]",
-        "[#7;!n][C;!$(C(=[O,N])[N,O])][#8;!o]",
-        "[#8;!o][C;!$(C(=[O,N])[N,O])][#16;!s]",
-        "[#8;!o][C;!$(C(=[O,N])[N,O])][#8;!o]",
-        "[#16;!s][C;!$(C(=[O,N])[N,O])][#16;!s]"
-    ]
     """
 
     if is_stage_2_RL:

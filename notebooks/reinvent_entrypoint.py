@@ -1,6 +1,6 @@
 from args import get_args
-from notebooks.run_rl import run_reinforcement_learning
-from notebooks.run_tl import run_transfer_learning
+from run_rl import run_reinforcement_learning
+from run_tl import run_transfer_learning
 import os
 
 if __name__ == "__main__":

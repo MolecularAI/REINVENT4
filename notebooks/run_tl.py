@@ -1,41 +1,8 @@
-    # ---
-# jupyter:
-#   jupytext:
-#     formats: ipynb,py:light
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.19.1
-#   kernelspec:
-#     display_name: reinvent4
-#     language: python
-#     name: python3
-# ---
-
-# # Focus a _de novo_ model for Reinforcement Learning with the Reinvent prior
-#
-# This tutorial demonstrate how to focus a prior with transfer learning (RL) and use the new model for further reinforcement learning (RL).  We will use the Reinvent prior (_de novo_ model).
-#
-# We assume you run this tutorial from within the `notebook/` directory of the repository.
-
-# +
 import os
 import shutil
-import re
-
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-
 import reinvent
-
-import ipywidgets as widgets
 from datasets import load_dataset
 import subprocess
-
-
 
 
 def run_transfer_learning(args, wd):

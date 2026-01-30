@@ -1,16 +1,13 @@
-"""Compute scores with test score:)"""
+"""Compute scores with Carbon atom Count:)"""
 
 from __future__ import annotations
+from rdkit import Chem
 
-__all__ = ["TestScore"]
-import pickle
+__all__ = ["AtomCount"]
 from typing import List
 import logging
-import json
-
 import numpy as np
 from pydantic.dataclasses import dataclass
-
 from .component_results import ComponentResults
 from .add_tag import add_tag
 from ..normalize import normalize_smiles
@@ -33,31 +30,32 @@ class Parameters:
 
 
 @add_tag("__component")
-class TestScore:
+class AtomCount:
+    """
+    Calculates the number of target atoms in a SMILES and gives reward accordingly.
+    Gives reward of 0 if given SMILES is invalid molecule.
+    DISCLAIMER: Counts both aromatic and aliphatic atoms.
+    """
+
     def __init__(self, params: Parameters):
         self.targets = params.target
-
-        # needed in the normalize_smiles decorator
-        # FIXME: really needs to be configurable for each model separately
         self.smiles_type = "rdkit_smiles"
 
     @normalize_smiles
-    def __call__(self, smilies: List[str]) -> np.ndarray:
-        scores = []
+    def __call__(self, smilies):
+
+        carbon_counts = []
 
         for smi in smilies:
-            score = 0.0
-            for target in self.targets:
-                for char in smi:
-                    if char == target:
-                        score += 1.0
-            if score == 0.0:
-                score = "NaN"
-            scores.append([score])  
+            mol = Chem.MolFromSmiles(smi)
 
-        scores = np.array(scores)  # shape (N,1)
+            if mol is None:
+                carbon_counts.append(np.nan)
+                continue
 
-        print("SCORES shape:", scores.shape)
+            count = sum(1 for atom in mol.GetAtoms() if atom.GetSymbol() in self.targets)
+            carbon_counts.append(float(count))
 
-        return ComponentResults(scores)
+        scores = [np.array(carbon_counts, dtype=float)]
 
+        return ComponentResults(scores=scores)
