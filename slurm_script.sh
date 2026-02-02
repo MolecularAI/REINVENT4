@@ -1,17 +1,26 @@
 #!/bin/bash
+#SBATCH --account=naiss2025-5-462
+#SBATCH --partition=alvis
+#SBATCH --gpus-per-node=T4:1
+#SBATCH --job-name=protac_generation
+#SBATCH --time=00:05:00
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=erngard@chalmers.se
+#SBATCH --output=/mimer/NOBACKUP/groups/naiss2023-6-290/%u/REINVENT4_MasterThesis/runs/slurm_job_%j.log
+#SBATCH --error=/mimer/NOBACKUP/groups/naiss2023-6-290/%u/REINVENT4_MasterThesis/runs/slurm_job_%j.err
 
+BASE_DIR=/mimer/NOBACKUP/groups/naiss2023-6-290/${USER}/REINVENT4_MasterThesis
 
-
-# TODO: Write python code to fix everything
 WD_PATH=""
 for arg in "$@"; do
-    if [ "$arg" = "test" ]; then
-        WD_PATH = $arg
+    if [ "$arg" = "wd" ]; then
+        WD_PATH=$arg
         break
     fi
 done
+
 if [ -z "$WD_PATH" ]; then
-    WD_PATH=$(python << EOF
+    WD_PATH=$(python -u << EOF
 import os
 from datetime import datetime
 
@@ -22,21 +31,20 @@ origin = f"{os.getcwd()}/runs"
 if not os.path.isdir(origin):
     os.mkdir(origin)
 
-print(f"{origin}/{date}")
+print(date)
 EOF
     )
 fi
-echo $WD_PATH
 
-#SBATCH --account=naiss2025-5-462
-#SBATCH --partition=alvis
-#SBATCH --gpus-per-node=T4:1
-#SBATCH --job-name=reinvent-test
-#SBATCH --output=/mimer/NOBACKUP/groups/naiss2023-6-290/${USER}/REINVENT4_MasterThesis/${WD_PATH}/reinvent_test.log
-#SBATCH --error=/mimer/NOBACKUP/groups/naiss2023-6-290/${USER}/REINVENT4_MasterThesis/${WD_PATH}/reinvent_test.err
-#SBATCH --time=1:00:00
-#SBATCH --mail-type=END
-#SBATCH --mail-user=${USER}@chalmers.se
+python -u << EOF
+import os
+origin = f"{os.getcwd()}/runs"
+if not os.path.isdir(f"{origin}/${WD_PATH}"):
+    os.mkdir(f"{origin}/${WD_PATH}")
+    os.utime(origin, None)
+EOF
+
+echo "Working directory: $WD_PATH"
 
 # Load necessary modules
 module load Python/3.11.3-GCCcore-12.3.0
@@ -45,5 +53,8 @@ prj_dir=/mimer/NOBACKUP/groups/naiss2023-6-290/${USER}/REINVENT4_MasterThesis
 # Source the virtual environment
 source ${prj_dir}/reinvent4/bin/activate
 
+# Run the job
+mv ${BASE_DIR}/runs/slurm_job_${SLURM_JOB_ID}.log "${BASE_DIR}/runs/${WD_PATH}/"
+mv ${BASE_DIR}/runs/slurm_job_${SLURM_JOB_ID}.err "${BASE_DIR}/runs/${WD_PATH}/"
 
-srun python ${prj_dir}/notebooks/Reinvent_entrypoint.py "$@" --wd=$WD_PATH
+srun -u python -u ${prj_dir}/notebooks/reinvent_entrypoint.py "$@" --wd=$WD_PATH

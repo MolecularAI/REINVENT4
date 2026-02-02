@@ -1,7 +1,6 @@
 import os
 import shutil
 import reinvent
-from datasets import load_dataset
 import subprocess
 
 
@@ -13,30 +12,10 @@ def run_transfer_learning(args, wd):
 
     prior_filename = os.path.abspath(os.path.join(reinvent.__path__[0], "..", "priors", "reinvent.prior"))
 
-    tack_ds = load_dataset("ailab-bio/TACK")
+    base_path = os.getcwd() + "/" + args.data_folder
 
-    tack_ds_train = tack_ds["train"].to_pandas()
-
-    TL_train_filename = f"{wd}/tack_train.smi"
-    TL_validation_filename = f"{wd}/tack_validation.smi"
-    tack_smiles = tack_ds_train["SMILES"]
-
-    #remove smiles containing %11 #FIXME: not supported by reinvent.prior change later
-    tack_smiles = tack_smiles[~tack_smiles.str.contains("%11")]
-    for smi in tack_smiles:
-        if "%11" in smi:
-            print("FOUND IT:")
-            print(smi)
-
-    n_head = int(0.8 * len(tack_smiles))  # 80% of the data for training
-    n_tail = len(tack_smiles) - n_head
-    print(f"number of molecules for: training={n_head}, validation={n_tail}")
-
-    train, validation = tack_smiles.head(n_head), tack_smiles.tail(n_tail)
-
-    train.to_csv(TL_train_filename, sep="\t", index=False, header=False)
-    validation.to_csv(TL_validation_filename, sep="\t", index=False, header=False)
-
+    TL_train_filename = f"{base_path}/tack_train.smi"
+    TL_validation_filename = f"{base_path}/tack_validation.smi"
 
     # #### TL setup
     #FIXME: change, only uses reinvent.prior temporaryly instead of checkpoint
@@ -58,7 +37,7 @@ def run_transfer_learning(args, wd):
 
     input_model_file = "{prior_filename}" 
     output_model_file = "{output_model_file}"
-    smiles_file = "{TL_train_filename}"
+    smiles_file = "{TL_train_filename}/"
     validation_smiles_file = "{TL_validation_filename}"
     standardize_smiles = true
     randomize_smiles = false
