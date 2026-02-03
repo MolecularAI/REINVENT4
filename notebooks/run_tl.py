@@ -4,7 +4,7 @@ import reinvent
 import subprocess
 
 
-def run_transfer_learning(args, wd):
+def run_transfer_learning(args, wd, data_prefix):
 
     checkpoints_wd = f"{wd}/checkpoints"
     if not os.path.isdir(checkpoints_wd):
@@ -14,8 +14,8 @@ def run_transfer_learning(args, wd):
 
     base_path = os.getcwd() + "/" + args.data_folder
 
-    TL_train_filename = f"{base_path}/tack_train.smi"
-    TL_validation_filename = f"{base_path}/tack_validation.smi"
+    TL_train_filename = f"{base_path}/{data_prefix}_train.smi"
+    TL_validation_filename = f"{base_path}/{data_prefix}_validation.smi"
 
     # #### TL setup
     #FIXME: change, only uses reinvent.prior temporaryly instead of checkpoint

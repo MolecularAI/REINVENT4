@@ -17,5 +17,6 @@ def get_args():
     parser.add_argument("--tl-checkpoint", type=str, default="")
     parser.add_argument("--max-steps", type=int, default=300)
     parser.add_argument("--data-folder", type=str, default="dataset")
+    parser.add_argument("--data-type", type=str, default="tack")
 
     return parser.parse_args()

@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
         
         if runform== "tl":
-            run_transfer_learning(args, wd)
+            run_transfer_learning(args, wd, args.data_type)
         
         elif runform == "rl":
             run_reinforcement_learning(args, wd)
@@ -40,9 +40,15 @@ if __name__ == "__main__":
             run_reinforcement_learning(args, f"{wd}/Stage_1_RL")
 
             os.mkdir(f"{wd}/Stage_2_TL")
-            run_transfer_learning(args, f"{wd}/Stage_2_TL")
+            run_transfer_learning(args, f"{wd}/Stage_2_TL", "synthetic")
 
             os.mkdir(f"{wd}/Stage_3_RL")
+            run_reinforcement_learning(args, f"{wd}/Stage_3_RL")
+
+            os.mkdir(f"{wd}/Stage_4_TL")
+            run_transfer_learning(args, f"{wd}/Stage_2_TL", "tack")
+
+            os.mkdir(f"{wd}/Stage_5_RL")
             run_reinforcement_learning(args, f"{wd}/Stage_3_RL", True)
 
         elif runform == "rl_s2":
