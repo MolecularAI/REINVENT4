@@ -4,13 +4,22 @@ import reinvent
 import subprocess
 
 
-def run_transfer_learning(args, wd, data_prefix):
+def run_transfer_learning(args, wd, data_prefix, batch_size=512, num_epochs=5):
 
     checkpoints_wd = f"{wd}/checkpoints"
+    print("Creating TL checkpoints directory at:", checkpoints_wd)
     if not os.path.isdir(checkpoints_wd):
         os.mkdir(checkpoints_wd)
 
-    prior_filename = os.path.abspath(os.path.join(reinvent.__path__[0], "..", "priors", "reinvent.prior"))
+    """#FIXME: change, only uses reinvent.prior temporaryly instead of checkpoint
+    prior_filename = os.path.join(wd, "..", "Stage_1_RL/checkpoints", "rl.chkpt")
+
+    # check if prior RL stage 1 checkpoint exists
+    if not os.path.isfile(prior_filename):"""
+        # fall back to default prior, user selected TL only run
+    prior_filename = os.path.abspath(os.path.join(reinvent.__path__[0], "..", "priors", "reinvent.prior"))        
+    
+    print("Using prior filename:", prior_filename)
 
     base_path = os.getcwd() + "/" + args.data_folder
 
@@ -18,7 +27,6 @@ def run_transfer_learning(args, wd, data_prefix):
     TL_validation_filename = f"{base_path}/{data_prefix}_validation.smi"
 
     # #### TL setup
-    #FIXME: change, only uses reinvent.prior temporaryly instead of checkpoint
     tb_logdir = f"{wd}/tb_0"
     output_model_file = f"{wd}/checkpoints/TL_reinvent.model"
 
@@ -30,16 +38,16 @@ def run_transfer_learning(args, wd, data_prefix):
 
     [parameters]
 
-    num_epochs = 3
-    save_every_n_epochs = 1
-    batch_size = 12
-    sample_batch_size = 100
+    num_epochs = {num_epochs}
+    save_every_n_epochs = 2
+    batch_size = {batch_size}
+    sample_batch_size = 128
 
     input_model_file = "{prior_filename}" 
     output_model_file = "{output_model_file}"
-    smiles_file = "{TL_train_filename}/"
+    smiles_file = "{TL_train_filename}"
     validation_smiles_file = "{TL_validation_filename}"
-    standardize_smiles = true
+    standardize_smiles = false
     randomize_smiles = false
     randomize_all_smiles = false
     internal_diversity = true

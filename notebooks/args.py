@@ -9,7 +9,7 @@ def get_args():
     now = datetime.now()
     date = now.strftime("%Y-%m-%d_%H-%M-%S")
     parser = ArgumentParser()
-    parser.add_argument("--run", type=str, default="TL")
+    parser.add_argument("--run", type=str, default="both")
     parser.add_argument("--statistics", action='store_true')
     parser.add_argument("--wd", type=str, default=date)
     parser.add_argument("--prior", type=str, default=prior_filename)

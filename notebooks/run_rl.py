@@ -4,9 +4,68 @@ import subprocess
 import re
 
 def get_scorer(is_stage_2_RL):
+    # QED prob not good since lower desirability for heavier molecules (kind of follows Ro5)
     if not is_stage_2_RL:
         return """
+            [stage.scoring]
+            type = "arithmetic_mean"
+
             [[stage.scoring.component]]
+
+            [stage.scoring.component.MolecularWeight]
+
+            [[stage.scoring.component.MolecularWeight.endpoint]]
+
+            name = "MW"
+
+            weight = 1.0
+            transform.type = "Double_Sigmoid"
+
+            transform.low = 700.0
+
+            transform.high = 1200.0
+
+
+            [[stage.scoring.component]]
+            [stage.scoring.component.QED]
+            [[stage.scoring.component.QED.endpoint]]
+            name = "QED"
+            weight = 2.0
+
+            [[stage.scoring.component]]
+            [stage.scoring.component.SlogP]
+            [[stage.scoring.component.SlogP.endpoint]]
+            name = "LogP_Limit"
+            weight = 0.5
+            transform.type = "Double_Sigmoid"
+            transform.low = 3.0
+            transform.high = 7.0
+            transform.coef_div = 0.5
+
+            [[stage.scoring.component]]
+
+            [stage.scoring.component.SAScore]
+
+            [[stage.scoring.component.SAScore.endpoint]]
+
+            name = "SAscore"
+
+            weight = 1.00
+
+            transform.type = "Right_Step"
+
+            transform.high = 6.0
+            transform.low = 4.0
+
+
+            [stage.diversity_filter]
+            type = "IdenticalMurckoScaffold"
+            bucket_size = 25
+            minscore = 0.4
+            minsimilarity = 0.4
+        """
+        #return
+        """ [[stage.scoring.component]]
             [stage.scoring.component.QED]
 
             [[stage.scoring.component.QED.endpoint]]
@@ -23,9 +82,62 @@ def get_scorer(is_stage_2_RL):
 
             transform.type = "left_step"
             transform.low = 0
+        """ 
+    return """
+            [stage.scoring]
+            type = "geometric_mean"
+
+            [[stage.scoring.component]]
+
+            [stage.scoring.component.TPSA]
+
+            [[stage.scoring.component.TPSA.endpoint]]
+            name = "ScoringComponent"
+
+            weight = 1.5
+
+
+            [[stage.scoring.component]]
+
+            [stage.scoring.component.MolecularWeight]
+
+            [[stage.scoring.component.MolecularWeight.endpoint]]
+
+            name = "MW"
+
+            weight = 1.0
+            transform.type = "Double_Sigmoid"
+
+            transform.low = 900.0
+
+            transform.high = 1100.0
+
+
+            [[stage.scoring.component]]
+
+            [stage.scoring.component.NumRotBond]
+
+            [[stage.scoring.component.NumRotBond.endpoint]]
+
+            name = "NumRotBond"
+
+            weight = 1.00
+            transform.type = "Double_Sigmoid"
+
+            transform.low = 10.0
+
+            transform.high = 25.0
+
+
+            [stage.diversity_filter]
+            type = "IdenticalMurckoScaffold"
+            bucket_size = 25
+            minscore = 0.4
+            minsimilarity = 0.4
         """
 
-    return """
+    #return 
+    """
         [[stage.scoring.component]]
         [[stage.scoring.component.AtomCount.endpoint]]
         name = "AtomCount"
@@ -42,7 +154,7 @@ def get_scorer(is_stage_2_RL):
 
 
 
-def run_reinforcement_learning(args, wd, is_stage_2_RL=False):
+def run_reinforcement_learning(args, wd, is_stage_2_RL=False, min_steps=200, max_steps=1000):
 
     checkpoints_wd = f"{wd}/checkpoints"
     if not os.path.isdir(checkpoints_wd):
@@ -65,7 +177,7 @@ def run_reinforcement_learning(args, wd, is_stage_2_RL=False):
     agent_file = "{agent_filename}"
     summary_csv_prefix = "{wd}/rl"
 
-    batch_size = 32
+    batch_size = 256
 
     use_checkpoint = false
     """
@@ -81,12 +193,10 @@ def run_reinforcement_learning(args, wd, is_stage_2_RL=False):
     stage_config = f"""
     [[stage]]
 
-    max_steps = 3
+    max_steps = {max_steps}
+    min_steps = {min_steps}
 
     chkpt_file = '{wd}/checkpoints/rl.chkpt'
-
-    [stage.scoring]
-    type = "custom_sum"
 
     """
 
@@ -95,7 +205,7 @@ def run_reinforcement_learning(args, wd, is_stage_2_RL=False):
         agent_filename = ""
         tl_checkpoint = args.tl_checkpoint
         if str.lower(args.run) == "both" and not tl_checkpoint:
-            TL_checkpoint_path = f"{wd[:-11]}/Stage_2_TL/checkpoints"
+            TL_checkpoint_path = f"{wd[:-11]}/Stage_3_RL/checkpoints"
             checkpoint_files = os.listdir(TL_checkpoint_path)
             agent_filename = max(checkpoint_files, key=lambda d: os.path.getmtime(os.path.join(TL_checkpoint_path, d)))
 

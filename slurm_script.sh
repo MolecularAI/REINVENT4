@@ -2,10 +2,11 @@
 #SBATCH --account=naiss2025-5-462
 #SBATCH --partition=alvis
 #SBATCH --gpus-per-node=T4:1
+#SBATCH --cpus-per-task=4
 #SBATCH --job-name=protac_generation
-#SBATCH --time=00:05:00
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=erngard@chalmers.se
+#SBATCH --time=16:00:00
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=alexper@chalmers.se
 #SBATCH --output=/mimer/NOBACKUP/groups/naiss2023-6-290/%u/REINVENT4_MasterThesis/runs/slurm_job_%j.log
 #SBATCH --error=/mimer/NOBACKUP/groups/naiss2023-6-290/%u/REINVENT4_MasterThesis/runs/slurm_job_%j.err
 
