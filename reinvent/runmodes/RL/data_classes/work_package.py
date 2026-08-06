@@ -23,5 +23,5 @@ class WorkPackage:
     learning_strategy: RLReward
     max_steps: int
     terminator: Callable
-    diversity_filter: DiversityFilter = None
-    out_state_filename: str = None
+    diversity_filter: DiversityFilter | None = None
+    out_state_filename :  str | None = None

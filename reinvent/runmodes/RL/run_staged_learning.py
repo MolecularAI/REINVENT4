@@ -5,6 +5,7 @@ import logging
 
 import torch
 
+from reinvent.runmodes.RL.memories.diversity_filter import DiversityFilter
 from reinvent.utils import setup_logger, CsvFormatter, config_parse, get_tokens_from_vocabulary
 from reinvent.runmodes import Handler, RL, create_adapter
 from reinvent.runmodes.setup_sampler import setup_sampler
@@ -98,16 +99,27 @@ def run_staged_learning(
         logger.info(f"Input molecules/fragments read from file {parameters.smiles_file}")
 
     sampler, _ = setup_sampler(model_type, parameters.model_dump(), agent)
-    reward_strategy = setup_reward_strategy(config.learning_strategy, agent)
+    reward_strategy = setup_reward_strategy(config.learning_strategy, agent, config.inception)
 
     global_df_only = False
     intrinsic_penalty = None
+    diversity_filter: DiversityFilter | None = None
 
     if parameters.use_checkpoint and "staged_learning" in agent_save_dict:
         logger.info(f"Using diversity filter from {agent_model_filename}")
         diversity_filter = agent_save_dict["staged_learning"]["diversity_filter"]
+        if not isinstance(diversity_filter, DiversityFilter):
+            logger.warning(
+                f"Loaded diversity filter is not an instance of DiversityFilter: {type(diversity_filter)}. Ignoring."
+            )
+            diversity_filter = None
     elif config.diversity_filter:
-        diversity_filter = setup_diversity_filter(config.diversity_filter, rdkit_smiles_flags2)
+        diversity_filter = setup_diversity_filter(
+            config.diversity_filter,
+            device,
+            prior_model_filename,
+            rdkit_smiles_flags2,
+        )
         global_df_only = True
     elif config.intrinsic_penalty:
         intrinsic_penalty = setup_intrinsic_penalty(
@@ -126,12 +138,14 @@ def run_staged_learning(
 
     # Inception only set up here for the very first step
     if config.inception:  # and model_type == "Reinvent":
-        inception = setup_inception(config.inception, prior)
+        inception = setup_inception(config.inception, diversity_filter, prior)
 
     if inception is None and model_type == "Reinvent":
         logger.warning("Inception disabled but may speed up convergence")
 
-    packages = create_packages(reward_strategy, stages, rdkit_smiles_flags2)
+    packages = create_packages(
+        reward_strategy, stages, device, prior_model_filename, rdkit_smiles_flags2
+    )
 
     summary_csv_prefix = parameters.summary_csv_prefix
 
@@ -201,11 +215,12 @@ def run_staged_learning(
 
             handler.save()
 
-            if terminate:
-                logger.warning(
-                    f"Maximum number of steps of {package.max_steps} reached in stage "
-                    f"{stage_no}. Terminating all stages."
-                )
-                break
+            # TODO: revert back
+            # if terminate:
+            #     logger.warning(
+            #         f"Maximum number of steps of {package.max_steps} reached in stage "
+            #         f"{stage_no}. Terminating all stages."
+            #     )
+            #     break
 
             logger.info(f"Finished stage {stage_no} >>>")

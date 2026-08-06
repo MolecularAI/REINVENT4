@@ -99,9 +99,9 @@ def write_summary(data, write_header):
                 header.extend(filler_headers)
                 columns.extend(filler_records)
 
-    if data.scaffolds:
+    if data.diversity_results and data.diversity_results.scaffolds:
         header.append("Scaffold")
-        columns.append(data.scaffolds)
+        columns.append(data.diversity_results.scaffolds)
 
     names = []
     scores = []
