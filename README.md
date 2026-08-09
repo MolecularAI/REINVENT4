@@ -51,7 +51,7 @@ Installation
     ```
 1. Create a Python environment and install a compatible version of Python, for example with [Conda](https://conda.io/projects/conda/en/latest/index.html) or other virtual environments.
     ```shell
-    conda create --name reinvent4 python=3.10
+    conda create --name reinvent4 python=3.11
     conda activate reinvent4
     ```
 1. Change directory to the repository to install.  You will need to set the right processor type, see [PyTorch versions](https://pytorch.org/get-started/locally/). Make sure that the toolkit version (e.g. CUDA) is compatible with the hardware driver (e.g. NVIDIA) of your OS.  Linux supports CUDA (e.g. "cu126"), AMD ROCm (e.g. "rocm6.4"), Intel XPU ("xpu") and CPU. Windows supports CUDA, XPU and CPU.  Newer Apple chips e.g. M5 are supported by PyTorch's MPS backend (use "mac" as processor type). Optionally, you can select dependencies "openeye" (for ROCS; you need to obtain your own license), "chemprop1" for Chemprop v1, "isim" for similarity tracking in TensorBoard or "none" to skip all.  The default is installation of "all" dependencies.  See the help text from the install script for details.
