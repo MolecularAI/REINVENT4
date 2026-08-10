@@ -136,7 +136,7 @@ def read_smiles_csv_file(
                 if actions:
                     for action in actions:
                         if callable(action) and smiles:
-                            smiles = action(orig_smiles)
+                            smiles = action(smiles)
 
                 if not smiles:
                     continue
