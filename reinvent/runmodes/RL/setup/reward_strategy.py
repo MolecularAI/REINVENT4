@@ -6,12 +6,16 @@ import torch
 
 from reinvent.models import ModelAdapter
 from reinvent.runmodes import RL
-from reinvent.runmodes.RL.validation import SectionLearningStrategy
+from reinvent.runmodes.RL.validation import SectionLearningStrategy, SectionInception
 
 logger = logging.getLogger(__name__)
 
 
-def setup_reward_strategy(config: SectionLearningStrategy, agent: ModelAdapter):
+def setup_reward_strategy(
+    config: SectionLearningStrategy,
+    agent: ModelAdapter,
+    inception_config: SectionInception | None = None,
+):
     """Setup the Reinforcement Learning reward strategy
 
     Basic parameter setup for RL learning including the reward function. The
@@ -39,7 +43,16 @@ def setup_reward_strategy(config: SectionLearningStrategy, agent: ModelAdapter):
         raise RuntimeError(msg)
 
     torch_optim = torch.optim.Adam(agent.get_network_parameters(), lr=learning_rate)
-    learning_strategy = RL.RLReward(torch_optim, sigma, reward_strategy)
+
+    is_kw = {}
+    if inception_config is not None:
+        is_kw = dict(
+            is_weighted_scores=inception_config.is_weighted_scores,
+            is_weight_clip=inception_config.is_weight_clip,
+            is_weight_temperature=inception_config.is_weight_temperature,
+        )
+
+    learning_strategy = RL.RLReward(torch_optim, sigma, reward_strategy, **is_kw)
 
     logger.info(f"Using reward strategy {reward_strategy_str}")
 

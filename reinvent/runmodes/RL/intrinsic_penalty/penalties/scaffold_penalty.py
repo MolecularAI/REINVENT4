@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from reinvent.runmodes.RL.memories.bucket_counter import BucketCounter
+from reinvent.runmodes.RL.memories.utils.bucket_counter import BucketCounter
 
 
 class ScaffoldPenalty(ABC):
