@@ -189,7 +189,8 @@ class SMILESTokenizer:
         for i, token in enumerate(tokens):
             if token == "$":
                 break
-            if token != "^" or (token == "^" and i != 0):
+            # skip start and padding tokens, they are not part of the SMILES
+            if (token != "^" or (token == "^" and i != 0)) and token != "<PAD>":
                 smi += token
         return smi
 

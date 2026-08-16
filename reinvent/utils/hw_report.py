@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import platform
-import resource
 import subprocess as sp
 import logging
 from typing import Optional
 
 import torch
 from torch import device
+
+try:
+    import resource
+except ImportError:  # Windows does not provide the "resource" module
+    resource = None
 
 SYSTEM = platform.system()
 logger = logging.getLogger(__name__)
@@ -108,7 +112,7 @@ def report_hardware(actual_device: device):
 
 
 def report_resource_usage(actual_device: device):
-    if SYSTEM != "Windows":
+    if SYSTEM != "Windows" and resource is not None:
         maxrss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         peak_mem = 0
 

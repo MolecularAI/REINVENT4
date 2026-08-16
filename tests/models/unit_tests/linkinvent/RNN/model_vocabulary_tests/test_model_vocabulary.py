@@ -53,7 +53,8 @@ class TestModelVocabulary(unittest.TestCase):
     def _decode_with_and_without_padding(self, smiles, encoded):
         self.assertEqual(self.model_voc.decode(encoded), smiles)
         self.assertEqual(self.model_voc.decode(np.append(encoded, [0, 0])), smiles)
-        self.assertNotEqual(self.model_voc.decode(np.append([0, 0], encoded)), smiles)
+        # padding must not leak into the decoded SMILES (issue #221)
+        self.assertEqual(self.model_voc.decode(np.append([0, 0], encoded)), smiles)
 
     def test_decode(self):
         self._decode_with_and_without_padding(ETHANE, [2, 10, 10, 1])
@@ -62,7 +63,8 @@ class TestModelVocabulary(unittest.TestCase):
             SCAFFOLD_SUZUKI, self.model_voc.encode(SCAFFOLD_SUZUKI)
         )
 
-        self.assertEqual(self.model_voc.decode([0]), "<pad>")
+        # pure padding decodes to an empty string (issue #221)
+        self.assertEqual(self.model_voc.decode([0]), "")
 
     def test_len(self):
         self.assertEqual(len(self.model_voc), 19)
