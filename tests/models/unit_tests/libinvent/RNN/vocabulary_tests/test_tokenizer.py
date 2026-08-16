@@ -105,3 +105,8 @@ class TestSmilesTokenizer(unittest.TestCase):
             ),
             "C1CC(Br)CCC1[ClH]",
         )
+
+    def test_untokenize_drops_padding(self):
+        # issue #221: trailing "<pad>" tokens must not leak into the decoded
+        # SMILES, otherwise re-tokenization produces unsupported "<", "p", ... tokens
+        self.assertEqual(self.tokenizer.untokenize(["^", "C", "C", "<pad>", "<pad>", "$"]), "CC")

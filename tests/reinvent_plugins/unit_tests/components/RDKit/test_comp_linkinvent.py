@@ -100,3 +100,41 @@ def test_linker_effective_length_ratio():
     for component in expected_results:
         results = component()(input_fragments)
         assert np.allclose(results.scores[0], expected_results[component])
+
+
+def test_fragment_components_return_nan_for_unscoreable_smiles():
+    # issue #333: unparseable fragments (and pathological ones) must not crash
+    # the component; they are reported as NaN
+    components = [
+        FragmentQed,
+        FragmentMolecularWeight,
+        FragmentTPSA,
+        FragmentNumRotBond,
+        FragmentCsp3,
+        FragmentEffectiveLength,
+        FragmentNumAromaticRings,
+        FragmentNumAliphaticRings,
+        FragmentSlogP,
+    ]
+    input_fragments = ["not_a_molecule", "[*]c1ccc2c(N)noc2c1[*]"]
+
+    for component in components:
+        results = component()(input_fragments)
+
+        assert np.isnan(results.scores[0][0]), component.__name__
+        assert not np.isnan(results.scores[0][1]), component.__name__
+
+
+def test_fragment_components_do_not_crash_on_multi_bonded_attachment():
+    # a "*" bridging two rings cannot be capped with a single hydrogen; this
+    # must yield NaN rather than raising (issue #333)
+    input_fragments = ["c1ccc(cc1)[*]c1ccccc1[*]"]
+
+    for component in [
+        FragmentQed,
+        FragmentMolecularWeight,
+        FragmentNumRotBond,
+        FragmentNumAromaticRings,
+    ]:
+        results = component()(input_fragments)
+        assert np.isnan(results.scores[0][0]), component.__name__

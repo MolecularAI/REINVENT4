@@ -272,3 +272,9 @@ def test_untokenize(input, expected):
     tokenizer = SMILESTokenizer()
     result = tokenizer.untokenize(expected)
     assert result == expected
+
+
+def test_untokenize_drops_padding():
+    # issue #221: trailing "<PAD>" tokens must not leak into the decoded SMILES
+    tokenizer = SMILESTokenizer()
+    assert tokenizer.untokenize(["^", "C", "C", "<PAD>", "<PAD>", "$"]) == "CC"

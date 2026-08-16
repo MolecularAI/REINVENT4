@@ -50,7 +50,10 @@ class RDKitDescriptors:
         scores = []
 
         for mol in mols:
-            result = self.calc(mol, missingVal=np.nan)
+            if not mol:
+                result = np.full(len(self.calc.propNames), np.nan)
+            else:
+                result = self.calc(mol, missingVal=np.nan)
             scores.append(np.array(result))
 
         scores = np.array(scores).transpose()

@@ -99,6 +99,8 @@ def cap_fragment(smiles):
 
         return clean_mol
 
+    return None
+
 
 def compute_scores(smilies: List[str], func: Callable) -> np.array:
     """Compute scores using a RDKit function
@@ -113,10 +115,15 @@ def compute_scores(smilies: List[str], func: Callable) -> np.array:
     for smiles in smilies:
         try:
             mol = cap_fragment(smiles)
-            score = func(mol)
-        except ValueError:
+
+            if not mol:
+                score = np.nan
+                logger.warning(f"{__name__}: Invalid SMILES {smiles}")
+            else:
+                score = func(mol)
+        except Exception:
             score = np.nan
-            logger.warning(f"{__name__}: Invalid SMILES {smiles}")
+            logger.warning(f"{__name__}: Could not score SMILES {smiles}")
 
         scores.append(score)
 
