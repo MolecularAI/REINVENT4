@@ -131,18 +131,18 @@ def read_smiles_csv_file(
 
             if isinstance(columns, int):  # RL, sampling, TL (Reinvent, Mol2Mol)
                 smiles = row[columns].strip()
-                orig_smiles = smiles
 
                 if actions:
                     for action in actions:
                         if callable(action) and smiles:
-                            smiles = action(orig_smiles)
+                            smiles = action(smiles)
 
                 if not smiles:
                     continue
 
-                # Linkinvent "warheads" (R-groups)
-                smiles = smiles.replace(".", "|")
+                # Linkinvent "warheads" (R-groups); only where "|" is a valid token
+                if "|" in allowed_tokens[0] or "|" in allowed_tokens[1]:
+                    smiles = smiles.replace(".", "|")
                 validate_tokens(smiles, allowed_tokens)
             else:  # TL (Lib/Linkinvent)
                 smiles_pair = [smiles.strip() for smiles in row[columns]]
