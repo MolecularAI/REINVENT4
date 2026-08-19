@@ -177,7 +177,8 @@ class SMILESTokenizer:
         for token in tokens:
             if token == "$":
                 break
-            if token != "^":
+            # skip start and padding tokens, they are not part of the SMILES
+            if token not in ("^", "<pad>"):
                 smi += token
         return smi
 
