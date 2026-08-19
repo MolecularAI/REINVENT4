@@ -101,12 +101,13 @@ def compute_component_scores(
     if len(smilies_to_score) > 0:
         _results = scoring_function(smilies_to_score)
 
-        # FIXME: crash and burn because currently we have no way to recover from
-        #        this e.g. by setting the scores of missing SMILES to NaN
+        # the missing SMILES are not present in the results and will be
+        # backfilled with NaN downstream in compute_transform
         if len(_results.scores[0]) != len(smilies_to_score):
-            msg = f"Scoring component {scoring_function} has returned {len(_results.scores[0])} but expected {len(smilies_to_score)}"
-            logger.critical(msg)
-            raise RuntimeError(msg)
+            logger.warning(
+                f"Scoring component {scoring_function} has returned {len(_results.scores[0])} but expected {len(smilies_to_score)}. "
+                "Missing scores will be set to NaN."
+            )
 
         component_results = SmilesAssociatedComponentResults(
             component_results=_results, smiles=index_smiles_to_score
@@ -169,8 +170,23 @@ def compute_transform(
         missing_scores = [smiles for smiles in index_smiles if smiles not in component_results.data]
     else:
         missing_scores = [smiles for smiles in smilies if smiles not in component_results.data]
+
+    # A scoring component may fail to return a score for some of the input
+    # SMILES (e.g. a fragment that could not be parsed).  Rather than
+    # terminating the whole run, backfill these with NaN (the failure marker,
+    # see ComponentResults docstring) so scoring can continue.
     if missing_scores:
-        raise RuntimeError(f"Missing scores for {component_type} for {missing_scores}")
+        logger.warning(
+            f"{component_type}: backfilling {len(missing_scores)} missing scores with NaN"
+        )
+
+        n_endpoints = getattr(scoring_function, "number_of_endpoints", 1)
+
+        for smiles in missing_scores:
+            component_results.update_scores(
+                smiles=[smiles],
+                scores=[(np.nan,) * n_endpoints],
+            )
 
     for scores, transform in zip(
         component_results.fetch_scores(
