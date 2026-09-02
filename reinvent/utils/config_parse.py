@@ -131,7 +131,6 @@ def read_smiles_csv_file(
 
             if isinstance(columns, int):  # RL, sampling, TL (Reinvent, Mol2Mol)
                 smiles = row[columns].strip()
-                orig_smiles = smiles
 
                 if actions:
                     for action in actions:
