@@ -140,8 +140,9 @@ def read_smiles_csv_file(
                 if not smiles:
                     continue
 
-                # Linkinvent "warheads" (R-groups)
-                smiles = smiles.replace(".", "|")
+                # Linkinvent "warheads" (R-groups); only where "|" is a valid token
+                if "|" in allowed_tokens[0] or "|" in allowed_tokens[1]:
+                    smiles = smiles.replace(".", "|")
                 validate_tokens(smiles, allowed_tokens)
             else:  # TL (Lib/Linkinvent)
                 smiles_pair = [smiles.strip() for smiles in row[columns]]
