@@ -99,6 +99,8 @@ def cap_fragment(smiles):
 
         return clean_mol
 
+    return None
+
 
 def compute_scores(smilies: List[str], func: Callable) -> np.array:
     """Compute scores using a RDKit function
@@ -109,16 +111,42 @@ def compute_scores(smilies: List[str], func: Callable) -> np.array:
     """
 
     scores = []
+    n_failed = 0
 
     for smiles in smilies:
         try:
             mol = cap_fragment(smiles)
-            score = func(mol)
-        except ValueError:
+
+            if not mol:
+                score = np.nan
+                n_failed += 1
+                logger.warning(f"{__name__}: Invalid SMILES {smiles}")
+            else:
+                score = func(mol)
+        except Exception as ex:
+            # The exceptions raised here are version-dependent and
+            # heterogeneous (e.g. IndexError, ValueError, and RDKit sanitize
+            # exceptions that do not always subclass ValueError), so they are
+            # caught broadly.  Each SMILES is scored in isolation and a
+            # failure is reported as NaN (issue #333); the full traceback is
+            # logged so genuine bugs remain diagnosable.
             score = np.nan
-            logger.warning(f"{__name__}: Invalid SMILES {smiles}")
+            n_failed += 1
+            logger.warning(
+                f"{__name__}: Could not score SMILES {smiles}: {type(ex).__name__}: {ex}",
+                exc_info=True,
+            )
 
         scores.append(score)
+
+    # if *every* input failed to score this is more likely a bug in the
+    # component or its configuration than per-SMILES noise - flag it loudly
+    if n_failed == len(smilies):
+        logger.error(
+            f"{__name__}: every input failed to score for "
+            f"{getattr(func, '__name__', str(func))}; "
+            "this is probably a component/configuration bug, not per-SMILES noise"
+        )
 
     return ComponentResults([np.array(scores, dtype=float)])
 
