@@ -194,3 +194,83 @@ def test_compute_component_scores_with_index_smiles_and_duplicates():
         "CCOO",
         "CCCC",
     }  # cehck all are scored
+
+
+def scoring_function_incomplete(smilies):
+    # returns fewer scores than the number of input SMILES, mimicking a
+    # component that fails to score some of its inputs (e.g. unparseable
+    # fragments).  See issue #335.
+    scores = []
+
+    for smiles in smilies:
+        mol = Chem.MolFromSmiles(smiles)
+
+        if mol is None:
+            continue
+
+        scores.append(Descriptors.MolWt(mol))
+
+    return ComponentResults([np.array(scores, dtype=float)])
+
+
+def test_compute_scores_incomplete_result_backfilled_with_nan():
+    # a component returning fewer scores than inputs must not crash the run
+    # (issue #335); missing (trailing) scores are backfilled with NaN
+    smilies = ["CCC", "CCCC", "not_a_molecule"]
+
+    transform_results = compute_transform(
+        "test",
+        (["test"], scoring_function_incomplete, [None], [1.0]),
+        smilies,
+        {},
+        np.array([True, True, True]),
+    )
+
+    scores = transform_results.component_result.fetch_scores(smilies, transpose=True)[0]
+
+    assert scores[0] == pytest.approx(Descriptors.MolWt(Chem.MolFromSmiles("CCC")))
+    assert scores[1] == pytest.approx(Descriptors.MolWt(Chem.MolFromSmiles("CCCC")))
+    assert np.isnan(scores[2])
+
+
+def test_fetch_scores_returns_nan_for_missing_smiles():
+    component_results = ComponentResults(scores=[np.array([0.5, 0.7])])
+    smiles_associated = SmilesAssociatedComponentResults(component_results, smiles=["A", "B"])
+
+    # "X" was never scored -> NaN, and ordering is preserved (issue #335)
+    scores = smiles_associated.fetch_scores(["A", "X", "B"], transpose=True)[0]
+
+    assert scores[0] == pytest.approx(0.5)
+    assert np.isnan(scores[1])
+    assert scores[2] == pytest.approx(0.7)
+
+
+def test_fetch_metadata_returns_none_for_missing_smiles():
+    component_results = ComponentResults(
+        scores=[np.array([0.5, 0.7])], metadata={"prop": ["a", "b"]}
+    )
+    smiles_associated = SmilesAssociatedComponentResults(component_results, smiles=["A", "B"])
+
+    # "X" was never scored -> None, and ordering is preserved (issue #335)
+    metadata = smiles_associated.fetch_metadata(["A", "X", "B"])
+
+    assert metadata == {"prop": ["a", None, "b"]}
+
+
+def scoring_function_short(smilies):
+    # returns fewer scores than the number of input SMILES regardless of
+    # validity, mimicking a broken component (issue #335)
+    scores = [Descriptors.MolWt(Chem.MolFromSmiles(s)) for s in smilies[:2]]
+    return ComponentResults([np.array(scores, dtype=float)])
+
+
+def test_compute_component_scores_short_result_warns_not_raises():
+    # a component returning fewer scores than inputs must warn and continue
+    # rather than raise (issue #335); missing scores are backfilled downstream
+    smilies = ["CCC", "CCCC", "CCCN"]
+
+    component_results = compute_component_scores(
+        smilies, scoring_function_short, {}, np.array([True, True, True])
+    )
+
+    assert set(component_results.data.keys()) == {"CCC", "CCCC"}
