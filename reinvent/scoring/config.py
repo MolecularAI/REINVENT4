@@ -1,6 +1,6 @@
 """Convert the components dictionary into an internal data structure"""
 
-__all__ = ["get_components", "check_pumas_available"]
+__all__ = ["get_components"]
 from dataclasses import dataclass
 from collections import defaultdict
 from typing import List, Dict, Optional, Tuple, Any
@@ -9,27 +9,9 @@ import logging
 from .importer import get_registry
 from .transforms.transform import get_transform
 
-try:
-    from pumas.desirability import desirability_catalogue
-
-    have_pumas = True
-except ImportError:
-    have_pumas = False
+from .pumas_support import check_pumas_available, desirability_catalogue
 
 logger = logging.getLogger(__name__)
-
-
-def check_pumas_available() -> None:
-    """Check that the optional PUMAS package is installed
-
-    :raises RuntimeError: when PUMAS is requested but not installed
-    """
-
-    if not have_pumas:
-        raise RuntimeError(
-            "use_pumas is set but the optional 'pumas' package is not "
-            "installed: pip install reinvent[pumas]"
-        )
 
 
 @dataclass

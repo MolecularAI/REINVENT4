@@ -21,15 +21,11 @@ import numpy as np
 
 from reinvent.utils import config_parse
 from . import aggregators
-from .config import get_components, check_pumas_available
+from .config import get_components
 from .compute_scores import compute_transform
+from .pumas_support import aggregation_catalogue, check_pumas_available
 from .results import ScoreResults
 from .validation import ScorerConfig
-
-try:
-    from pumas.aggregation import aggregation_catalogue
-except ImportError:  # optional dependency, guarded by check_pumas_available()
-    aggregation_catalogue = None
 
 
 MAX_CPU_COUNT = 8

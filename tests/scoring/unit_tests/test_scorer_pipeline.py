@@ -1,10 +1,9 @@
 import numpy as np
 import pytest
-from reinvent.scoring.config import have_pumas
+from reinvent.scoring.pumas_support import have_pumas
 from reinvent.scoring.scorer import Scorer
 from numpy.testing import assert_array_almost_equal
 
-# pumas is an optional dependency: skip its half of the parametrisation when absent
 USE_PUMAS = [
     pytest.param(
         True,
@@ -449,7 +448,7 @@ def test_metadata_passing(use_pumas):
 
 
 def test_use_pumas_without_pumas_installed_raises(monkeypatch):
-    monkeypatch.setattr("reinvent.scoring.config.have_pumas", False)
+    monkeypatch.setattr("reinvent.scoring.pumas_support.have_pumas", False)
 
     scorer_config = {
         "type": "geometric_mean",
