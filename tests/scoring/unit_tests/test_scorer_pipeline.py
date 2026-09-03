@@ -1,10 +1,20 @@
 import numpy as np
 import pytest
+from reinvent.scoring.config import have_pumas
 from reinvent.scoring.scorer import Scorer
 from numpy.testing import assert_array_almost_equal
 
+# pumas is an optional dependency: skip its half of the parametrisation when absent
+USE_PUMAS = [
+    pytest.param(
+        True,
+        marks=pytest.mark.skipif(not have_pumas, reason="optional 'pumas' package not installed"),
+    ),
+    pytest.param(False),
+]
 
-@pytest.mark.parametrize("use_pumas", [True, False])
+
+@pytest.mark.parametrize("use_pumas", USE_PUMAS)
 def test_geo_scorer(use_pumas):
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
     invalid_mask = np.array([True, True, True, True])
@@ -64,7 +74,7 @@ def test_geo_scorer(use_pumas):
     )  # molecularweight, qed, custom alerts, matching subs
 
 
-@pytest.mark.parametrize("use_pumas", [True, False])
+@pytest.mark.parametrize("use_pumas", USE_PUMAS)
 def test_arth_scorer(use_pumas):
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
     invalid_mask = np.array([True, True, True, True])
@@ -123,7 +133,7 @@ def test_arth_scorer(use_pumas):
     )  # molecularweight, qed, custom alerts, matching subs
 
 
-@pytest.mark.parametrize("use_pumas", [True, False])
+@pytest.mark.parametrize("use_pumas", USE_PUMAS)
 def test_filter_and_penalty(use_pumas):
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
     invalid_mask = np.array([True, True, True, True])
@@ -168,7 +178,7 @@ def test_filter_and_penalty(use_pumas):
     )  # molecularweight, qed, custom alerts, matching subs
 
 
-@pytest.mark.parametrize("use_pumas", [True, False])
+@pytest.mark.parametrize("use_pumas", USE_PUMAS)
 def test_filter_scorer(use_pumas):
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
     invalid_mask = np.array([True, True, True, True])
@@ -205,7 +215,7 @@ def test_filter_scorer(use_pumas):
     assert_array_almost_equal(arth_results.total_scores, expected_result_arth_mean)
 
 
-@pytest.mark.parametrize("use_pumas", [True, False])
+@pytest.mark.parametrize("use_pumas", USE_PUMAS)
 def test_all_filter_scorer(use_pumas):
     smiles = ["NCc1ccccc1", "NCc1ccccc1C(=O)O", "NCc1ccccc1C(F)", "NCc1ccccc1C(=O)F"]
     invalid_mask = np.array([True, True, True, True])
@@ -241,7 +251,7 @@ def test_all_filter_scorer(use_pumas):
     assert_array_almost_equal(arth_results.total_scores, expected_result_arth_mean)
 
 
-@pytest.mark.parametrize("use_pumas", [True, False])
+@pytest.mark.parametrize("use_pumas", USE_PUMAS)
 def test_fragment_scoring(use_pumas):
     smilies = ["CC(C)(C(=O)O)n1cnc(NC=O)c1", "O=COc1ccc2cc(-c3ccc(C(=O)O)nn3)ccc2[n+]1CC(=O)O"]
     fragments = [
@@ -312,7 +322,7 @@ def test_fragment_scoring(use_pumas):
     )
 
 
-@pytest.mark.parametrize("use_pumas", [True, False])
+@pytest.mark.parametrize("use_pumas", USE_PUMAS)
 def test_libinvent_scoring(use_pumas):
     smilies = ["CC(Oc1ccc(C(C)C)cc1)C(=O)NCCCCc1ccc(N(C)C)cc1", "O=CNCCCCc1ccc(-c2ccc(O)cc2)cc1"]
     connectivity_annotated_smiles = [
@@ -382,7 +392,7 @@ def test_libinvent_scoring(use_pumas):
     )
 
 
-@pytest.mark.parametrize("use_pumas", [True, False])
+@pytest.mark.parametrize("use_pumas", USE_PUMAS)
 def test_metadata_passing(use_pumas):
     smiles = ["FCc1ccccc1", "SCc1ccccc1", "OCc1ccccc1", "O=Cc1ccccc1"]
     invalid_mask = np.array([True, True, True, True])
@@ -436,3 +446,24 @@ def test_metadata_passing(use_pumas):
     assert metadata_values == metadata_res_values
     assert metadata_names == metadata_res_names
     assert_array_almost_equal(geo_results.total_scores, expected_result_geo_mean)
+
+
+def test_use_pumas_without_pumas_installed_raises(monkeypatch):
+    monkeypatch.setattr("reinvent.scoring.config.have_pumas", False)
+
+    scorer_config = {
+        "type": "geometric_mean",
+        "use_pumas": True,
+        "component": [
+            {
+                "custom_alerts": {
+                    "endpoint": [
+                        {"name": "Unwanted SMARTS", "weight": 1, "params": {"smarts": ["F"]}}
+                    ]
+                }
+            }
+        ],
+    }
+
+    with pytest.raises(RuntimeError, match=r"reinvent\[pumas\]"):
+        Scorer(scorer_config)

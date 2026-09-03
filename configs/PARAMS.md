@@ -264,7 +264,7 @@ All run modes that score molecules use the same scoring block structure.
 |------------|---------|--------------------------------------------------------------------------------------------------------|
 | `type`     | required | Aggregation function: `"arithmetic_mean"` / `"custom_sum"` or `"geometric_mean"` / `"custom_product"`. |
 | `parallel` | `1`      | Number of CPU cores to use for component computation (maximum 40).                                     |
-| `use_pumas`| `false`  | Use the alternative PUMAS desirability transform library instead of the built-in transforms.           |
+| `use_pumas`| `false`  | Use the alternative PUMAS desirability transform library instead of the built-in transforms.  Requires the optional `pumas` extra: `pip install reinvent[pumas]`. |
 | `filename` | —        | Load the scoring setup from this external file (TOML or JSON).                                         |
 | `filetype` | —        | File format when `filename` is set: `"toml"` or `"json"` (optional, filetype inferred from suffix).    |
 
