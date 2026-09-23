@@ -10,7 +10,7 @@
 import subprocess as sp
 import argparse
 
-OPTIONAL_DEPENDENCIES = ("all", "none", "openeye", "isim", "chemprop1", "chemprop2")
+OPTIONAL_DEPENDENCIES = ("all", "none", "openeye", "isim", "pumas", "chemprop1", "chemprop2")
 OPENEYE_URL = "https://pypi.anaconda.org/OpenEye/simple"
 PYTORCH_BASE_URL = "https://download.pytorch.org/whl"
 
