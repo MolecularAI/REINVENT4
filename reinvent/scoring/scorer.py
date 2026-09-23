@@ -23,10 +23,9 @@ from reinvent.utils import config_parse
 from . import aggregators
 from .config import get_components
 from .compute_scores import compute_transform
+from .pumas_support import aggregation_catalogue, check_pumas_available
 from .results import ScoreResults
 from .validation import ScorerConfig
-
-from pumas.aggregation import aggregation_catalogue
 
 
 MAX_CPU_COUNT = 8
@@ -103,7 +102,8 @@ class Scorer:
 
         self.use_pumas = config.use_pumas
         if self.use_pumas:
-           
+            check_pumas_available()
+
             # Need to handle mapping for back compatibility
             if config.type == 'custom_product':
                 config.type = 'geometric_mean'
