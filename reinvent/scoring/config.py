@@ -9,8 +9,7 @@ import logging
 from .importer import get_registry
 from .transforms.transform import get_transform
 
-import pumas
-from pumas.desirability import desirability_catalogue
+from .pumas_support import check_pumas_available, desirability_catalogue
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +40,9 @@ def get_components(components: list[dict[str, dict]], use_pumas: bool = False) -
     scorers = []
     filters = []
     penalties = []
+
+    if use_pumas:
+        check_pumas_available()
 
     component_registry = get_registry()
 
