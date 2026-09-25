@@ -35,7 +35,22 @@ class SectionDiversityFilter(GlobalConfig):
     minscore: float = Field(0.4, ge=0.0, le=1.0)  # not needed for PenalizeSameSmiles
     minsimilarity: Optional[float] = Field(0.4, ge=0.0, le=1.0)  # ScaffoldSimilarity only
     penalty_multiplier: Optional[float] = Field(0.5, ge=0.0, le=1.0)  # PenalizeSameSmiles only
+    penalty_function: str = Field("Step") # Penality function for downscoring, default: 0 or 1 based on bucket_size
+    intrinsic_reward: Optional[str] = Field(None)  # Add intrinsic reward as optional parameter
 
+    # BitBirch clustering parameters
+    discard: bool = Field(False) # BitBirchDiversityFilter only
+    merge_threshold: float = Field(0.65, ge=0.0, le=1.0) # BitBirchDiversityFilter only
+    branching_factor: int = Field(2500, ge=1) # BitBirchDiversityFilter only
+    recluster_tolerance: Optional[float] = Field(None, ge=0.0) # BitBirchDiversityFilter only
+    recluster_interval: Optional[int] = Field(None, ge=1) # BitBirchDiversityFilter only
+
+    debug: bool = False  # Includes metrics in the tensorboard logs, but slows down training. Only for debugging purposes.
+
+    learning_rate: float = Field(
+        1e-4,
+        gt=0.0,
+    )  # IdenticalScaffoldPenaltyRND only, defaults to 1e-4
 
 class SectionIntrinsicPenalty(GlobalConfig):
     type: str
@@ -53,6 +68,12 @@ class SectionInception(GlobalConfig):
     memory_size: int = 50
     sample_size: int = 10
     deduplicate: bool = True  # obsolete, True by default now
+    diversity_penalty_weight: float = Field(0.0, ge=0.0, le=1.0)
+    is_weighted_sampling: bool = False
+    is_weighted_scores: bool = False
+    is_weight_clip: Optional[float] = None
+    is_weight_temperature: float = 1.0
+    debug: bool = False  # Includes metrics in the tensorboard logs, but slows down training. Only for debugging purposes.
 
 
 class SectionStage(GlobalConfig):

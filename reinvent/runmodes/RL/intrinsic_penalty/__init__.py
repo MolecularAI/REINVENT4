@@ -1,1 +1,2 @@
 from .identical_murcko_scaffold_rnd import IdenticalMurckoScaffoldRND
+from .information_penalty import InformationPenalty

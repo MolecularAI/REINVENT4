@@ -163,17 +163,31 @@ def mauli_reinforce_strategy(
 
 
 class RLReward:
-    def __init__(self, optimizer, sigma=120, strategy: Callable = dap_strategy):
+    def __init__(
+        self,
+        optimizer,
+        sigma=120,
+        strategy: Callable = dap_strategy,
+        is_weighted_scores: bool = False,
+        is_weight_clip: float | None = None,
+        is_weight_temperature: float = 1.0,
+    ):
         """Run the chosen RL reward strategy to optimize the model.
 
         :param optimizer: torch optimizer for the network
         :param strategy: a callable to compute the loss function
         :param sigma: the scaling hyperparameter
+        :param is_weighted_scores: apply IS weight correction to inception replay scores
+        :param is_weight_clip: clamp log IS weights to [-clip, clip] before softmax
+        :param is_weight_temperature: temperature divisor for log IS weights
         """
 
         self._optimizer = optimizer
         self._sigma = sigma
         self._strategy = strategy
+        self._is_weighted_scores = is_weighted_scores
+        self._is_weight_clip = is_weight_clip
+        self._is_weight_temperature = is_weight_temperature
 
     def __call__(
         self,
@@ -214,8 +228,12 @@ class RLReward:
         )
 
         if inception is not None:
-            _orig_smilies, _scores, _prior_lls = inception(
-                np.array(orig_smilies)[mask_idx], scores_nonnan[mask_idx], prior_lls[mask_idx]
+            _orig_smilies, _scores, _prior_lls, _stored_agent_lls = inception(
+                np.array(orig_smilies)[mask_idx],
+                scores_nonnan[mask_idx],
+                prior_lls[mask_idx],
+                agent_lls[mask_idx],
+                agent,
             )
 
             # compute the agent NLLs for the _current_ state of the agent
@@ -226,9 +244,19 @@ class RLReward:
             else:  # all other models
                 _agent_lls = -lls.likelihood
 
+            _scores_t = torch.tensor(_scores).to(_agent_lls)
+
+            if self._is_weighted_scores:
+                _stored_lls_t = torch.tensor(_stored_agent_lls).to(_agent_lls)
+                log_w = (_agent_lls.detach() - _stored_lls_t) / self._is_weight_temperature
+                if self._is_weight_clip is not None:
+                    log_w = log_w.clamp(-self._is_weight_clip, self._is_weight_clip)
+                w = torch.softmax(log_w, dim=0)
+                _scores_t = _scores_t * w * len(w)  # mean-preserving reweighting
+
             inception_loss, _ = self._strategy(
                 _agent_lls,
-                torch.tensor(_scores).to(_agent_lls),
+                _scores_t,
                 torch.tensor(_prior_lls).to(_agent_lls),
                 self._sigma,
             )

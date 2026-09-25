@@ -11,10 +11,11 @@ from reinvent.utils import get_tokens_from_vocabulary, config_parse
 logger = logging.getLogger(__name__)
 
 
-def setup_inception(config: SectionInception, prior: ModelAdapter):
+def setup_inception(config: SectionInception, diversity_filter: memories.DiversityFilter | None, prior: ModelAdapter):
     """Setup inception memory
 
     :param config: the config specific to the inception memory
+    :param diversity_filter: the diversity filter to be used
     :param prior: the prior network
     :return: the set up inception memory or None
     """
@@ -47,8 +48,17 @@ def setup_inception(config: SectionInception, prior: ModelAdapter):
         seed_smilies=smilies,
         scoring_function=None,
         prior=prior,
+        diversity_filter=diversity_filter if config.diversity_penalty_weight > 0.0 else None,
+        diversity_penalty_weight=config.diversity_penalty_weight,
+        is_weighted_sampling=config.is_weighted_sampling,
+        is_weight_clip=config.is_weight_clip,
+        is_weight_temperature=config.is_weight_temperature,
+        debug=config.debug,
     )
 
     logger.info(f"Using inception memory")
+
+    if inception.diversity_filter is not None:
+        logger.info(f"Inception memory is using diversity penalty")
 
     return inception

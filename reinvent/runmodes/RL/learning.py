@@ -7,6 +7,7 @@ take care of the specifics for optimization of the model.
 
 from __future__ import annotations
 
+
 __all__ = ["Learning"]
 import logging
 import time
@@ -27,15 +28,15 @@ except ImportError:
 
 from .reports import RLTBReporter, RLCSVReporter, RLRemoteReporter, RLReportData
 from reinvent.runmodes.RL.data_classes import ModelState
-from reinvent.utils.logmon import VERBOSE
 from reinvent.models.model_factory.sample_batch import SmilesState
 from reinvent.models.model_factory.model_adapter import SampledSequencesDTO
 from reinvent.utils import get_reporter
 
 if TYPE_CHECKING:
+    from reinvent.runmodes.RL.memories.utils.diversity_results import DiversityResults
     from reinvent.runmodes.samplers import Sampler
     from reinvent.runmodes.RL import RLReward, terminator_callable
-    from reinvent.runmodes.RL.memories import Inception
+    from reinvent.runmodes.RL.memories.filters import Inception
     from reinvent.runmodes.RL.intrinsic_penalty.intrinsic_penalty import IntrinsicPenalty
     from reinvent.models import ModelAdapter
     from reinvent.scoring import Scorer, ScoreResults
@@ -127,16 +128,11 @@ class Learning(ABC):
         """
 
         step = -1
-        scaffolds = None
+        diversity_results: DiversityResults | None = None
         self.start_time = time.time()
 
         for step in range(self.max_steps):
             self.sampled = self.sampling_model.sample(self.input_smilies)
-
-            if logger.isEnabledFor(VERBOSE):
-                for smi, state in zip(self.sampled.smilies, self.sampled.states):
-                    logger.verbose(f"{smi} | {state}")
-
             self.smiles_memory.update(self.sampled.smilies)  # NOTE: global -> only update here!
 
             self.invalid_mask = np.where(self.sampled.states == SmilesState.INVALID, False, True)
@@ -149,13 +145,13 @@ class Learning(ABC):
             if self._state.diversity_filter:
                 df_mask = np.where(self.invalid_mask, True, False)
 
-                scaffolds = self._state.diversity_filter.update_score(
-                    results.total_scores, results.smilies, df_mask
+                diversity_results = self._state.diversity_filter.update_score(
+                    results.total_scores, self.sampled, df_mask
                 )
             elif self.intrinsic_penalty:
                 df_mask = np.where(self.invalid_mask, True, False)
 
-                scaffolds = self.intrinsic_penalty.update_score(
+                diversity_results = self.intrinsic_penalty.update_score(
                     results.total_scores, results.smilies, df_mask, self.sampled
                 )
 
@@ -164,10 +160,14 @@ class Learning(ABC):
             else:
                 orig = []
 
-                for inp, outp, nll in zip(self.sampled.items1, self.sampled.items2, self.sampled.nlls):
+                for inp, outp, nll in zip(self.sampled.input, self.sampled.output, self.sampled.nlls):
                     orig.append(SampledSequencesDTO(inp, outp, nll))
 
             agent_lls, prior_lls, augmented_nll, loss = self.update(results, orig)
+
+            inception_results = None
+            if self.inception is not None:
+                inception_results = getattr(self.inception, "last_results", None)
 
             state_dict = self._state.as_dict()
             self._state_info.update(state_dict)
@@ -179,12 +179,13 @@ class Learning(ABC):
             self.report(
                 step,
                 mean_scores,
-                scaffolds,
+                diversity_results,
                 score_results=results,
                 agent_lls=agent_lls,
                 prior_lls=prior_lls,
                 augmented_nll=augmented_nll,
-                loss=loss.item(),
+                loss=float(loss),
+                inception_results=inception_results,
             )
 
             if converged(mean_scores, step):
@@ -290,12 +291,13 @@ class Learning(ABC):
         self,
         step: int,
         mean_score: float,
-        scaffolds,
+        diversity_results: DiversityResults | None,
         score_results: ScoreResults,
         agent_lls: torch.tensor,
         prior_lls: torch.tensor,
         augmented_nll: torch.tensor,
         loss: float,
+        inception_results=None,
     ):
         """Log the results"""
 
@@ -338,7 +340,7 @@ class Learning(ABC):
             stage=self.stage_no,
             smilies=smilies,
             isim=isim,  # Add isim to report_data
-            scaffolds=scaffolds,
+            diversity_results=diversity_results,
             sampled=self.sampled,
             score_results=score_results,
             prior_mean_nll=prior_mean,
@@ -350,19 +352,12 @@ class Learning(ABC):
             loss=loss,
             fraction_valid_smiles=fract_valid_smiles,
             fraction_duplicate_smiles=fract_duplicate_smiles,
-            df_memory_smilies=len(diversity_filter.smiles_memory) if diversity_filter else 0,
-            bucket_max_size=(
-                diversity_filter.scaffold_memory.max_size if diversity_filter else None
-            ),
-            num_full_buckets=(
-                diversity_filter.scaffold_memory.count_full() if diversity_filter else None
-            ),
-            num_total_buckets=(len(diversity_filter.scaffold_memory) if diversity_filter else None),
             mean_score=mean_score,
             model_type=self._state.agent.model_type,
             start_time=self.start_time,
             n_steps=self.max_steps,
             mask_idx=mask_idx,
+            inception_results=inception_results,
         )
 
         for reporter in self.reporters:
