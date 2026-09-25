@@ -6,7 +6,7 @@ is full.
 
 from __future__ import annotations
 
-all = ["BucketCounter"]
+__all__ = ["BucketCounter"]
 from collections import Counter
 from typing import TYPE_CHECKING
 

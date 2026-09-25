@@ -215,12 +215,11 @@ def run_staged_learning(
 
             handler.save()
 
-            # TODO: revert back
-            # if terminate:
-            #     logger.warning(
-            #         f"Maximum number of steps of {package.max_steps} reached in stage "
-            #         f"{stage_no}. Terminating all stages."
-            #     )
-            #     break
+            if terminate:
+                logger.warning(
+                    f"Maximum number of steps of {package.max_steps} reached in stage "
+                    f"{stage_no}. Terminating all stages."
+                )
+                break
 
             logger.info(f"Finished stage {stage_no} >>>")

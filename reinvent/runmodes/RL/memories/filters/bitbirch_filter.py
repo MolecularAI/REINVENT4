@@ -9,7 +9,6 @@ from reinvent.models.model_factory.sample_batch import SampleBatch
 
 from ..diversity_filter import DiversityFilter
 
-# from bblean.merges import MergeAcceptFunction
 from ..utils.bitbirch_diameter_merge import BitBirchTrackingDiameterMerge
 from ..utils.diversity_results import DiversityResults
 
@@ -22,10 +21,10 @@ class BitBirchDiversityFilter(DiversityFilter):
     def __init__(
         self,
         discard=False,
-        threshold: float = 0.65,
+        merge_threshold: float = 0.65,
         branching_factor: int = 2500,
         # merge_criterion: str | MergeAcceptFunction | None = None,
-        tolerance: float | None = None,
+        recluster_tolerance: float | None = None,
         recluster_interval: int | None = None,
         *args,
         **kwargs,
@@ -37,10 +36,10 @@ class BitBirchDiversityFilter(DiversityFilter):
         )
         self.recluster_interval = recluster_interval
         self.bb_tree = BitBirch(
-            threshold=threshold,
+            threshold=merge_threshold,
             merge_criterion=self.merge_criterion,
             branching_factor=branching_factor,
-            tolerance=tolerance,
+            tolerance=recluster_tolerance,
         )
 
     def calculate_penalty(self, scores: np.ndarray, smilies: list[str]) -> tuple[np.ndarray, None | list[tuple[list[int], int]]]:

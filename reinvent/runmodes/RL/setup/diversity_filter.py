@@ -77,4 +77,5 @@ def setup_diversity_filter(
         learning_rate=config.learning_rate,
         penalty_function=penalty,
         intrinsic_reward=intrinsic_reward,
+        debug=config.debug,
     )

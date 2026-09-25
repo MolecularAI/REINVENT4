@@ -190,3 +190,5 @@ class DiversityFilter(ABC):
             # calculate the final runtime after post-update, which can be used to update the memory
             results.runtime = end - start # type: ignore
             return results
+        else:
+            self.post_update(None, scores, sampled, active_idxs, penalties, mask)

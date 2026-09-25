@@ -58,10 +58,11 @@ The penalty function and (optionally) an intrinsic reward are always attached to
 |----------------------|---------|-----------------------------------------------------------------------------|
 | `type`               | —       | Filter class name (see table below)                                         |
 | `bucket_size`        | 25      | Max molecules per cluster before penalty kicks in                           |
-| `minscore`           | 0.5     | Minimum score for a molecule to be memorised                                |
+| `minscore`           | 0.4     | Minimum score for a molecule to be memorised                                |
 | `penalty_function`   | `Step`  | How score is scaled based on bucket utilization: `Step`, `Linear`, `Tanh`, `Sigmoid`, `Erf` |
 | `intrinsic_reward`   | —       | Optional exploration bonus: `RND` or `Information`                          |
 | `learning_rate`      | 1e-4    | Optimizer rate for `RND` intrinsic reward                                   |
+| `debug`                   | false   | Record per-step diversity metrics into tensorboard results and logs                                        |
 
 ## Filter Types
 

@@ -1,6 +1,4 @@
 import logging
-from collections.abc import Sequence
-
 import numpy as np
 
 from reinvent.models.model_factory.sample_batch import SampleBatch

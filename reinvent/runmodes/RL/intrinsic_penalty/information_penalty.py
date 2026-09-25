@@ -5,7 +5,6 @@ import numpy as np
 
 from reinvent.models.model_factory.sample_batch import SampleBatch
 
-# from bblean.merges import MergeAcceptFunction
 from ..memories.utils.diversity_results import DiversityResults
 from .intrinsic_penalty import IntrinsicPenalty
 
