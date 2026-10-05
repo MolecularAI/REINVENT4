@@ -27,8 +27,12 @@ class PMI:
     def __init__(self, params: Parameters):
         self.properties = params.property
 
-        if not "npr1" in self.properties and not "npr2" in self.properties:
+        if not self.properties:
             raise ValueError(f"{__name__}: need one or both of: 'npr1', 'npr2'")
+
+        for prop in self.properties:
+            if prop not in ("npr1", "npr2"):
+                raise ValueError(f"{__name__}: unknown property '{prop}', need 'npr1' or 'npr2'")
 
         self.number_of_endpoints = len(params.property)
 
@@ -51,12 +55,12 @@ class PMI:
             scores1.append(npr1)
             scores2.append(npr2)
 
-        scores = []
+        npr_scores = {
+            "npr1": np.array(scores1, dtype=float),
+            "npr2": np.array(scores2, dtype=float),
+        }
 
-        if "npr1" in self.properties:
-            scores.append(np.array(scores1, dtype=float))
-
-        if "npr2" in self.properties:
-            scores.append(np.array(scores2, dtype=float))
+        # one score array per endpoint, in the order the endpoints were configured
+        scores = [npr_scores[prop] for prop in self.properties]
 
         return ComponentResults(scores)
