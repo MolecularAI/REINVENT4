@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from reinvent.models import ModelAdapter
-    from reinvent.runmodes.RL.memories import DiversityFilter
+    from reinvent.runmodes.RL.memories.filters import DiversityFilter
 
 
 @dataclass
@@ -16,7 +16,7 @@ class ModelState:
     """Data structures that describe a model's state"""
 
     agent: ModelAdapter
-    diversity_filter: DiversityFilter
+    diversity_filter: DiversityFilter | None = None
 
     # FIXME: dataclasses.asdict does not work here (deepcopy of tensors not
     #        created explicitly by the user not support by pytorch)

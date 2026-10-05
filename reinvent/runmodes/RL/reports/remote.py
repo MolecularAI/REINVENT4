@@ -66,8 +66,38 @@ class RLRemoteReporter:
                 "smarts_pattern": smarts_pattern,
                 "smiles_legend_pairs": smiles_legend_pairs,
             },
-            "collected smiles in memory": data.df_memory_smilies,
+            "collected smiles in memory": data.diversity_results.memory_size if data.diversity_results else 0,
         }
+
+        if data.diversity_results:
+            dr = data.diversity_results
+            record["diversity"] = {
+                "memory_size": dr.memory_size,
+                "runtime": dr.runtime,
+                "bucket_max_size": dr.bucket_max_size,
+                "num_full_buckets": dr.num_full_buckets,
+                "num_active": dr.num_active,
+                "num_downscored": dr.num_downscored,
+                "num_total_buckets": dr.num_total_buckets,
+                "intrinsic_reward": dr.intrinsic_reward,
+                "mean_extrinsic_score": dr.mean_extrinsic_score,
+                "modified_bucket_occupation": dr.modified_bucket_occupation,
+            }
+
+        if data.inception_results:
+            ir = data.inception_results
+            record["inception"] = {
+                "memory_size": ir.memory_size,
+                "top_score": ir.top_score,
+                "mean_score": ir.mean_score,
+                "bottom_score": ir.bottom_score,
+                "mean_sampled_score": ir.mean_sampled_score,
+                "num_new_added": ir.num_new_added,
+                "num_evicted": ir.num_evicted,
+                "is_weight_max": ir.is_weight_max,
+                "is_weight_entropy": ir.is_weight_entropy,
+                "mean_agent_ll_drift": ir.mean_agent_ll_drift,
+            }
 
         self.reporter.send(record)
 

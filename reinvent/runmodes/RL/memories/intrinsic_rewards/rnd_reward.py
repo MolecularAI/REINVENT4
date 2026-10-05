@@ -1,21 +1,19 @@
 import logging
-import time
+from collections.abc import Sequence
 from copy import deepcopy
-from typing import List
 
 import numpy as np
 import torch
 
 from reinvent.models.model_factory.sample_batch import SampleBatch
 from reinvent.runmodes import create_adapter
-from reinvent.runmodes.RL.memories.utils.diversity_results import DiversityResults
 
-from .intrinsic_penalty import IntrinsicPenalty
+from ..intrinsic_reward_base import IntrinsicReward
 
 logger = logging.getLogger(__name__)
 
 
-class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
+class RNDReward(IntrinsicReward):
     """Provides extrinsic reward penalty and intrinsic rewards based on random network distillation."""
 
     def __init__(self, *args, **kwargs):
@@ -38,9 +36,9 @@ class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
             device=self.device,
         )
 
-        assert (
-            model_type in supported_novelty_functions.keys()
-        ), f"Model type {model_type} not supported for RND intrinsic reward. Supported types: {supported_novelty_functions.keys()}"
+        assert model_type in supported_novelty_functions.keys(), (
+            f"Model type {model_type} not supported for RND intrinsic reward. Supported types: {supported_novelty_functions.keys()}"
+        )
 
         self._add_intrinsic_reward = supported_novelty_functions[model_type]
 
@@ -54,9 +52,9 @@ class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
             device=self.device,
         )
 
-        assert (
-            model_type == model_type_pred
-        ), f"Model type mismatch between target and prediction networks: {model_type} vs {model_type_pred}"
+        assert model_type == model_type_pred, (
+            f"Model type mismatch between target and prediction networks: {model_type} vs {model_type_pred}"
+        )
 
         # Randomly initialize target network parameters and freeze them
         for param in self._target_network.get_network_parameters():
@@ -68,48 +66,18 @@ class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
             self._prediction_network.get_network_parameters(), lr=self.learning_rate
         )
 
-    def update_score(
+    def add_intrinsic_reward(
         self,
         scores: np.ndarray,
-        smilies: List[str],
-        mask: np.ndarray,
         sampled: SampleBatch,
-    ) -> DiversityResults:
-        """Compute the score and add intrinsic rewards based on RND."""
+        active_idxs: list[int],
+        bucket_utilization: list[tuple[Sequence[int], int]],
+    ) -> np.ndarray | None:
 
-        prev_scores = np.copy(scores)
-
-        start = time.time()
-
-        assert len(smilies) == len(
-            sampled.items2
-        ), f"Length of smilies ({len(smilies)}) and sampled.items2 ({len(sampled.items2)}) must be the same"
-
-        scaffolds, active_idxs = self.score_scaffolds(
-            scores,
-            smilies,
-            mask,
-            topological=False,
-        )
-
-        self._add_intrinsic_reward(sampled, scores, active_idxs)
-
-        end = time.time()
-
-        return DiversityResults(
-            runtime=end-start,
-            scaffolds=scaffolds,
-            memory_size=len(self.smiles_memory),
-            bucket_max_size=self.bucket_size,
-            num_full_buckets=self.scaffold_memory.count_full(),
-            num_total_buckets=len(self.scaffold_memory),
-            num_active=len(active_idxs),
-            intrinsic_reward=float(np.sum(scores - prev_scores)),
-            mean_extrinsic_score= prev_scores.mean()
-        )
+        return self._add_intrinsic_reward(sampled, scores, active_idxs)
 
     def _calculate_novelty_reinvent(
-        self, sampled: SampleBatch, scores: np.ndarray, active_idxs: List[int]
+        self, sampled: SampleBatch, scores: np.ndarray, active_idxs: list[int]
     ) -> np.ndarray:
 
         if len(active_idxs) == 0:
@@ -131,7 +99,9 @@ class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
         loss.backward()
         self._optimizer.step()
 
-        novelty = (novelty - np.amin(novelty)) / (np.amax(novelty) - np.amin(novelty) + 1e-6)
+        novelty = (novelty - np.amin(novelty)) / (
+            np.amax(novelty) - np.amin(novelty) + 1e-6
+        )
 
         for i, idx in enumerate(active_idxs):
             scores[idx] += novelty[i]
@@ -139,19 +109,19 @@ class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
         return novelty
 
     def _calculate_novelty_common(
-        self, sampled: SampleBatch, scores: np.ndarray, active_idxs: List[int]
+        self, sampled: SampleBatch, scores: np.ndarray, active_idxs: list[int]
     ) -> np.ndarray:
 
         if len(active_idxs) == 0:
             return np.array([])
 
         with torch.no_grad():
-            target_likelihoods = self._target_network.likelihood_smiles(sampled).likelihood[
-                active_idxs
-            ]
-        prediction_likelihoods = self._prediction_network.likelihood_smiles(sampled).likelihood[
-            active_idxs
-        ]
+            target_likelihoods = self._target_network.likelihood_smiles(
+                sampled
+            ).likelihood[active_idxs]
+        prediction_likelihoods = self._prediction_network.likelihood_smiles(
+            sampled
+        ).likelihood[active_idxs]
 
         loss = torch.pow(prediction_likelihoods - target_likelihoods, 2)
 
@@ -163,7 +133,9 @@ class IdenticalMurckoScaffoldRND(IntrinsicPenalty):
         loss.backward()
         self._optimizer.step()
 
-        novelty = (novelty - np.amin(novelty)) / (np.amax(novelty) - np.amin(novelty) + 1e-6)
+        novelty = (novelty - np.amin(novelty)) / (
+            np.amax(novelty) - np.amin(novelty) + 1e-6
+        )
 
         for i, idx in enumerate(active_idxs):
             scores[idx] += novelty[i]
