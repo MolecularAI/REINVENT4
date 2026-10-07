@@ -40,3 +40,11 @@ def test_comp_matching_chirality(use_chirality):
     else:
         assert results.scores[0][0] == 1.0
         assert results.scores[0][1] == 1.0
+
+
+@pytest.mark.parametrize("smarts", [["C(("], [["CO", "C(("]]])
+def test_comp_matching_invalid_smarts(smarts):
+    params = Parameters(smarts, [False])
+
+    with pytest.raises(ValueError, match=r"C\(\("):
+        MatchingSubstructure(params)
