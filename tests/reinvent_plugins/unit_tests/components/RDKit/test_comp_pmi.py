@@ -10,6 +10,7 @@ NOTE: This is a 3D descriptor and therefore the scoring component creates
 """
 
 import numpy as np
+import pytest
 
 from reinvent_plugins.components.RDKit.comp_pmi import Parameters, PMI
 
@@ -64,3 +65,33 @@ def test_comp_pmi_none_molecule_scores_nan():
     assert np.isnan(results.scores[1][0])
     assert not np.isnan(results.scores[0][1])
     assert not np.isnan(results.scores[1][1])
+
+
+def test_comp_pmi_endpoint_order():
+    # a linear molecule has NPR1 ~ 0 and NPR2 ~ 1 for any conformer
+    smiles = ["C#CC#C"]
+
+    params = Parameters(["npr2", "npr1"])
+    pmi = PMI(params)
+    results = pmi(smiles)
+
+    assert len(results.scores) == pmi.number_of_endpoints == 2
+    assert np.allclose(results.scores[0], [1.0], atol=0.01)  # npr2
+    assert np.allclose(results.scores[1], [0.0], atol=0.01)  # npr1
+
+
+def test_comp_pmi_repeated_property():
+    smiles = ["C#CC#C"]
+
+    params = Parameters(["npr1", "npr1"])
+    pmi = PMI(params)
+    results = pmi(smiles)
+
+    assert len(results.scores) == pmi.number_of_endpoints == 2
+
+
+def test_comp_pmi_unknown_property():
+    params = Parameters(["npr1", "npr3"])
+
+    with pytest.raises(ValueError):
+        PMI(params)
