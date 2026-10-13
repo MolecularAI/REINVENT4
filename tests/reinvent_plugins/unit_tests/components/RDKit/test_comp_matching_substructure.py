@@ -54,3 +54,11 @@ def test_comp_matching_substructure_none_molecule_scores_nan():
 
     assert np.isnan(results.scores[0][0])
     assert results.scores[0][1] == 1.0
+
+
+@pytest.mark.parametrize("smarts", [["C(("], [["CO", "C(("]]])
+def test_comp_matching_invalid_smarts(smarts):
+    params = Parameters(smarts, [False])
+
+    with pytest.raises(ValueError, match=r"C\(\("):
+        MatchingSubstructure(params)

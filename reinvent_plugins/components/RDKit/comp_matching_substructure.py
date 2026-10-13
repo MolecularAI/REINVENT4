@@ -42,12 +42,15 @@ class MatchingSubstructure:
 
         for smarts in params.smarts:
             patterns = []
+            smarts_list = smarts if isinstance(smarts, list) else [smarts]
 
-            if isinstance(smarts, list):
-                for smart in smarts:
-                    patterns.append(Chem.MolFromSmarts(smart))
-            else:
-                patterns = [Chem.MolFromSmarts(smarts)]
+            for smart in smarts_list:
+                pattern = Chem.MolFromSmarts(smart)
+
+                if pattern is None:
+                    raise ValueError(f"{__name__}: invalid SMARTS pattern '{smart}'")
+
+                patterns.append(pattern)
 
             if patterns:
                 self.patterns_per_endpoint.append(patterns)
