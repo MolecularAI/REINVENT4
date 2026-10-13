@@ -139,7 +139,18 @@ class SmilesAssociatedComponentResults:
 
         """
         # note that the input smiles are needed to ensure the list has a consistent order with validity masked in scorer
-        scores_list = [self[smiles].score for smiles in smiles]  # first dimension is smiles
+        # any missing SMILES get NaN scores so reporters do not crash on incomplete results
+        if self.data:
+            n_endpoints = len(next(iter(self.data.values())).score)
+        else:
+            n_endpoints = 1
+
+        scores_list = []
+        for smile in smiles:
+            if smile in self.data:
+                scores_list.append(self.data[smile].score)
+            else:
+                scores_list.append((np.nan,) * n_endpoints)
 
         if transpose:  # original csv writing and reporting functions need the data in this format
             scores_list = list(zip(*scores_list))  # first dimension is endpoints
@@ -162,9 +173,9 @@ class SmilesAssociatedComponentResults:
             metadata_collection[metadata_name] = []
 
             for smile in smiles:
-                smile_metadata = self[smile].metadata
+                smile_metadata = self[smile].metadata if smile in self.data else None
 
-                if metadata_name in smile_metadata.keys():
+                if smile_metadata and metadata_name in smile_metadata.keys():
                     metadata_collection[metadata_name].append(str(smile_metadata[metadata_name]))
                 else:
                     metadata_collection[metadata_name].append(None)

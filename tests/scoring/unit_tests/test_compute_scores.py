@@ -194,3 +194,29 @@ def test_compute_component_scores_with_index_smiles_and_duplicates():
         "CCOO",
         "CCCC",
     }  # cehck all are scored
+
+
+def test_fetch_scores_returns_nan_for_missing_smiles():
+    component_results = ComponentResults(scores=[np.array([0.5, 0.7])])
+    smiles_associated = SmilesAssociatedComponentResults(component_results, smiles=["A", "B"])
+
+    # "X" was never scored -> NaN, and ordering is preserved (issue #335)
+    scores = smiles_associated.fetch_scores(["A", "X", "B"], transpose=True)[0]
+
+    assert scores[0] == pytest.approx(0.5)
+    assert np.isnan(scores[1])
+    assert scores[2] == pytest.approx(0.7)
+
+
+def test_fetch_metadata_returns_none_for_missing_smiles():
+    component_results = ComponentResults(
+        scores=[np.array([0.5, 0.7])], metadata={"prop": ["a", "b"]}
+    )
+    smiles_associated = SmilesAssociatedComponentResults(component_results, smiles=["A", "B"])
+
+    # "X" was never scored -> None, and ordering is preserved (issue #335)
+    metadata = smiles_associated.fetch_metadata(["A", "X", "B"])
+
+    assert metadata == {"prop": ["a", None, "b"]}
+
+

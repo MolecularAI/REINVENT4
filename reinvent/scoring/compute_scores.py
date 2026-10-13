@@ -167,6 +167,7 @@ def compute_transform(
         missing_scores = [smiles for smiles in index_smiles if smiles not in component_results.data]
     else:
         missing_scores = [smiles for smiles in smilies if smiles not in component_results.data]
+
     if missing_scores:
         raise RuntimeError(f"Missing scores for {component_type} for {missing_scores}")
 
