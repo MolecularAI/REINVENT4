@@ -62,14 +62,18 @@ class MatchingSubstructure:
         scores = []
 
         for patterns, use_chirality in zip(self.patterns_per_endpoint, self.use_chirality):
-            match = [
-                any(
-                    mol.HasSubstructMatch(pattern, useChirality=use_chirality)
-                    for pattern in patterns
-                )
-                for mol in mols
-            ]
+            match = []
+            for mol in mols:
+                if not mol:
+                    match.append(np.nan)
+                else:
+                    match.append(
+                        any(
+                            mol.HasSubstructMatch(pattern, useChirality=use_chirality)
+                            for pattern in patterns
+                        )
+                    )
 
-            scores.append(0.5 * (1.0 + np.array(match)))
+            scores.append(0.5 * (1.0 + np.array(match, dtype=float)))
 
         return ComponentResults(scores)

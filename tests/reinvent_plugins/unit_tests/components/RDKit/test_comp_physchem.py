@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from reinvent_plugins.components.RDKit.comp_physchem import Qed
 from reinvent_plugins.components.RDKit.comp_physchem import MolecularWeight
@@ -44,3 +45,12 @@ def test_comp_physchem():
     for component in expected_results:
         results = component()(input_smiles)
         assert np.allclose(results.scores[0], expected_results[component])
+
+
+def test_comp_physchem_none_molecule_scores_nan():
+    # an invalid SMILES (None molecule from molcache) must score NaN rather
+    # than raising (issue #333)
+    results = MolecularWeight()(["not_a_molecule", "c1ccccc1"])
+
+    assert np.isnan(results.scores[0][0])
+    assert results.scores[0][1] == pytest.approx(78.114)

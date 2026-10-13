@@ -29,3 +29,15 @@ def test_comp_tpsa_default_all_false():
     results = component(smilies)
 
     assert np.allclose(results.scores, expected_results)
+
+
+def test_comp_tpsa_none_molecule_scores_nan():
+    # an invalid SMILES (None molecule from molcache) must score NaN rather
+    # than raising (issue #333)
+    params = Parameters([False])
+    component = TPSA(params)
+
+    results = component(["not_a_molecule", "c1ccccc1"])
+
+    assert np.isnan(results.scores[0][0])
+    assert not np.isnan(results.scores[0][1])

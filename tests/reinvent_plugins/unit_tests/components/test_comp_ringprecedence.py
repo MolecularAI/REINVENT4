@@ -49,3 +49,23 @@ def test_comp_ringprecedence():
         npt.assert_array_equal(results.scores[0], expected_results)
         assert "highest_nll_ring" in results.metadata
         assert len(results.metadata["highest_nll_ring"]) == len(inputs)
+
+
+def test_comp_ringprecedence_none_molecule_scores_nan():
+    # an invalid SMILES (None molecule from molcache) must score NaN rather
+    # than raising (issue #333)
+    import numpy as np
+
+    database_string = '{"rings": {"c1ccccc1": 0.98}, "generic_rings": {}}'
+    mock_file = mock_open(read_data=database_string)
+
+    with patch("builtins.open", mock_file):
+        params = Parameters(
+            nll_method=["total"], database_file=["/mocked/path"], make_generic=[False]
+        )
+        component = RingPrecedence(params)
+        results = component(["not_a_molecule", "c1ccccc1"])
+
+    assert np.isnan(results.scores[0][0])
+    assert not np.isnan(results.scores[0][1])
+    assert results.metadata["highest_nll_ring"][0] is None

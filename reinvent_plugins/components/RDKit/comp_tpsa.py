@@ -43,10 +43,13 @@ class TPSA:
             endpoint_scores = []
 
             for mol in mols:
-                try:
-                    score = Descriptors.TPSA(mol, includeSandP=includeSandP)
-                except ValueError:
+                if not mol:
                     score = np.nan
+                else:
+                    try:
+                        score = Descriptors.TPSA(mol, includeSandP=includeSandP)
+                    except Exception:
+                        score = np.nan
 
                 endpoint_scores.append(score)
 

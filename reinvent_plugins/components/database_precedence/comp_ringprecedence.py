@@ -98,20 +98,23 @@ class RingPrecedence:
 
     @molcache
     def _compute_scores(self, mols: List[Mol]) -> np.array:
-        empirical_ring_nlls = []
-
-        # extract rings
-        all_rings = [get_rings(mol) for mol in mols]
+        # None mol (invalid SMILES from molcache) is represented as None rings
+        all_rings = [get_rings(mol) if mol else None for mol in mols]
 
         if self.make_generic:
-            all_rings = [make_rings_generic(rings) for rings in all_rings]
+            all_rings = [
+                make_rings_generic(rings) if rings is not None else None for rings in all_rings
+            ]
             nll_dictionary = self.database["generic_rings"]
         else:
             nll_dictionary = self.database["rings"]
-        ## compute empirical nll for each ring in each molecule and also log the highest nll ring for each molecule
         empirical_ring_nll_scores = []
         highest_nll_rings = []
         for rings in all_rings:
+            if rings is None:
+                empirical_ring_nll_scores.append(np.nan)
+                highest_nll_rings.append(None)
+                continue
             empirical_ring_nlls = [compute_ring_nll(ring, nll_dictionary) for ring in rings]
             if empirical_ring_nlls:
                 max_nll = np.max(empirical_ring_nlls)

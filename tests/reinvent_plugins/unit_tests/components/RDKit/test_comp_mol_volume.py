@@ -14,3 +14,15 @@ def test_comp_mol_volume():
     # regardless of which tests ran before this one.
     expected = np.array([95.144, 123.712])
     assert np.allclose(np.concatenate(results.scores), expected, atol=1e-3)
+
+
+def test_comp_mol_volume_none_molecule_scores_nan():
+    # an invalid SMILES (None molecule from molcache) must score NaN rather
+    # than raising (issue #333)
+    params = Parameters([0.2])
+    component = MolVolume(params)
+
+    results = component(["not_a_molecule", "c1ccccc1N"])
+
+    assert np.isnan(results.scores[0][0])
+    assert not np.isnan(results.scores[0][1])

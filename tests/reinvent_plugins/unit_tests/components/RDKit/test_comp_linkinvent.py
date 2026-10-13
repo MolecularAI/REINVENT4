@@ -1,5 +1,7 @@
 import numpy as np
 
+from rdkit.Chem import Descriptors
+
 from reinvent_plugins.components.RDKit.comp_linkinvent import FragmentQed
 from reinvent_plugins.components.RDKit.comp_linkinvent import FragmentMolecularWeight
 from reinvent_plugins.components.RDKit.comp_linkinvent import FragmentTPSA
@@ -100,3 +102,65 @@ def test_linker_effective_length_ratio():
     for component in expected_results:
         results = component()(input_fragments)
         assert np.allclose(results.scores[0], expected_results[component])
+
+
+def test_fragment_components_return_nan_for_unscoreable_smiles():
+    # issue #333: unparseable fragments (and pathological ones) must not crash
+    # the component; they are reported as NaN
+    components = [
+        FragmentQed,
+        FragmentMolecularWeight,
+        FragmentTPSA,
+        FragmentNumRotBond,
+        FragmentCsp3,
+        FragmentEffectiveLength,
+        FragmentNumAromaticRings,
+        FragmentNumAliphaticRings,
+        FragmentSlogP,
+    ]
+    input_fragments = ["not_a_molecule", "[*]c1ccc2c(N)noc2c1[*]"]
+
+    for component in components:
+        results = component()(input_fragments)
+
+        assert np.isnan(results.scores[0][0]), component.__name__
+        assert not np.isnan(results.scores[0][1]), component.__name__
+
+
+def test_fragment_components_do_not_crash_on_multi_bonded_attachment():
+    # a "*" bridging two rings cannot be capped with a single hydrogen; this
+    # must yield NaN rather than raising (issue #333)
+    input_fragments = ["c1ccc(cc1)[*]c1ccccc1[*]"]
+
+    for component in [
+        FragmentQed,
+        FragmentMolecularWeight,
+        FragmentNumRotBond,
+        FragmentNumAromaticRings,
+    ]:
+        results = component()(input_fragments)
+        assert np.isnan(results.scores[0][0]), component.__name__
+
+
+def test_all_failures_are_flagged_as_systemic(caplog):
+    # a component failing on every input is more likely a component/config
+    # bug than per-SMILES noise and must be flagged loudly (issue #333)
+    input_fragments = ["c1ccc(cc1)[*]c1ccccc1[*]"] * 3
+
+    with caplog.at_level("ERROR"):
+        results = FragmentQed()(input_fragments)
+
+    assert np.isnan(results.scores[0]).all()
+    assert any("every input failed to score" in record.message for record in caplog.records)
+
+
+def test_empty_batch_does_not_flag_systemic_failure(caplog):
+    # an empty batch is not a failure and must not trigger the
+    # systemic-failure flag (issue #333)
+    from reinvent_plugins.components.RDKit.comp_linkinvent import compute_scores
+
+    with caplog.at_level("ERROR"):
+        results = compute_scores([], Descriptors.MolWt)
+
+    assert len(results.scores[0]) == 0
+    assert not any("every input failed to score" in record.message for record in caplog.records)

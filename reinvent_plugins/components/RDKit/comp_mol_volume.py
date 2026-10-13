@@ -39,14 +39,17 @@ class MolVolume:
             volumes = []
 
             for mol in mols:
-                try:
-                    mol3d = Chem.AddHs(mol)  # will not consider protonation state
-                    Chem.EmbedMolecule(mol3d, randomSeed=0xf00d)
-                    volume = Chem.ComputeMolVolume(
-                        mol3d, gridSpacing=grid_spacing, boxMargin=box_margin
-                    )
-                except ValueError:
+                if not mol:
                     volume = np.nan
+                else:
+                    try:
+                        mol3d = Chem.AddHs(mol)  # will not consider protonation state
+                        Chem.EmbedMolecule(mol3d, randomSeed=0xf00d)
+                        volume = Chem.ComputeMolVolume(
+                            mol3d, gridSpacing=grid_spacing, boxMargin=box_margin
+                        )
+                    except Exception:
+                        volume = np.nan
 
                 volumes.append(volume)
 

@@ -42,16 +42,18 @@ class PMI:
         scores2 = []
 
         for mol in mols:
-            mol3d = Chem.AddHs(mol)
-            embed_result = Chem.EmbedMolecule(mol3d)
-            
-            if embed_result == -1:  # embedding failed
-                npr1 = np.nan
-                npr2 = np.nan
-            else:
+            if not mol:
+                scores1.append(np.nan)
+                scores2.append(np.nan)
+                continue
+            try:
+                mol3d = Chem.AddHs(mol)
+                Chem.EmbedMolecule(mol3d)
                 npr1 = Chem.CalcNPR1(mol3d)
                 npr2 = Chem.CalcNPR2(mol3d)
-
+            except Exception:
+                npr1 = np.nan
+                npr2 = np.nan
             scores1.append(npr1)
             scores2.append(npr2)
 

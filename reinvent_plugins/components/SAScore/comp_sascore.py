@@ -26,6 +26,6 @@ class SAScore:
 
     @molcache
     def __call__(self, mols: List[Chem.Mol]) -> np.ndarray:
-        sa_scores = [calculateScore(mol) for mol in mols]
+        sa_scores = [calculateScore(mol) if mol else np.nan for mol in mols]
 
         return ComponentResults([np.array(sa_scores)])

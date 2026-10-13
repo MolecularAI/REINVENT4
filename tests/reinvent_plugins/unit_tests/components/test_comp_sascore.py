@@ -13,3 +13,14 @@ def test_comp_sascore():
     results = np.concatenate(SAScore_scorer(inputs).scores)
 
     assert np.allclose(results, expected_values)
+
+
+def test_comp_sascore_none_molecule_scores_nan():
+    # an invalid SMILES (None molecule from molcache) must score NaN rather
+    # than raising (issue #333)
+    component = SAScore()
+
+    results = component(["not_a_molecule", "O=C(C)Oc1ccccc1C(=O)O"])
+
+    assert np.isnan(results.scores[0][0])
+    assert np.isclose(results.scores[0][1], 1.58003975)
