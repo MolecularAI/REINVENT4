@@ -25,7 +25,7 @@ def compute_scores(mols: List[Chem.Mol], func: Callable) -> np.array:
         else:
             try:
                 score = func(mol)
-            except ValueError:
+            except Exception:
                 score = np.nan
 
         scores.append(score)

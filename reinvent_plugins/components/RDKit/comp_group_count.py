@@ -57,8 +57,11 @@ class GroupCount:
             endpoint_scores = []
 
             for mol in mols:
-                matches = mol.GetSubstructMatches(pattern)
-                endpoint_scores.append(len(matches))
+                if not mol:
+                    endpoint_scores.append(np.nan)
+                else:
+                    matches = mol.GetSubstructMatches(pattern)
+                    endpoint_scores.append(len(matches))
 
             scores.append(np.array(endpoint_scores))
 
