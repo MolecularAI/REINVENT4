@@ -38,16 +38,23 @@ def _aggregate(
     # here because broadcast returns a view by default.
     weights = np.array(np.broadcast_to(weights.reshape(-1, 1), scores.shape), dtype=np.float32)
     weights[nans] = np.nan
+    all_nans = nans.all(axis=0)
 
     if mode == "sum":
         sum_weights = np.nansum(weights, axis=0)
-        result = np.nansum(scores * (weights / sum_weights), axis=0)
+        safe_sum_weights = np.where(all_nans, 1.0, sum_weights)
+        result = np.nansum(scores * (weights / safe_sum_weights), axis=0)
     elif mode == "prod":
         scores = np.maximum(scores, 1e-8)
         sum_weights = np.maximum(np.nansum(weights, axis=0), 1e-8)
         result = np.nanprod(scores ** (weights / sum_weights), axis=0)
     else:
         raise ValueError(f"Invalid mode '{mode}'")
+
+    if all_nans.any():
+        result = np.array(result, copy=True)
+        result[all_nans] = np.nan
+
     return result
 
 

@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pytest
 
@@ -75,3 +77,35 @@ def test_geometric_mean_negative():
 
     result = geometric_mean(data)
     assert np.allclose(result, [1.88, 3.97, 0.0, 4.20, 2.62], atol=1e-2)
+
+
+def test_geometric_mean_all_nan():
+    data1 = np.array([np.nan, 0.25, 0.5], dtype=np.float32)
+    data2 = np.array([np.nan, 0.81, np.nan], dtype=np.float32)
+
+    result = geometric_mean([(data1, 1.0), (data2, 1.0)])
+
+    assert np.isnan(result[0])
+    assert result[1] == pytest.approx(0.45)
+    assert result[2] == pytest.approx(0.5)
+
+
+def test_arithmetic_mean_all_nan():
+    data1 = np.array([np.nan, 0.25, 0.5], dtype=np.float32)
+    data2 = np.array([np.nan, 0.81, np.nan], dtype=np.float32)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        result = arithmetic_mean([(data1, 1.0), (data2, 1.0)])
+
+    assert np.isnan(result[0])
+    assert result[1] == pytest.approx(0.53)
+    assert result[2] == pytest.approx(0.5)
+
+
+@pytest.mark.parametrize("aggregator", [arithmetic_mean, geometric_mean])
+def test_single_component_all_nan(aggregator):
+    result = aggregator([(np.array([np.nan, np.nan], dtype=np.float32), 1.0)])
+
+    assert result.shape == (2,)
+    assert np.all(np.isnan(result))
